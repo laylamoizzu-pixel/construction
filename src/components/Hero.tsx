@@ -4,6 +4,8 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 
+import Image from "next/image";
+
 export default function Hero() {
     return (
         <section className="relative h-[85vh] w-full overflow-hidden flex items-center justify-center">
@@ -12,9 +14,14 @@ export default function Hero() {
                 <div className="absolute inset-0 bg-gradient-to-t from-brand-dark via-brand-dark/50 to-transparent z-10" />
                 <div className="absolute inset-0 bg-brand-green/20 z-10 mix-blend-multiply" />
                 {/* Placeholder for video/image - using a solid color for now, replaced by actual asset later */}
-                <div className="w-full h-full bg-slate-900">
-                    {/* In a real scenario, this would be <video> or <Image> */}
-                    <div className="w-full h-full object-cover opacity-60 bg-[url('https://images.unsplash.com/photo-1567401893414-76b7b1e5a7a5?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center" />
+                <div className="w-full h-full bg-slate-900 relative">
+                    <Image
+                        src="https://images.unsplash.com/photo-1567401893414-76b7b1e5a7a5?q=80&w=2070&auto=format&fit=crop"
+                        alt="Smart Avenue Entrance"
+                        fill
+                        className="object-cover opacity-60"
+                        priority
+                    />
                 </div>
             </div>
 

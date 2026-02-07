@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight, ShoppingBasket, Shirt, Smartphone } from "lucide-react";
 
 const HIGHLIGHTS = [
@@ -48,10 +48,15 @@ export default function Highlights() {
                             href={`/departments#${item.id}`}
                             className="group relative h-[400px] overflow-hidden rounded-2xl shadow-lg cursor-pointer block"
                         >
-                            <div
-                                className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
-                                style={{ backgroundImage: `url(${item.image})` }}
-                            />
+                            <div className="absolute inset-0 transition-transform duration-700 group-hover:scale-110">
+                                <Image
+                                    src={item.image}
+                                    alt={item.title}
+                                    fill
+                                    className="object-cover"
+                                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                                />
+                            </div>
                             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-90 transition-opacity duration-300" />
 
                             <div className="absolute bottom-0 left-0 right-0 p-8 transform translate-y-2 transition-transform duration-300 group-hover:translate-y-0">
