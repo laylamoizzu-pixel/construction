@@ -47,7 +47,7 @@ export default function OffersPage() {
         <div className="bg-white min-h-screen py-20 px-4 md:px-6">
             <div className="container mx-auto max-w-5xl">
                 <div className="text-center mb-16">
-                    <span className="text-brand-gold font-bold tracking-wider uppercase text-sm mb-2 block">Don't Miss Out</span>
+                    <span className="text-brand-gold font-bold tracking-wider uppercase text-sm mb-2 block">Don&apos;t Miss Out</span>
                     <h1 className="text-4xl md:text-5xl font-serif font-bold text-brand-dark mb-6">
                         Weekly <span className="text-brand-gold">Smart Deals</span>
                     </h1>

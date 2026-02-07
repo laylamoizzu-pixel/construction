@@ -9,7 +9,7 @@ export default function ContactPage() {
             {/* Header */}
             <section className="bg-brand-dark text-white py-20 text-center">
                 <h1 className="text-4xl md:text-5xl font-serif font-bold mb-4">Visit <span className="text-brand-gold">Us</span></h1>
-                <p className="text-gray-300">We love to hear from our customers. Here's how you can reach us.</p>
+                <p className="text-gray-300">We love to hear from our customers. Here&apos;s how you can reach us.</p>
             </section>
 
             <div className="container mx-auto px-4 md:px-6 py-16">

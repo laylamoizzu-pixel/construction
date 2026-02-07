@@ -27,7 +27,7 @@ export default function GalleryPage() {
                         A Glimpse of <span className="text-brand-gold">Smart Avenue</span>
                     </h1>
                     <p className="text-gray-500 max-w-2xl mx-auto">
-                        Experience the ambiance, the aisles, and the architecture that makes us Patna's premier shopping destination.
+                        Experience the ambiance, the aisles, and the architecture that makes us Patna&apos;s premier shopping destination.
                     </p>
                 </div>
 

@@ -26,7 +26,7 @@ export default function Hero() {
                     transition={{ duration: 0.8, delay: 0.2 }}
                 >
                     <span className="inline-block py-1 px-3 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-brand-gold text-sm font-medium tracking-wide mb-6">
-                        Patna's Premier Shopping Destination
+                        Patna&apos;s Premier Shopping Destination
                     </span>
                     <h1 className="text-5xl md:text-7xl font-serif font-bold mb-6 leading-tight">
                         Experience World-Class <br />

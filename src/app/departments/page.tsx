@@ -3,9 +3,10 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ShoppingBasket, Shirt, Smartphone, Home as HomeIcon, ArrowRight, X } from "lucide-react";
+import { LucideIcon } from "lucide-react";
 import { DEPARTMENTS } from "@/lib/data";
 
-const iconMap: Record<string, any> = {
+const iconMap: Record<string, LucideIcon> = {
     ShoppingBasket,
     Shirt,
     Smartphone,

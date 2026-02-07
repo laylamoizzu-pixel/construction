@@ -17,7 +17,7 @@ export default function Footer() {
                             </span>
                         </Link>
                         <p className="text-gray-400 text-sm leading-relaxed max-w-xs">
-                            Patna's premier shopping destination where luxury meets convenience. Experience world-class retail therapy.
+                            Patna&apos;s premier shopping destination where luxury meets convenience. Experience world-class retail therapy.
                         </p>
                         <div className="flex gap-4">
                             <a href="#" className="p-2 bg-white/5 rounded-full hover:bg-brand-gold hover:text-brand-dark transition-colors">

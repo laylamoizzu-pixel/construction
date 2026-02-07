@@ -1,8 +1,5 @@
-"use client";
-
 import { useState } from "react";
-import { motion } from "framer-motion";
-import { LayoutDashboard, ShoppingBag, Image as ImageIcon, Settings, LogOut, Plus, Upload, Save } from "lucide-react";
+import { ShoppingBag, Image as ImageIcon, Settings, LogOut, Plus, Upload, Save } from "lucide-react";
 
 export default function AdminPage() {
     const [activeTab, setActiveTab] = useState("offers");
