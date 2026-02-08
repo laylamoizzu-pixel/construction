@@ -8,7 +8,7 @@ export const revalidate = 0;
 export default async function ProductsPage({
     searchParams
 }: {
-    searchParams: Promise<{ category?: string; subcategory?: string }>
+    searchParams: Promise<{ category?: string; subcategory?: string; search?: string }>
 }) {
     const params = await searchParams;
     const [products, categories, offers] = await Promise.all([
@@ -24,6 +24,16 @@ export default async function ProductsPage({
 
     // Filter products
     let filteredProducts = products.filter(p => p.available);
+
+    // Search filter
+    if (params.search) {
+        const searchLower = params.search.toLowerCase();
+        filteredProducts = filteredProducts.filter(p =>
+            p.name.toLowerCase().includes(searchLower) ||
+            (p.description && p.description.toLowerCase().includes(searchLower))
+        );
+    }
+
     if (params.category) {
         filteredProducts = filteredProducts.filter(p =>
             p.categoryId === params.category || p.subcategoryId === params.category
@@ -101,9 +111,25 @@ export default async function ProductsPage({
 
                     {/* Editorial Grid */}
                     <main className="flex-1">
+                        {/* Search Indicator */}
+                        {params.search && (
+                            <div className="mb-6 flex items-center gap-3 text-sm">
+                                <span className="text-gray-400">Searching for:</span>
+                                <span className="px-3 py-1 bg-brand-gold/10 text-brand-gold rounded-full font-medium">
+                                    &quot;{params.search}&quot;
+                                </span>
+                                <Link
+                                    href="/products"
+                                    className="text-gray-400 hover:text-brand-dark underline transition-colors"
+                                >
+                                    Clear search
+                                </Link>
+                            </div>
+                        )}
+
                         <div className="flex items-center justify-between mb-8 pb-4 border-b border-gray-200">
                             <p className="text-gray-500 text-sm font-light tracking-wide">
-                                Showing {filteredProducts.length} Results
+                                Showing {filteredProducts.length} Results{params.search ? ` for "${params.search}"` : ''}
                             </p>
                             <div className="flex items-center gap-2">
                                 <span className="text-sm text-gray-400">Sort by:</span>

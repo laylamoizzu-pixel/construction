@@ -1,17 +1,28 @@
 "use client";
 
 import { BrandingProvider } from "@/context/branding-context";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
+import { AuthProvider } from "@/context/auth-context";
+import { ContactProvider } from "@/context/contact-context";
+import Header from "./Header";
+import Footer from "./Footer";
+import { ErrorBoundary } from "./ErrorBoundary";
 
-export default function ClientLayout({ children }: { children: React.ReactNode }) {
+export default function ClientLayout({
+    children,
+}: {
+    children: React.ReactNode;
+}) {
     return (
-        <BrandingProvider>
-            <Header />
-            <main className="flex-grow pt-20">
-                {children}
-            </main>
-            <Footer />
-        </BrandingProvider>
+        <ErrorBoundary>
+            <AuthProvider>
+                <BrandingProvider>
+                    <ContactProvider>
+                        <Header />
+                        {children}
+                        <Footer />
+                    </ContactProvider>
+                </BrandingProvider>
+            </AuthProvider>
+        </ErrorBoundary>
     );
 }

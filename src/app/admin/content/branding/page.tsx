@@ -8,11 +8,13 @@ import {
     Loader2,
     ArrowLeft,
     Save,
-    Image,
+    Image as ImageIcon,
     FileImage,
-    Palette
+    Palette,
+    Share2
 } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 
 interface BrandingContent {
     logoUrl: string;
@@ -22,6 +24,8 @@ interface BrandingContent {
     tagline: string;
     primaryColor: string;
     secondaryColor: string;
+    instagramUrl?: string;
+    whatsappUrl?: string;
 }
 
 const defaultBranding: BrandingContent = {
@@ -31,7 +35,9 @@ const defaultBranding: BrandingContent = {
     siteName: "Smart Avenue",
     tagline: "All your home needs, simplified.",
     primaryColor: "#f59e0b",
-    secondaryColor: "#1e293b"
+    secondaryColor: "#1e293b",
+    instagramUrl: "https://instagram.com",
+    whatsappUrl: "https://wa.me/"
 };
 
 export default function BrandingEditor() {
@@ -106,7 +112,7 @@ export default function BrandingEditor() {
                         {/* Logo & Favicon */}
                         <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
                             <h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                                <Image className="w-5 h-5 text-amber-500" />
+                                <ImageIcon className="w-5 h-5 text-amber-500" />
                                 Logo & Favicon
                             </h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -238,6 +244,36 @@ export default function BrandingEditor() {
                                             className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500"
                                         />
                                     </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Social Media */}
+                        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                            <h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                                <Share2 className="w-5 h-5 text-amber-500" />
+                                Social Media Links
+                            </h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Instagram URL</label>
+                                    <input
+                                        type="text"
+                                        value={content.instagramUrl || ""}
+                                        onChange={(e) => setContent({ ...content, instagramUrl: e.target.value })}
+                                        placeholder="https://instagram.com/..."
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">WhatsApp URL</label>
+                                    <input
+                                        type="text"
+                                        value={content.whatsappUrl || ""}
+                                        onChange={(e) => setContent({ ...content, whatsappUrl: e.target.value })}
+                                        placeholder="https://wa.me/..."
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500"
+                                    />
                                 </div>
                             </div>
                         </div>

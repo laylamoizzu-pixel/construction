@@ -27,9 +27,13 @@ import {
     EyeOff,
     Tag,
     X,
-    Filter
+    Filter,
+    Upload,
+    ImageIcon
 } from "lucide-react";
 import Link from "next/link";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { storage } from "@/lib/firebase";
 
 export default function ProductsManager() {
     const { user, loading: authLoading } = useAuth();
@@ -43,8 +47,22 @@ export default function ProductsManager() {
     const [editingId, setEditingId] = useState<string | null>(null);
     const [filterCategory, setFilterCategory] = useState<string>("");
     const [filterAvailable, setFilterAvailable] = useState<string>("");
+    const [uploading, setUploading] = useState(false);
 
-    const [formData, setFormData] = useState({
+    const [formData, setFormData] = useState<{
+        name: string;
+        description: string;
+        price: string;
+        originalPrice: string;
+        categoryId: string;
+        subcategoryId: string;
+        imageUrl: string; // Keep for backward compatibility/single main image
+        images: string[]; // New: support multiple images
+        available: boolean;
+        featured: boolean;
+        offerId: string;
+        tags: string;
+    }>({
         name: "",
         description: "",
         price: "",
@@ -52,6 +70,7 @@ export default function ProductsManager() {
         categoryId: "",
         subcategoryId: "",
         imageUrl: "",
+        images: [],
         available: true,
         featured: false,
         offerId: "",
@@ -105,12 +124,53 @@ export default function ProductsManager() {
             categoryId: "",
             subcategoryId: "",
             imageUrl: "",
+            images: [],
             available: true,
             featured: false,
             offerId: "",
             tags: ""
         });
         setEditingId(null);
+    };
+
+    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = e.target.files;
+        if (!files || files.length === 0) return;
+
+        setUploading(true);
+        const newImages: string[] = [];
+
+        try {
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const storageRef = ref(storage, `products/${Date.now()}_${file.name}`);
+                await uploadBytes(storageRef, file);
+                const url = await getDownloadURL(storageRef);
+                newImages.push(url);
+            }
+
+            setFormData(prev => ({
+                ...prev,
+                images: [...prev.images, ...newImages],
+                imageUrl: prev.imageUrl || newImages[0] || "" // Set primary if empty
+            }));
+        } catch (error) {
+            console.error("Error uploading images:", error);
+            alert("Failed to upload images. Please try again.");
+        } finally {
+            setUploading(false);
+        }
+    };
+
+    const removeImage = (indexToRemove: number) => {
+        setFormData(prev => {
+            const updatedImages = prev.images.filter((_, index) => index !== indexToRemove);
+            return {
+                ...prev,
+                images: updatedImages,
+                imageUrl: updatedImages.length > 0 ? updatedImages[0] : ""
+            };
+        });
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -124,8 +184,8 @@ export default function ProductsManager() {
             originalPrice: formData.originalPrice ? parseFloat(formData.originalPrice) : undefined,
             categoryId: formData.categoryId,
             subcategoryId: formData.subcategoryId || undefined,
-            imageUrl: formData.imageUrl,
-            images: formData.imageUrl ? [formData.imageUrl] : [],
+            imageUrl: formData.images.length > 0 ? formData.images[0] : formData.imageUrl,
+            images: formData.images.length > 0 ? formData.images : (formData.imageUrl ? [formData.imageUrl] : []),
             available: formData.available,
             featured: formData.featured,
             offerId: formData.offerId || undefined,
@@ -156,6 +216,7 @@ export default function ProductsManager() {
             categoryId: product.categoryId,
             subcategoryId: product.subcategoryId || "",
             imageUrl: product.imageUrl,
+            images: product.images && product.images.length > 0 ? product.images : (product.imageUrl ? [product.imageUrl] : []),
             available: product.available,
             featured: product.featured,
             offerId: product.offerId || "",
@@ -281,14 +342,50 @@ export default function ProductsManager() {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Image URL</label>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Upload Images</label>
+                                    <div className="flex items-center gap-2">
+                                        <label className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg cursor-pointer transition-colors text-sm text-gray-700 border border-gray-300">
+                                            {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+                                            {uploading ? "Uploading..." : "Choose Files"}
+                                            <input
+                                                type="file"
+                                                multiple
+                                                accept="image/*"
+                                                onChange={handleImageUpload}
+                                                className="hidden"
+                                                disabled={uploading}
+                                            />
+                                        </label>
+                                        <span className="text-xs text-gray-500">{formData.images.length} images selected</span>
+                                    </div>
+                                    <div className="mt-2 text-xs text-gray-500">
+                                        Or paste URL below as fallback/primary
+                                    </div>
                                     <input
                                         type="url"
                                         value={formData.imageUrl}
                                         onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
                                         placeholder="https://..."
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500"
+                                        className="w-full px-4 py-2 mt-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 text-sm"
                                     />
+
+                                    {/* Image Preview */}
+                                    {formData.images.length > 0 && (
+                                        <div className="flex flex-wrap gap-2 mt-2">
+                                            {formData.images.map((img, idx) => (
+                                                <div key={idx} className="relative w-16 h-16 border border-gray-200 rounded-md overflow-hidden group">
+                                                    <img src={img} alt="Preview" className="w-full h-full object-cover" />
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => removeImage(idx)}
+                                                        className="absolute top-0 right-0 bg-red-500 text-white p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                    >
+                                                        <X className="w-3 h-3" />
+                                                    </button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
                             </div>
 
@@ -491,13 +588,20 @@ export default function ProductsManager() {
                                                     <span className="text-sm text-gray-400 line-through">₹{product.originalPrice}</span>
                                                 )}
                                             </div>
+                                            {/* Show Image Count if multiple */}
+                                            {product.images && product.images.length > 1 && (
+                                                <div className="mt-1 flex items-center gap-1 text-xs text-gray-400">
+                                                    <ImageIcon className="w-3 h-3" />
+                                                    {product.images.length} images
+                                                </div>
+                                            )}
                                         </div>
                                         <div className="flex items-center gap-2">
                                             <button
                                                 onClick={() => handleToggleAvailability(product.id, product.available)}
                                                 className={`p-2 rounded-lg transition-colors ${product.available
-                                                        ? "text-green-600 hover:bg-green-50"
-                                                        : "text-gray-400 hover:bg-gray-100"
+                                                    ? "text-green-600 hover:bg-green-50"
+                                                    : "text-gray-400 hover:bg-gray-100"
                                                     }`}
                                                 title={product.available ? "Mark unavailable" : "Mark available"}
                                             >

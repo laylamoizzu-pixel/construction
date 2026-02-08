@@ -42,7 +42,11 @@ const OFFERS = [
     },
 ];
 
+import { useBranding } from "@/context/branding-context";
+
 export default function OffersPage() {
+    const { branding } = useBranding();
+
     return (
         <div className="bg-white min-h-screen py-20 px-4 md:px-6">
             <div className="container mx-auto max-w-5xl">
@@ -107,11 +111,17 @@ export default function OffersPage() {
 
                 <div className="mt-12 text-center">
                     <p className="text-gray-500 mb-4">Want to order directly?</p>
-                    <button className="px-8 py-3 bg-green-600 text-white rounded-full font-bold hover:bg-green-700 transition-colors shadow-lg shadow-green-600/20 inline-flex items-center gap-2">
-                        <ShoppingBag className="w-5 h-5" /> Order via WhatsApp
-                    </button>
+                    {branding.whatsappUrl && (
+                        <a
+                            href={branding.whatsappUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-8 py-3 bg-green-600 text-white rounded-full font-bold hover:bg-green-700 transition-colors shadow-lg shadow-green-600/20 inline-flex items-center gap-2"
+                        >
+                            <ShoppingBag className="w-5 h-5" /> Order via WhatsApp
+                        </a>
+                    )}
                 </div>
-
             </div>
         </div>
     );

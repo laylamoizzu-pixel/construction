@@ -1,19 +1,40 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, ShoppingBag, Search } from "lucide-react";
+import { Menu, X, Search } from "lucide-react";
 import { NAV_LINKS } from "@/lib/data";
 import { useBranding } from "@/context/branding-context";
 
 export default function Header() {
     const [isScrolled, setIsScrolled] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [isSearchOpen, setIsSearchOpen] = useState(false);
+    const [searchQuery, setSearchQuery] = useState("");
+    const searchInputRef = useRef<HTMLInputElement>(null);
     const pathname = usePathname();
+    const router = useRouter();
     const { branding } = useBranding();
+
+    const handleSearch = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (searchQuery.trim()) {
+            router.push(`/products?search=${encodeURIComponent(searchQuery.trim())}`);
+            setSearchQuery("");
+            setIsSearchOpen(false);
+            setIsMobileMenuOpen(false);
+        }
+    };
+
+    const toggleSearch = () => {
+        setIsSearchOpen(!isSearchOpen);
+        if (!isSearchOpen) {
+            setTimeout(() => searchInputRef.current?.focus(), 100);
+        }
+    };
 
     useEffect(() => {
         const handleScroll = () => {
@@ -61,19 +82,47 @@ export default function Header() {
                     ))}
                 </nav>
 
-                {/* Icons & Actions */}
+                {/* Search & Actions */}
                 <div className="hidden md:flex items-center gap-4">
-                    <button className={`p-2 rounded-full transition-colors ${isScrolled ? 'text-gray-600 hover:bg-gray-100' : 'text-white hover:bg-white/10'}`}>
-                        <Search className="w-5 h-5" />
-                    </button>
-
-                    <Link
-                        href="/products"
-                        className="flex items-center gap-2 bg-brand-gold hover:bg-yellow-500 text-white px-4 py-2 rounded-full text-sm font-medium transition-colors shadow-lg shadow-yellow-500/20"
-                    >
-                        <ShoppingBag className="w-4 h-4" />
-                        <span className="hidden lg:inline">Shop Now</span>
-                    </Link>
+                    <div className="relative flex items-center">
+                        <AnimatePresence>
+                            {isSearchOpen && (
+                                <motion.form
+                                    initial={{ width: 0, opacity: 0 }}
+                                    animate={{ width: 200, opacity: 1 }}
+                                    exit={{ width: 0, opacity: 0 }}
+                                    transition={{ duration: 0.2 }}
+                                    onSubmit={handleSearch}
+                                    className="overflow-hidden"
+                                >
+                                    <input
+                                        ref={searchInputRef}
+                                        type="text"
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        placeholder="Search products..."
+                                        className={`w-full px-4 py-2 rounded-full text-sm outline-none transition-colors ${isScrolled
+                                                ? 'bg-gray-100 text-gray-800 placeholder-gray-400'
+                                                : 'bg-white/20 text-white placeholder-white/70'
+                                            }`}
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Escape') {
+                                                setIsSearchOpen(false);
+                                                setSearchQuery("");
+                                            }
+                                        }}
+                                    />
+                                </motion.form>
+                            )}
+                        </AnimatePresence>
+                        <button
+                            onClick={toggleSearch}
+                            className={`p-2 rounded-full transition-colors ${isScrolled ? 'text-gray-600 hover:bg-gray-100' : 'text-white hover:bg-white/10'
+                                }`}
+                        >
+                            {isSearchOpen ? <X className="w-5 h-5" /> : <Search className="w-5 h-5" />}
+                        </button>
+                    </div>
                 </div>
 
                 {/* Mobile Menu Button */}
@@ -109,15 +158,27 @@ export default function Header() {
                                 {link.label}
                             </Link>
                         ))}
-                        <div className="flex gap-4 mt-2 pt-4 border-t border-gray-100">
-                            <Link
-                                href="/products"
-                                onClick={() => setIsMobileMenuOpen(false)}
-                                className="flex-1 flex items-center justify-center gap-2 p-3 rounded-lg bg-brand-green text-white"
-                            >
-                                <ShoppingBag className="w-5 h-5" /> Shop
-                            </Link>
-                        </div>
+                        {/* Mobile Search */}
+                        <form
+                            onSubmit={handleSearch}
+                            className="mt-4 pt-4 border-t border-gray-100"
+                        >
+                            <div className="relative">
+                                <input
+                                    type="text"
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    placeholder="Search products..."
+                                    className="w-full px-4 py-3 pr-12 rounded-lg bg-gray-100 text-gray-800 placeholder-gray-400 text-sm outline-none focus:ring-2 focus:ring-brand-gold"
+                                />
+                                <button
+                                    type="submit"
+                                    className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-gray-500 hover:text-brand-gold transition-colors"
+                                >
+                                    <Search className="w-5 h-5" />
+                                </button>
+                            </div>
+                        </form>
                     </motion.div>
                 )}
             </AnimatePresence>

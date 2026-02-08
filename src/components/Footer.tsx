@@ -2,7 +2,13 @@ import Link from "next/link";
 import Image from "next/image";
 import { Facebook, Instagram, Twitter, MapPin, Phone, Mail } from "lucide-react";
 
+import { useContact } from "@/context/contact-context";
+import { useBranding } from "@/context/branding-context";
+
 export default function Footer() {
+    const { branding } = useBranding();
+    const { contact } = useContact();
+
     return (
         <footer className="bg-brand-dark text-white pt-16 pb-8">
             <div className="container mx-auto px-4 md:px-6">
@@ -20,15 +26,17 @@ export default function Footer() {
                             </div>
                         </Link>
                         <p className="text-gray-400 text-sm leading-relaxed max-w-xs">
-                            Patna&apos;s premier shopping destination where luxury meets convenience. Experience world-class retail therapy.
+                            {branding.tagline || "Patna's premier shopping destination where luxury meets convenience. Experience world-class retail therapy."}
                         </p>
                         <div className="flex gap-4">
                             <a href="#" className="p-2 bg-white/5 rounded-full hover:bg-brand-gold hover:text-brand-dark transition-colors">
                                 <Facebook className="w-4 h-4" />
                             </a>
-                            <a href="#" className="p-2 bg-white/5 rounded-full hover:bg-brand-gold hover:text-brand-dark transition-colors">
-                                <Instagram className="w-4 h-4" />
-                            </a>
+                            {branding.instagramUrl && (
+                                <a href={branding.instagramUrl} target="_blank" rel="noopener noreferrer" className="p-2 bg-white/5 rounded-full hover:bg-brand-gold hover:text-brand-dark transition-colors">
+                                    <Instagram className="w-4 h-4" />
+                                </a>
+                            )}
                             <a href="#" className="p-2 bg-white/5 rounded-full hover:bg-brand-gold hover:text-brand-dark transition-colors">
                                 <Twitter className="w-4 h-4" />
                             </a>
@@ -65,15 +73,15 @@ export default function Footer() {
                         <ul className="space-y-4 text-sm text-gray-400">
                             <li className="flex items-start gap-3">
                                 <MapPin className="w-5 h-5 text-brand-gold shrink-0 mt-0.5" />
-                                <span>Level 3, P&M Mall, Patliputra Colony,<br />Patna, Bihar 800013</span>
+                                <span className="whitespace-pre-line">{contact.address}</span>
                             </li>
                             <li className="flex items-center gap-3">
                                 <Phone className="w-5 h-5 text-brand-gold shrink-0" />
-                                <span>+91 612 2xxx xxx</span>
+                                <span>{contact.phone}</span>
                             </li>
                             <li className="flex items-center gap-3">
                                 <Mail className="w-5 h-5 text-brand-gold shrink-0" />
-                                <span>support@smartavenue.com</span>
+                                <span>{contact.email}</span>
                             </li>
                         </ul>
                     </div>

@@ -22,8 +22,14 @@ export default function AdminLoginPage() {
             await login(email, password);
             router.push("/admin");
         } catch (err: unknown) {
-            const errorMessage = err instanceof Error ? err.message : "Invalid credentials";
-            setError(errorMessage);
+            console.error(err);
+            const error = err as { code?: string; message?: string };
+            if (error?.code === "auth/invalid-credential" || error?.message?.includes("auth/invalid-credential")) {
+                setError("Invalid credential");
+            } else {
+                const errorMessage = err instanceof Error ? err.message : "Invalid credentials";
+                setError(errorMessage);
+            }
         } finally {
             setLoading(false);
         }

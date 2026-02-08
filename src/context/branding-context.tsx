@@ -11,6 +11,8 @@ export interface BrandingSettings {
     tagline: string;
     primaryColor: string;
     secondaryColor: string;
+    instagramUrl?: string;
+    whatsappUrl?: string;
 }
 
 const defaultBranding: BrandingSettings = {
@@ -20,7 +22,9 @@ const defaultBranding: BrandingSettings = {
     siteName: "Smart Avenue",
     tagline: "All your home needs, simplified.",
     primaryColor: "#C5A059",
-    secondaryColor: "#0F281E"
+    secondaryColor: "#0F281E",
+    instagramUrl: "https://instagram.com",
+    whatsappUrl: "https://wa.me/"
 };
 
 interface BrandingContextType {
