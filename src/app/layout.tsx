@@ -49,7 +49,7 @@ export const metadata: Metadata = {
     siteName: "Smart Avnue",
     images: [
       {
-        url: "/og-image.jpg", // We should probably ensure this image exists or use a placeholder
+        url: "/og-image.jpg",
         width: 1200,
         height: 630,
         alt: "Smart Avnue - Premium Retail Experience",
@@ -62,7 +62,7 @@ export const metadata: Metadata = {
     description:
       "We are a one-stop departmental store offering a wide range of home essentials, stylish home décor, premium kitchenware, durable plasticware, quality crockery, cosmetics, premium stationery, soft toys, and thoughtfully curated gift items—bringing comfort, convenience, and elegance to everyday living.",
     images: ["/og-image.jpg"],
-    creator: "@smartavnue", // Placeholder handle
+    creator: "@smartavnue",
   },
   verification: {
     google: "P58XCY_8uZe5I7QC5eNh2wivKElDpu2ckaI60IgD5yc",
@@ -80,29 +80,18 @@ export const metadata: Metadata = {
   },
 };
 
-import { headers } from "next/headers";
-
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const headersList = await headers();
-  const pathname = headersList.get("x-pathname") || "";
-  const isAdminRoute = pathname.startsWith("/admin");
-
   return (
     <html lang="en">
       <body
         className={`${inter.variable} ${playfair.variable} antialiased bg-slate-50 text-slate-900 flex flex-col min-h-screen`}
       >
-        {!isAdminRoute && <Header />}
-        <main className={isAdminRoute ? "" : "flex-grow pt-20"}>
-          {children}
-        </main>
-        {!isAdminRoute && <Footer />}
+        {children}
       </body>
     </html>
   );
 }
-
