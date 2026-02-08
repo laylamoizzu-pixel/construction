@@ -532,7 +532,7 @@ export default function ProductsManager() {
                         <h3 className="font-semibold text-gray-800">All Products ({products.length})</h3>
                     </div>
 
-                    {loading ? (
+                    {loading && products.length === 0 ? (
                         <div className="p-8 text-center">
                             <Loader2 className="w-8 h-8 animate-spin text-amber-600 mx-auto" />
                         </div>
@@ -542,59 +542,100 @@ export default function ProductsManager() {
                             <p>No products yet. Add your first product!</p>
                         </div>
                     ) : (
-                        <div className="divide-y divide-gray-100">
-                            {products.map((product) => {
-                                const offer = product.offerId ? getOfferName(product.offerId) : null;
-                                return (
-                                    <div key={product.id} className="p-4 flex items-center gap-4">
-                                        <div className="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
-                                            {product.imageUrl ? (
-                                                <img
-                                                    src={product.imageUrl}
-                                                    alt={product.name}
-                                                    className="w-full h-full object-cover"
-                                                    onError={(e) => {
-                                                        (e.target as HTMLImageElement).src = "https://via.placeholder.com/100?text=No+Image";
-                                                    }}
-                                                />
-                                            ) : (
-                                                <div className="w-full h-full flex items-center justify-center">
-                                                    <Package className="w-6 h-6 text-gray-300" />
-                                                </div>
-                                            )}
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                                    <Package className="w-12 h-12 text-gray-300" />
-                                                </div>
-                                            )}
-                                            <div className="absolute top-2 right-2 flex gap-1">
-                                                <div className={`px - 2 py - 1 rounded - full text - xs font - medium ${ product.available ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' } `}>
-                                                    {product.available ? 'Stock' : 'Out'}
-                                                </div>
-                                                {product.featured && (
-                                                    <div className="px-2 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-700">
-                                                        Featured
+                        <div>
+                            <div className="divide-y divide-gray-100">
+                                {products.map((product) => {
+                                    const offer = product.offerId ? getOfferName(product.offerId) : null;
+                                    return (
+                                        <div key={product.id} className="p-4 flex items-center gap-4 hover:bg-gray-50 transition-colors">
+                                            <div className="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0 relative">
+                                                {product.imageUrl ? (
+                                                    <img
+                                                        src={product.imageUrl}
+                                                        alt={product.name}
+                                                        className="w-full h-full object-cover"
+                                                        onError={(e) => {
+                                                            (e.target as HTMLImageElement).src = "https://via.placeholder.com/100?text=No+Image";
+                                                        }}
+                                                    />
+                                                ) : (
+                                                    <div className="w-full h-full flex items-center justify-center">
+                                                        <Package className="w-6 h-6 text-gray-300" />
                                                     </div>
                                                 )}
                                             </div>
-                                        </div>
-                                        
-                                        <div className="p-4">
-                                            <h3 className="font-semibold text-gray-800 mb-1 truncate">{product.name}</h3>
-                                            <div className="flex items-center justify-between mb-3">
-                                                <span className="text-lg font-bold text-amber-600">₹{product.price}</span>
-                                                {product.originalPrice && (
-                                                    <span className="text-sm text-gray-400 line-through">₹{product.originalPrice}</span>
-                                                )}
+                                            
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex items-center gap-2 flex-wrap mb-1">
+                                                    <h4 className="font-semibold text-gray-800 truncate">{product.name}</h4>
+                                                    {!product.available && (
+                                                        <span className="px-2 py-0.5 text-xs bg-red-100 text-red-600 rounded">
+                                                            Unavailable
+                                                        </span>
+                                                    )}
+                                                    {product.featured && (
+                                                        <span className="px-2 py-0.5 text-xs bg-amber-100 text-amber-600 rounded">
+                                                            Featured
+                                                        </span>
+                                                    )}
+                                                    {offer && (
+                                                        <span className="px-2 py-0.5 text-xs bg-green-100 text-green-600 rounded flex items-center gap-1">
+                                                            <Tag className="w-3 h-3" />
+                                                            {offer.discount}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <p className="text-sm text-gray-500">
+                                                    {getCategoryName(product.categoryId)}
+                                                    {product.subcategoryId && ` → ${ getCategoryName(product.subcategoryId) } `}
+                                                </p>
+                                                <div className="flex items-center gap-2 mt-1">
+                                                    <span className="font-bold text-amber-600">₹{product.price}</span>
+                                                    {product.originalPrice && (
+                                                        <span className="text-sm text-gray-400 line-through">₹{product.originalPrice}</span>
+                                                    )}
+                                                </div>
                                             </div>
-                                                className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
-                                            >
-                                                <Trash2 className="w-5 h-5" />
-                                            </button>
+
+                                            <div className="flex items-center gap-2">
+                                                <button
+                                                    onClick={() => handleToggleAvailability(product.id, product.available)}
+                                                    className={`p - 2 rounded - lg transition - colors ${ product.available ? 'text-green-600 hover:bg-green-50' : 'text-gray-400 hover:bg-gray-100' } `}
+                                                    title={product.available ? "Mark as Out of Stock" : "Mark as In Stock"}
+                                                >
+                                                    {product.available ? <Eye className="w-5 h-5" /> : <EyeOff className="w-5 h-5" />}
+                                                </button>
+                                                <button
+                                                    onClick={() => handleEdit(product)}
+                                                    className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                                >
+                                                    <Edit2 className="w-5 h-5" />
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDelete(product.id)}
+                                                    className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                                >
+                                                    <Trash2 className="w-5 h-5" />
+                                                </button>
+                                            </div>
                                         </div>
-                                    </div>
-                                );
-                            })}
+                                    );
+                                })}
+                            </div>
+
+                            {/* Load More Button */}
+                            {hasMore && !loading && (
+                                <div className="p-4 border-t border-gray-100 text-center">
+                                    <button
+                                        onClick={loadMoreProducts}
+                                        disabled={loadingMore}
+                                        className="px-6 py-2 bg-white border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 disabled:opacity-50 flex items-center gap-2 mx-auto"
+                                    >
+                                        {loadingMore ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+                                        Load More Products
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>
