@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, ShoppingBag, Search } from "lucide-react";
@@ -28,12 +29,15 @@ export default function Header() {
             <div className="container mx-auto px-4 md:px-6 flex items-center justify-between">
                 {/* Logo */}
                 <Link href="/" className="flex items-center gap-2 group">
-                    <div className="w-8 h-8 bg-brand-green rounded-br-xl rounded-tl-xl flex items-center justify-center text-white font-serif font-bold text-xl group-hover:bg-brand-gold transition-colors">
-                        S
+                    <div className="relative w-40 h-12">
+                        <Image
+                            src="/logo.png"
+                            alt="Smart Avenue"
+                            fill
+                            className="object-contain"
+                            priority
+                        />
                     </div>
-                    <span className={`font-serif text-2xl font-bold tracking-tight ${isScrolled ? 'text-brand-dark' : 'text-white'}`}>
-                        Smart<span className="text-brand-gold">Avenue</span>
-                    </span>
                 </Link>
 
                 {/* Desktop Navigation */}

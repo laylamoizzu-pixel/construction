@@ -13,18 +13,26 @@ import {
     Users,
     Home,
     Menu,
-    X
+    X,
+    Package,
+    Folder,
+    Palette
 } from "lucide-react";
 import Link from "next/link";
 
 const navItems = [
     { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
+    { name: "Branding", href: "/admin/content/branding", icon: Palette },
     { name: "Hero Section", href: "/admin/content/hero", icon: Home },
+    { name: "Products", href: "/admin/content/products", icon: Package },
+    { name: "Categories", href: "/admin/content/categories", icon: Folder },
     { name: "Offers", href: "/admin/content/offers", icon: Tag },
     { name: "Gallery", href: "/admin/content/gallery", icon: Image },
     { name: "Contact Info", href: "/admin/content/contact", icon: Phone },
     { name: "Staff Management", href: "/admin/staff", icon: Users },
 ];
+
+
 
 export default function AdminDashboard() {
     const { user, loading: authLoading, logout } = useAuth();

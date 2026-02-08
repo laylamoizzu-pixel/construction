@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Facebook, Instagram, Twitter, MapPin, Phone, Mail } from "lucide-react";
 
 export default function Footer() {
@@ -8,13 +9,15 @@ export default function Footer() {
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
                     {/* Brand Column */}
                     <div className="space-y-4">
-                        <Link href="/" className="flex items-center gap-2">
-                            <div className="w-8 h-8 bg-brand-green rounded-br-xl rounded-tl-xl flex items-center justify-center text-white font-serif font-bold text-xl">
-                                S
+                        <Link href="/" className="flex items-center gap-2 mb-4">
+                            <div className="relative w-40 h-12">
+                                <Image
+                                    src="/logo.png"
+                                    alt="Smart Avenue"
+                                    fill
+                                    className="object-contain brightness-0 invert"
+                                />
                             </div>
-                            <span className="font-serif text-2xl font-bold tracking-tight">
-                                Smart<span className="text-brand-gold">Avenue</span>
-                            </span>
                         </Link>
                         <p className="text-gray-400 text-sm leading-relaxed max-w-xs">
                             Patna&apos;s premier shopping destination where luxury meets convenience. Experience world-class retail therapy.

@@ -258,3 +258,177 @@ export async function deleteStaffMember(id: string) {
     }
 }
 
+// ==================== CATEGORIES ====================
+
+export interface Category {
+    id: string;
+    name: string;
+    slug: string;
+    parentId: string | null;
+    order: number;
+    createdAt: Date;
+}
+
+export async function getCategories(): Promise<Category[]> {
+    try {
+        const snapshot = await getAdminDb().collection("categories").orderBy("order", "asc").get();
+        return snapshot.docs.map((doc: admin.firestore.QueryDocumentSnapshot) => ({
+            id: doc.id,
+            ...doc.data(),
+            createdAt: (doc.data().createdAt as admin.firestore.Timestamp)?.toDate() || new Date(),
+        })) as Category[];
+    } catch (error) {
+        console.error("Error fetching categories:", error);
+        return [];
+    }
+}
+
+export async function createCategory(name: string, parentId: string | null = null) {
+    try {
+        const slug = name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+        const snapshot = await getAdminDb().collection("categories").get();
+        const order = snapshot.size;
+
+        const docRef = await getAdminDb().collection("categories").add({
+            name,
+            slug,
+            parentId,
+            order,
+            createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        });
+        return { success: true, id: docRef.id };
+    } catch (error: unknown) {
+        return { success: false, error: error instanceof Error ? error.message : "Unknown error" };
+    }
+}
+
+export async function updateCategory(id: string, data: Partial<Category>) {
+    try {
+        await getAdminDb().collection("categories").doc(id).update({
+            ...data,
+            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        });
+        return { success: true };
+    } catch (error: unknown) {
+        return { success: false, error: error instanceof Error ? error.message : "Unknown error" };
+    }
+}
+
+export async function deleteCategory(id: string) {
+    try {
+        await getAdminDb().collection("categories").doc(id).delete();
+        return { success: true };
+    } catch (error: unknown) {
+        return { success: false, error: error instanceof Error ? error.message : "Unknown error" };
+    }
+}
+
+// ==================== PRODUCTS ====================
+
+export interface Product {
+    id: string;
+    name: string;
+    description: string;
+    price: number;
+    originalPrice?: number;
+    categoryId: string;
+    subcategoryId?: string;
+    imageUrl: string;
+    images: string[];
+    available: boolean;
+    featured: boolean;
+    offerId?: string;
+    tags: string[];
+    createdAt: Date;
+    updatedAt?: Date;
+}
+
+export async function getProducts(categoryId?: string, available?: boolean): Promise<Product[]> {
+    try {
+        let query: admin.firestore.Query = getAdminDb().collection("products");
+
+        if (categoryId) {
+            query = query.where("categoryId", "==", categoryId);
+        }
+        if (available !== undefined) {
+            query = query.where("available", "==", available);
+        }
+
+        const snapshot = await query.orderBy("createdAt", "desc").get();
+        return snapshot.docs.map((doc: admin.firestore.QueryDocumentSnapshot) => ({
+            id: doc.id,
+            ...doc.data(),
+            createdAt: (doc.data().createdAt as admin.firestore.Timestamp)?.toDate() || new Date(),
+            updatedAt: (doc.data().updatedAt as admin.firestore.Timestamp)?.toDate() || undefined,
+        })) as Product[];
+    } catch (error) {
+        console.error("Error fetching products:", error);
+        return [];
+    }
+}
+
+export async function getProduct(id: string): Promise<Product | null> {
+    try {
+        const doc = await getAdminDb().collection("products").doc(id).get();
+        if (doc.exists) {
+            const data = doc.data();
+            return {
+                id: doc.id,
+                ...data,
+                createdAt: (data?.createdAt as admin.firestore.Timestamp)?.toDate() || new Date(),
+                updatedAt: (data?.updatedAt as admin.firestore.Timestamp)?.toDate() || undefined,
+            } as Product;
+        }
+        return null;
+    } catch (error) {
+        console.error("Error fetching product:", error);
+        return null;
+    }
+}
+
+export async function createProduct(data: Omit<Product, "id" | "createdAt">) {
+    try {
+        const docRef = await getAdminDb().collection("products").add({
+            ...data,
+            createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        });
+        return { success: true, id: docRef.id };
+    } catch (error: unknown) {
+        return { success: false, error: error instanceof Error ? error.message : "Unknown error" };
+    }
+}
+
+export async function updateProduct(id: string, data: Partial<Product>) {
+    try {
+        await getAdminDb().collection("products").doc(id).update({
+            ...data,
+            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        });
+        return { success: true };
+    } catch (error: unknown) {
+        return { success: false, error: error instanceof Error ? error.message : "Unknown error" };
+    }
+}
+
+export async function deleteProduct(id: string) {
+    try {
+        await getAdminDb().collection("products").doc(id).delete();
+        return { success: true };
+    } catch (error: unknown) {
+        return { success: false, error: error instanceof Error ? error.message : "Unknown error" };
+    }
+}
+
+export async function toggleProductAvailability(id: string, available: boolean) {
+    try {
+        await getAdminDb().collection("products").doc(id).update({
+            available,
+            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        });
+        return { success: true };
+    } catch (error: unknown) {
+        return { success: false, error: error instanceof Error ? error.message : "Unknown error" };
+    }
+}
+
+
