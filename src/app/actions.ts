@@ -11,7 +11,7 @@ export async function testFirebaseConnection() {
         return {
             success: true,
             message: "Connected to Firebase!",
-            collections: snapshot.map(col => col.id)
+            collections: snapshot.map((col: { id: string }) => col.id)
         };
     } catch (error: unknown) {
         const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
