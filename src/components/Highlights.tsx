@@ -1,30 +1,46 @@
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, ShoppingBasket, Shirt, Smartphone } from "lucide-react";
+import { ArrowRight, PenTool, Smile, Utensils, Home as HomeIcon, Package } from "lucide-react";
 
 const HIGHLIGHTS = [
     {
-        id: "fresh",
-        title: "Fresh Grocery",
-        description: "Organic produce and exotic imports.",
-        icon: ShoppingBasket,
-        image: "https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=1974&auto=format&fit=crop",
-        color: "bg-green-100 text-green-800",
+        id: "stationery",
+        title: "Stationery",
+        description: "Premium & stylish stationery for students and professionals.",
+        icon: PenTool,
+        image: "https://images.unsplash.com/photo-1544816155-12df9643f363?q=80&w=2662&auto=format&fit=crop",
+        color: "bg-yellow-100 text-yellow-800",
     },
     {
-        id: "fashion",
-        title: "Premium Fashion",
-        description: "Trendsetting apparel from top brands.",
-        icon: Shirt,
-        image: "https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=2070&auto=format&fit=crop",
-        color: "bg-purple-100 text-purple-800",
+        id: "soft-toys",
+        title: "Soft Toys",
+        description: "Cute, safe, and high-quality soft toys for all ages.",
+        icon: Smile, // Using Smile as a proxy for toys if Bear is unavailable, or import Heart/Star
+        image: "https://images.unsplash.com/photo-1555449377-54da9dOcbe35?q=80&w=2670&auto=format&fit=crop", // Intentionally using a generic placeholder if ID is tricky, but lets try to get a real one
+        color: "bg-pink-100 text-pink-800",
     },
     {
-        id: "tech",
-        title: "Smart Electronics",
-        description: "The latest gadgets and smart home tech.",
-        icon: Smartphone,
-        image: "https://images.unsplash.com/photo-1550009158-9ebf69173e03?q=80&w=2101&auto=format&fit=crop",
+        id: "kitchen",
+        title: "Kitchen Décor",
+        description: "Stylish and durable utility products for your modern kitchen.",
+        icon: Utensils,
+        image: "https://images.unsplash.com/photo-1556910103-1c02745a30bf?q=80&w=2670&auto=format&fit=crop",
+        color: "bg-orange-100 text-orange-800",
+    },
+    {
+        id: "home-decor",
+        title: "Home Décor",
+        description: "Elegant and functional items to transform your living space.",
+        icon: HomeIcon,
+        image: "https://images.unsplash.com/photo-1513519245088-0e12902e35a6?q=80&w=2670&auto=format&fit=crop",
+        color: "bg-indigo-100 text-indigo-800",
+    },
+    {
+        id: "plastic",
+        title: "Plastic Products",
+        description: "Sturdy and long-lasting home essentials.",
+        icon: Package,
+        image: "https://images.unsplash.com/photo-1595079676339-1534827d8c18?q=80&w=2670&auto=format&fit=crop", // Storage box image
         color: "bg-blue-100 text-blue-800",
     },
 ];
@@ -42,7 +58,7 @@ export default function Highlights() {
                     </p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 justify-center">
                     {HIGHLIGHTS.map((item) => (
                         <Link
                             key={item.id}

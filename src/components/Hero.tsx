@@ -33,15 +33,15 @@ export default function Hero() {
                     transition={{ duration: 0.8, delay: 0.2 }}
                 >
                     <span className="inline-block py-1 px-3 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-brand-gold text-sm font-medium tracking-wide mb-6">
-                        Patna&apos;s Premier Shopping Destination
+                        Smart Avnue – Premium Products at Affordable Prices
                     </span>
-                    <h1 className="text-5xl md:text-7xl font-serif font-bold mb-6 leading-tight">
-                        Experience World-Class <br />
-                        <span className="text-brand-gold">Retail Luxury</span>
+                    <h1 className="text-4xl md:text-6xl font-serif font-bold mb-6 leading-tight">
+                        Premium Living, <br />
+                        <span className="text-brand-gold">Affordable Prices</span>
                     </h1>
-                    <p className="text-lg md:text-xl text-gray-200 mb-10 max-w-2xl mx-auto leading-relaxed">
-                        From fresh gourmet groceries to premium fashion and smart electronics.
-                        Discover a shopping experience like never before, right here in your city.
+                    <p className="text-lg md:text-xl text-gray-200 mb-10 max-w-3xl mx-auto leading-relaxed">
+                        Smart Avnue is your one-stop retail destination for premium, stylish, and affordable everyday products designed to elevate your lifestyle.
+                        From stationery to home décor, we bring quality and elegance within everyone’s reach.
                     </p>
 
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-4">

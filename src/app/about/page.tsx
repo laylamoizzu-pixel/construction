@@ -15,7 +15,7 @@ export default function AboutPage() {
                         animate={{ opacity: 1, y: 0 }}
                         className="text-4xl md:text-6xl font-serif font-bold mb-6"
                     >
-                        Redefining Retail in <span className="text-brand-gold">Patna</span>
+                        Smart Avnue – <span className="text-brand-gold">Premium & Affordable</span>
                     </motion.h1>
                     <motion.p
                         initial={{ opacity: 0, y: 20 }}
@@ -23,7 +23,7 @@ export default function AboutPage() {
                         transition={{ delay: 0.2 }}
                         className="text-xl text-gray-300 max-w-3xl mx-auto"
                     >
-                        Bringing a world-class shopping experience to the heart of Bihar. Where luxury meets convenience, and tradition meets modernity.
+                        Making everyday essentials look better, feel better, and last longer. Quality and elegance within everyone’s reach.
                     </motion.p>
                 </div>
             </section>
@@ -32,12 +32,12 @@ export default function AboutPage() {
             <section className="py-20 container mx-auto px-4 md:px-6">
                 <div className="flex flex-col md:flex-row items-center gap-12">
                     <div className="flex-1">
-                        <h2 className="text-3xl font-serif font-bold text-brand-dark mb-6">Our Vision</h2>
+                        <h2 className="text-3xl font-serif font-bold text-brand-dark mb-6">Our Vision & Mission</h2>
                         <p className="text-gray-600 text-lg leading-relaxed mb-6">
-                            At Smart Avenue, we believe that Patna deserves a retail destination that rivals the best in Dubai or Singapore. Our vision is to create a space that is not just a store, but a lifestyle destination.
+                            At Smart Avnue, we believe that quality, style, and affordability should go hand in hand. Our mission is to redefine retail shopping by offering well-designed, long-lasting, and functional products that enhance everyday life while remaining budget-friendly.
                         </p>
                         <p className="text-gray-600 text-lg leading-relaxed">
-                            We are moving beyond the traditional clutter of kirana shops to offer wide, air-conditioned aisles, aromatic ambiance, and a curated selection of global and premium Indian brands.
+                            We continuously update our product range to match current trends, customer needs, and modern lifestyles, ensuring that every visit to Smart Avnue feels fresh, valuable, and satisfying.
                         </p>
                     </div>
                     <div className="flex-1 h-[400px] w-full bg-slate-100 rounded-2xl overflow-hidden relative">
