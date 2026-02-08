@@ -7,11 +7,13 @@ import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, ShoppingBag, Search } from "lucide-react";
 import { NAV_LINKS } from "@/lib/data";
+import { useBranding } from "@/context/branding-context";
 
 export default function Header() {
     const [isScrolled, setIsScrolled] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const pathname = usePathname();
+    const { branding } = useBranding();
 
     useEffect(() => {
         const handleScroll = () => {
@@ -27,12 +29,12 @@ export default function Header() {
                 }`}
         >
             <div className="container mx-auto px-4 md:px-6 flex items-center justify-between">
-                {/* Logo */}
+                {/* Logo - Now Dynamic */}
                 <Link href="/" className="flex items-center gap-2 group">
                     <div className="relative w-40 h-12">
                         <Image
-                            src="/logo.png"
-                            alt="Smart Avenue"
+                            src={branding.logoUrl || "/logo.png"}
+                            alt={branding.siteName || "Smart Avenue"}
                             fill
                             className="object-contain"
                             priority
@@ -65,10 +67,13 @@ export default function Header() {
                         <Search className="w-5 h-5" />
                     </button>
 
-                    <button className="flex items-center gap-2 bg-brand-gold hover:bg-yellow-500 text-white px-4 py-2 rounded-full text-sm font-medium transition-colors shadow-lg shadow-yellow-500/20">
+                    <Link
+                        href="/products"
+                        className="flex items-center gap-2 bg-brand-gold hover:bg-yellow-500 text-white px-4 py-2 rounded-full text-sm font-medium transition-colors shadow-lg shadow-yellow-500/20"
+                    >
                         <ShoppingBag className="w-4 h-4" />
                         <span className="hidden lg:inline">Shop Now</span>
-                    </button>
+                    </Link>
                 </div>
 
                 {/* Mobile Menu Button */}
@@ -105,10 +110,13 @@ export default function Header() {
                             </Link>
                         ))}
                         <div className="flex gap-4 mt-2 pt-4 border-t border-gray-100">
-
-                            <button className="flex-1 flex items-center justify-center gap-2 p-3 rounded-lg bg-brand-green text-white">
+                            <Link
+                                href="/products"
+                                onClick={() => setIsMobileMenuOpen(false)}
+                                className="flex-1 flex items-center justify-center gap-2 p-3 rounded-lg bg-brand-green text-white"
+                            >
                                 <ShoppingBag className="w-5 h-5" /> Shop
-                            </button>
+                            </Link>
                         </div>
                     </motion.div>
                 )}
