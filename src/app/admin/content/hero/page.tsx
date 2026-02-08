@@ -54,7 +54,7 @@ export default function HeroEditor() {
         e.preventDefault();
         setSaving(true);
         setSaved(false);
-        const result = await updateSiteContent("hero", content);
+        const result = await updateSiteContent("hero", content as unknown as Record<string, unknown>);
         if (result.success) {
             setSaved(true);
             setTimeout(() => setSaved(false), 3000);
