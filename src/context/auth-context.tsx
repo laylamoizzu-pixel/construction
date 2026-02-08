@@ -53,7 +53,7 @@ function setPersistedAuth(isLoggedIn: boolean) {
 
 export function AuthProvider({ children }: { children: ReactNode }) {
     // Initialize with persisted state for instant UI
-    const [hasPersistedAuth] = useState(() => getPersistedAuth());
+    const [_hasPersistedAuth] = useState(() => getPersistedAuth());
     const [user, setUser] = useState<User | null>(null);
     const [role, setRole] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);

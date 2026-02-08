@@ -15,7 +15,7 @@ export default async function DebugPage() {
                 </ul>
             </div>
         );
-    } catch (error: any) {
+    } catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
         return (
             <div className="p-10">
                 <h1 className="text-2xl font-bold text-red-600">Firebase Admin Connection Failed</h1>

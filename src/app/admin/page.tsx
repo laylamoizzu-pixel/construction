@@ -12,7 +12,6 @@ import {
     ShoppingBag,
     Tag,
     Menu,
-    X,
     Phone,
     Megaphone
 } from "lucide-react";
@@ -191,7 +190,7 @@ export default function AdminDashboard() {
                                 <div className="relative z-10">
                                     <h3 className="text-2xl font-serif mb-2">Welcome back, {user.email?.split('@')[0]}</h3>
                                     <p className="text-brand-gold/80 mb-6 max-w-md">
-                                        Manage your store's products, offers, and content from this unified dashboard.
+                                        Manage your store&apos;s products, offers, and content from this unified dashboard.
                                     </p>
                                     <div className="flex gap-3">
                                         <Link href="/admin/content/products" className="px-4 py-2 bg-white text-brand-green rounded-lg font-medium text-sm hover:bg-gray-100 transition-colors">
