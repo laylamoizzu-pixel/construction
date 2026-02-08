@@ -67,7 +67,7 @@ export default function BrandingEditor() {
         e.preventDefault();
         setSaving(true);
         setSaved(false);
-        const result = await updateSiteContent("branding", content);
+        const result = await updateSiteContent("branding", content as unknown as Record<string, unknown>);
         if (result.success) {
             setSaved(true);
             setTimeout(() => setSaved(false), 3000);
