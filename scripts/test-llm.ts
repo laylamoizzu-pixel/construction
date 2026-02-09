@@ -1,32 +1,51 @@
 
-import dotenv from 'dotenv';
+import fs from 'fs';
 import path from 'path';
+import type { Product } from '../src/app/actions';
 
-// Load environment variables from .env.local
-dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
+// Load environment variables from .env.local manually
+try {
+    const envPath = path.resolve(process.cwd(), '.env.local');
+    if (fs.existsSync(envPath)) {
+        const envConfig = fs.readFileSync(envPath, 'utf8');
+        envConfig.split('\n').forEach(line => {
+            const match = line.match(/^([^=]+)=(.*)$/);
+            if (match) {
+                const key = match[1].trim();
+                const value = match[2].trim().replace(/^["']|["']$/g, '');
+                process.env[key] = value;
+            }
+        });
+        console.log("Loaded .env.local properties:", Object.keys(process.env).filter(k => k.includes('KEY')));
 
-// Helper to mock the context if needed, but we'll try to import the service directly
-// We need to handle the fact that we can't easily import from src/ without tsconfig-paths registration
-// So we'll run this with `npx tsx scripts/test-llm.ts` which should handle paths if configured, 
-// OR we rely on relative imports if we were inside src.
-// Since we are in scripts/, we might need to adjust imports or use tsconfig-paths.
-// Just to be safe, I'm using relative path assumption or alias provided by tsx.
-
-import { analyzeIntent, rankAndSummarize } from '../src/lib/llm-service';
-import { Product } from '../src/app/actions';
+        if (!process.env.GROQ_API_KEY) {
+            console.error("GROQ_API_KEY not found in process.env after loading! Make sure .env.local exists.");
+        } else {
+            console.log("GROQ_API_KEY is properly set in process.env");
+        }
+    }
+} catch (e) {
+    console.warn("Failed to load .env.local", e);
+}
 
 async function main() {
+    console.log("GROQ_API_KEY before import:", process.env.GROQ_API_KEY ? "EXISTS" : "MISSING");
+    // Dynamic import to ensure env vars are loaded first
+    const { analyzeIntent, rankAndSummarize } = await import('../src/lib/llm-service');
+    // const { Product } = await import('../src/app/actions'); // Product is a type, just import it normally or mock it
+
     console.log("Starting LLM Test...");
 
     // 1. Test Intent Analysis
     console.log("\n--- Testing Intent Analysis (Groq) ---");
     const query = "I am looking for a running shoe under 5000";
-    const categories = [
-        { id: "cat_shoes", name: "Shoes", description: "Footwear", image: "", parentId: null },
-        { id: "cat_electronics", name: "Electronics", description: "Gadgets", image: "", parentId: null }
+    const categories: any[] = [
+        { id: "cat_shoes", name: "Shoes", description: "Footwear", image: "", parentId: null, slug: "shoes", order: 0, createdAt: new Date() },
+        { id: "cat_electronics", name: "Electronics", description: "Gadgets", image: "", parentId: null, slug: "electronics", order: 1, createdAt: new Date() }
     ];
 
     try {
+        // @ts-ignore
         const intent = await analyzeIntent(query, categories); // Should use default (Groq)
         console.log("Intent Result:", JSON.stringify(intent, null, 2));
     } catch (error) {
@@ -39,17 +58,20 @@ async function main() {
         {
             id: "p1", name: "SpeedRunner 3000", description: "High performance running shoe",
             price: 4500, categoryId: "cat_shoes", images: [], tags: ["running", "sports"],
-            available: true, featured: false, createdAt: new Date(), updatedAt: new Date()
+            available: true, featured: false, createdAt: new Date(), updatedAt: new Date(),
+            imageUrl: "placeholder.jpg"
         },
         {
             id: "p2", name: "ComfyWalker", description: "Casual walking shoe",
             price: 2000, categoryId: "cat_shoes", images: [], tags: ["walking", "casual"],
-            available: true, featured: false, createdAt: new Date(), updatedAt: new Date()
+            available: true, featured: false, createdAt: new Date(), updatedAt: new Date(),
+            imageUrl: "placeholder.jpg"
         },
         {
             id: "p3", name: "ProLaptop X", description: "Gaming laptop",
             price: 80000, categoryId: "cat_electronics", images: [], tags: ["gaming", "computer"],
-            available: true, featured: false, createdAt: new Date(), updatedAt: new Date()
+            available: true, featured: false, createdAt: new Date(), updatedAt: new Date(),
+            imageUrl: "placeholder.jpg"
         }
     ];
 

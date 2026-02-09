@@ -1,0 +1,22 @@
+Loaded .env.local properties: []
+GROQ_API_KEY not found in process.env after loading!
+GROQ_API_KEY before import: MISSING
+Starting LLM Test...
+
+--- Testing Intent Analysis (Groq) ---
+[APIKeyManager] Total keys available: 0
+[APIKeyManager] No API keys configured from env. Keys may be loaded from Firestore.
+Intent Analysis Failed: APIKeyExhaustedError: No API keys configured for provider: google
+    at APIKeyManager.getActiveKey (C:\Users\user\.gemini\antigravity\scratch\smart_avenue\src\lib\api-key-manager.ts:194:19)
+    at callGeminiAPI (C:\Users\user\.gemini\antigravity\scratch\smart_avenue\src\lib\llm-service.ts:129:29)
+    at callLLM (C:\Users\user\.gemini\antigravity\scratch\smart_avenue\src\lib\llm-service.ts:200:18)
+    at analyzeIntent (C:\Users\user\.gemini\antigravity\scratch\smart_avenue\src\lib\llm-service.ts:257:28)
+    at main (C:\Users\user\.gemini\antigravity\scratch\smart_avenue\scripts\test-llm.ts:49:30)
+
+--- Testing Rank & Summarize (Groq) ---
+Rank & Summarize Failed: APIKeyExhaustedError: No API keys configured for provider: google
+    at APIKeyManager.getActiveKey (C:\Users\user\.gemini\antigravity\scratch\smart_avenue\src\lib\api-key-manager.ts:194:19)
+    at callGeminiAPI (C:\Users\user\.gemini\antigravity\scratch\smart_avenue\src\lib\llm-service.ts:129:29)
+    at callLLM (C:\Users\user\.gemini\antigravity\scratch\smart_avenue\src\lib\llm-service.ts:200:18)
+    at rankAndSummarize (C:\Users\user\.gemini\antigravity\scratch\smart_avenue\src\lib\llm-service.ts:398:28)
+    at main (C:\Users\user\.gemini\antigravity\scratch\smart_avenue\scripts\test-llm.ts:91:30)

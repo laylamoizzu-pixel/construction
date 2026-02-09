@@ -1,0 +1,44 @@
+Loaded .env.local properties: []
+GROQ_API_KEY not found in process.env after loading!
+Using hardcoded key for verification.
+GROQ_API_KEY before import: EXISTS
+Starting LLM Test...
+
+--- Testing Intent Analysis (Groq) ---
+[APIKeyManager] Total keys available: 1
+[APIKeyManager] Initialized with 1 API key(s) from env
+[LLMService] Groq Request failed (400), retrying
+[LLMService] Groq Request failed (400), retrying
+[APIKeyManager] Key 0 (groq) reached max consecutive errors, entering cooldown
+[LLMService] Groq Request failed (400), retrying
+[LLMService] Groq failed, falling back to Gemini: APIKeyExhaustedError: All groq API keys are exhausted or rate-limited or in cooldown
+    at APIKeyManager.getActiveKey (C:\Users\user\.gemini\antigravity\scratch\smart_avenue\src\lib\api-key-manager.ts:200:19)
+    at callGroqAPI (C:\Users\user\.gemini\antigravity\scratch\smart_avenue\src\lib\llm-service.ts:57:29)
+    at callGroqAPI (C:\Users\user\.gemini\antigravity\scratch\smart_avenue\src\lib\llm-service.ts:92:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async callLLM (C:\Users\user\.gemini\antigravity\scratch\smart_avenue\src\lib\llm-service.ts:192:20)
+    at async analyzeIntent (C:\Users\user\.gemini\antigravity\scratch\smart_avenue\src\lib\llm-service.ts:257:22)
+    at async main (C:\Users\user\.gemini\antigravity\scratch\smart_avenue\scripts\test-llm.ts:52:24)
+Intent Analysis Failed: APIKeyExhaustedError: No API keys configured for provider: google
+    at APIKeyManager.getActiveKey (C:\Users\user\.gemini\antigravity\scratch\smart_avenue\src\lib\api-key-manager.ts:194:19)
+    at callGeminiAPI (C:\Users\user\.gemini\antigravity\scratch\smart_avenue\src\lib\llm-service.ts:129:29)
+    at callLLM (C:\Users\user\.gemini\antigravity\scratch\smart_avenue\src\lib\llm-service.ts:200:18)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async analyzeIntent (C:\Users\user\.gemini\antigravity\scratch\smart_avenue\src\lib\llm-service.ts:257:22)
+    at async main (C:\Users\user\.gemini\antigravity\scratch\smart_avenue\scripts\test-llm.ts:52:24)
+
+--- Testing Rank & Summarize (Groq) ---
+[LLMService] Groq failed, falling back to Gemini: APIKeyExhaustedError: All groq API keys are exhausted or rate-limited or in cooldown
+    at APIKeyManager.getActiveKey (C:\Users\user\.gemini\antigravity\scratch\smart_avenue\src\lib\api-key-manager.ts:200:19)
+    at callGroqAPI (C:\Users\user\.gemini\antigravity\scratch\smart_avenue\src\lib\llm-service.ts:57:29)
+    at callLLM (C:\Users\user\.gemini\antigravity\scratch\smart_avenue\src\lib\llm-service.ts:192:26)
+    at rankAndSummarize (C:\Users\user\.gemini\antigravity\scratch\smart_avenue\src\lib\llm-service.ts:398:28)
+    at main (C:\Users\user\.gemini\antigravity\scratch\smart_avenue\scripts\test-llm.ts:94:30)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+Rank & Summarize Failed: APIKeyExhaustedError: No API keys configured for provider: google
+    at APIKeyManager.getActiveKey (C:\Users\user\.gemini\antigravity\scratch\smart_avenue\src\lib\api-key-manager.ts:194:19)
+    at callGeminiAPI (C:\Users\user\.gemini\antigravity\scratch\smart_avenue\src\lib\llm-service.ts:129:29)
+    at callLLM (C:\Users\user\.gemini\antigravity\scratch\smart_avenue\src\lib\llm-service.ts:200:18)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async rankAndSummarize (C:\Users\user\.gemini\antigravity\scratch\smart_avenue\src\lib\llm-service.ts:398:22)
+    at async main (C:\Users\user\.gemini\antigravity\scratch\smart_avenue\scripts\test-llm.ts:94:24)

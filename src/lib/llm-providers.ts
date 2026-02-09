@@ -156,7 +156,7 @@ export class GroqProvider implements LLMProviderInterface {
     id: LLMProvider = "groq";
     name = "Groq Llama 3";
     private baseUrl = "https://api.groq.com/openai/v1/chat/completions";
-    private model = "llama3-70b-8192";
+    private model = "llama-3.3-70b-versatile";
 
     async generateContent(prompt: string, apiKey: string): Promise<string> {
         const response = await fetch(this.baseUrl, {

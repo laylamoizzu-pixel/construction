@@ -16,7 +16,7 @@ import { Product, Category } from "@/app/actions";
 const MAX_RETRIES = 3;
 
 const GROQ_API_BASE = "https://api.groq.com/openai/v1/chat/completions";
-const GROQ_MODEL = "llama3-70b-8192";
+const GROQ_MODEL = "llama-3.3-70b-versatile"; // Using Llama 3.3 70B for high quality
 const GEMINI_API_BASE = "https://generativelanguage.googleapis.com/v1beta/models";
 const GEMINI_MODEL = "gemini-2.0-flash";
 
@@ -86,12 +86,15 @@ async function callGroqAPI(prompt: string, retryCount: number = 0): Promise<stri
         }
 
         if (!response.ok) {
+            const errorText = await response.text();
+            console.error(`[LLMService] Groq Error Body: ${errorText}`);
+
             keyManager.markKeyFailed(apiKey);
             if (retryCount < MAX_RETRIES) {
                 console.log(`[LLMService] Groq Request failed (${response.status}), retrying`);
                 return callGroqAPI(prompt, retryCount + 1);
             }
-            throw new LLMServiceError(`Groq API request failed: ${response.statusText}`, response.status);
+            throw new LLMServiceError(`Groq API request failed: ${response.statusText} - ${errorText}`, response.status);
         }
 
         const data: GroqResponse = await response.json();
@@ -179,7 +182,7 @@ async function callGeminiAPI(prompt: string, retryCount: number = 0): Promise<st
  * Main LLM call function that routes to available providers
  * Prioritizes Groq > Gemini
  */
-async function callLLM(prompt: string, preferredProvider: LLMProvider = "google"): Promise<string> {
+async function callLLM(prompt: string, _preferredProvider: LLMProvider = "google"): Promise<string> {
     const keyManager = getAPIKeyManager();
 
     // If preferred is specified and we have keys, try that first?

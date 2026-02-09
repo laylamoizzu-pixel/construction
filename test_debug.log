@@ -1,0 +1,50 @@
+Loaded .env.local properties: []
+GROQ_API_KEY not found in process.env after loading!
+Using hardcoded key for verification.
+GROQ_API_KEY before import: EXISTS
+Starting LLM Test...
+
+--- Testing Intent Analysis (Groq) ---
+[APIKeyManager] Total keys available: 1
+[APIKeyManager] Initialized with 1 API key(s) from env
+[LLMService] Groq Error Body: {"error":{"message":"The model `llama3-70b-8192` has been decommissioned and is no longer supported. Please refer to https://console.groq.com/docs/deprecations for a recommendation on which model to use instead.","type":"invalid_request_error","code":"model_decommissioned"}}
+
+[LLMService] Groq Request failed (400), retrying
+[LLMService] Groq Error Body: {"error":{"message":"The model `llama3-70b-8192` has been decommissioned and is no longer supported. Please refer to https://console.groq.com/docs/deprecations for a recommendation on which model to use instead.","type":"invalid_request_error","code":"model_decommissioned"}}
+
+[LLMService] Groq Request failed (400), retrying
+[LLMService] Groq Error Body: {"error":{"message":"The model `llama3-70b-8192` has been decommissioned and is no longer supported. Please refer to https://console.groq.com/docs/deprecations for a recommendation on which model to use instead.","type":"invalid_request_error","code":"model_decommissioned"}}
+
+[APIKeyManager] Key 0 (groq) reached max consecutive errors, entering cooldown
+[LLMService] Groq Request failed (400), retrying
+[LLMService] Groq failed, falling back to Gemini: APIKeyExhaustedError: All groq API keys are exhausted or rate-limited or in cooldown
+    at APIKeyManager.getActiveKey (C:\Users\user\.gemini\antigravity\scratch\smart_avenue\src\lib\api-key-manager.ts:200:19)
+    at callGroqAPI (C:\Users\user\.gemini\antigravity\scratch\smart_avenue\src\lib\llm-service.ts:57:29)
+    at callGroqAPI (C:\Users\user\.gemini\antigravity\scratch\smart_avenue\src\lib\llm-service.ts:95:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async callLLM (C:\Users\user\.gemini\antigravity\scratch\smart_avenue\src\lib\llm-service.ts:195:20)
+    at async analyzeIntent (C:\Users\user\.gemini\antigravity\scratch\smart_avenue\src\lib\llm-service.ts:260:22)
+    at async main (C:\Users\user\.gemini\antigravity\scratch\smart_avenue\scripts\test-llm.ts:52:24)
+Intent Analysis Failed: APIKeyExhaustedError: No API keys configured for provider: google
+    at APIKeyManager.getActiveKey (C:\Users\user\.gemini\antigravity\scratch\smart_avenue\src\lib\api-key-manager.ts:194:19)
+    at callGeminiAPI (C:\Users\user\.gemini\antigravity\scratch\smart_avenue\src\lib\llm-service.ts:132:29)
+    at callLLM (C:\Users\user\.gemini\antigravity\scratch\smart_avenue\src\lib\llm-service.ts:203:18)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async analyzeIntent (C:\Users\user\.gemini\antigravity\scratch\smart_avenue\src\lib\llm-service.ts:260:22)
+    at async main (C:\Users\user\.gemini\antigravity\scratch\smart_avenue\scripts\test-llm.ts:52:24)
+
+--- Testing Rank & Summarize (Groq) ---
+[LLMService] Groq failed, falling back to Gemini: APIKeyExhaustedError: All groq API keys are exhausted or rate-limited or in cooldown
+    at APIKeyManager.getActiveKey (C:\Users\user\.gemini\antigravity\scratch\smart_avenue\src\lib\api-key-manager.ts:200:19)
+    at callGroqAPI (C:\Users\user\.gemini\antigravity\scratch\smart_avenue\src\lib\llm-service.ts:57:29)
+    at callLLM (C:\Users\user\.gemini\antigravity\scratch\smart_avenue\src\lib\llm-service.ts:195:26)
+    at rankAndSummarize (C:\Users\user\.gemini\antigravity\scratch\smart_avenue\src\lib\llm-service.ts:401:28)
+    at main (C:\Users\user\.gemini\antigravity\scratch\smart_avenue\scripts\test-llm.ts:94:30)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+Rank & Summarize Failed: APIKeyExhaustedError: No API keys configured for provider: google
+    at APIKeyManager.getActiveKey (C:\Users\user\.gemini\antigravity\scratch\smart_avenue\src\lib\api-key-manager.ts:194:19)
+    at callGeminiAPI (C:\Users\user\.gemini\antigravity\scratch\smart_avenue\src\lib\llm-service.ts:132:29)
+    at callLLM (C:\Users\user\.gemini\antigravity\scratch\smart_avenue\src\lib\llm-service.ts:203:18)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async rankAndSummarize (C:\Users\user\.gemini\antigravity\scratch\smart_avenue\src\lib\llm-service.ts:401:22)
+    at async main (C:\Users\user\.gemini\antigravity\scratch\smart_avenue\scripts\test-llm.ts:94:24)

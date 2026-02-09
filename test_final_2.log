@@ -1,0 +1,37 @@
+Loaded .env.local properties: []
+GROQ_API_KEY not found in process.env after loading!
+Using hardcoded key for verification.
+GROQ_API_KEY before import: EXISTS
+Starting LLM Test...
+
+--- Testing Intent Analysis (Groq) ---
+[APIKeyManager] Total keys available: 1
+[APIKeyManager] Initialized with 1 API key(s) from env
+Intent Result: {
+  "category": "cat_shoes",
+  "subcategory": null,
+  "requirements": [
+    "running shoe"
+  ],
+  "budgetMin": null,
+  "budgetMax": 5000,
+  "preferences": [],
+  "useCase": "running",
+  "confidence": 0.9
+}
+
+--- Testing Rank & Summarize (Groq) ---
+Rank & Summary Result: {
+  "rankings": [
+    {
+      "productId": "p1",
+      "matchScore": 100,
+      "highlights": [
+        "High performance",
+        "Running shoe"
+      ],
+      "whyRecommended": "The SpeedRunner 3000 is a high-performance running shoe that fits your budget and meets your running needs, making it an ideal choice for you."
+    }
+  ],
+  "summary": "We've found a great running shoe that fits your budget of ₹5000, check out our top recommendation for a comfortable and high-performance run."
+}
