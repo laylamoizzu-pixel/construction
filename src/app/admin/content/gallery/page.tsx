@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import ImageUpload from "@/components/ImageUpload";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function GalleryEditor() {
     const { user, loading: authLoading } = useAuth();

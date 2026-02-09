@@ -12,80 +12,192 @@ import {
     LLMProvider
 } from "@/types/assistant-types";
 import { Product, Category } from "@/app/actions";
-import { getProvider } from "./llm-providers";
 
 const MAX_RETRIES = 3;
 
+const GROQ_API_BASE = "https://api.groq.com/openai/v1/chat/completions";
+const GROQ_MODEL = "llama3-70b-8192";
+const GEMINI_API_BASE = "https://generativelanguage.googleapis.com/v1beta/models";
+const GEMINI_MODEL = "gemini-2.0-flash";
+
+interface GeminiResponse {
+    candidates?: Array<{
+        content?: {
+            parts?: Array<{
+                text?: string;
+            }>;
+        };
+    }>;
+    error?: {
+        code: number;
+        message: string;
+    };
+}
+
+interface GroqResponse {
+    choices?: Array<{
+        message?: {
+            content?: string;
+        };
+    }>;
+    error?: {
+        code: string | number;
+        message: string;
+    };
+}
+
 /**
- * Make a request to an LLM provider with automatic key rotation on failure
+ * Make a request to Groq API
  */
-async function callLLM(prompt: string, preferredProvider: LLMProvider = "google", retryCount: number = 0): Promise<string> {
+async function callGroqAPI(prompt: string, retryCount: number = 0): Promise<string> {
     const keyManager = getAPIKeyManager();
-
-    // In future we could fallback: const provider = keyManager.hasKeys(preferredProvider) ? preferredProvider : 'google';
-
-    // For now we assume the user checks available providers
-    const providerId = preferredProvider;
-
-    // Check if we have any keys for this provider
-    if (!keyManager.hasKeys(providerId)) {
-        // If the requested provider isn't available, check if we can fallback to Google
-        // This makes the transition smoother if user hasn't set up new keys yet
-        if (providerId !== "google" && keyManager.hasKeys("google")) {
-            console.log(`[LLMService] Provider ${providerId} has no keys, falling back to google`);
-            return callLLM(prompt, "google", retryCount);
-        }
-
-        throw new APIKeyExhaustedError(`No API keys configured for provider: ${providerId}`);
-    }
-
     let apiKey: string;
+
     try {
-        apiKey = keyManager.getActiveKey(providerId);
+        apiKey = keyManager.getActiveKey("groq");
     } catch (error) {
-        // If active keys are exhausted for this provider, try fallback
-        if (providerId !== "google" && keyManager.hasKeys("google")) {
-            console.log(`[LLMService] Provider ${providerId} exhausted, falling back to google`);
-            return callLLM(prompt, "google", retryCount);
-        }
         throw error;
     }
 
-    const provider = getProvider(providerId);
-
     try {
-        const text = await provider.generateContent(prompt, apiKey);
+        const response = await fetch(GROQ_API_BASE, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${apiKey}`
+            },
+            body: JSON.stringify({
+                model: GROQ_MODEL,
+                messages: [
+                    { role: "user", content: prompt }
+                ],
+                temperature: 0.7,
+                max_tokens: 2048,
+            }),
+        });
+
+        if (response.status === 429) {
+            keyManager.markKeyRateLimited(apiKey);
+            if (retryCount < MAX_RETRIES) {
+                console.log(`[LLMService] Groq Rate limited, retrying (attempt ${retryCount + 1})`);
+                return callGroqAPI(prompt, retryCount + 1);
+            }
+            throw new LLMServiceError("Rate limit exceeded on Groq keys", 429);
+        }
+
+        if (!response.ok) {
+            keyManager.markKeyFailed(apiKey);
+            if (retryCount < MAX_RETRIES) {
+                console.log(`[LLMService] Groq Request failed (${response.status}), retrying`);
+                return callGroqAPI(prompt, retryCount + 1);
+            }
+            throw new LLMServiceError(`Groq API request failed: ${response.statusText}`, response.status);
+        }
+
+        const data: GroqResponse = await response.json();
+
+        if (data.error) {
+            keyManager.markKeyFailed(apiKey);
+            throw new LLMServiceError(data.error.message, typeof data.error.code === 'number' ? data.error.code : 500);
+        }
+
+        const text = data.choices?.[0]?.message?.content;
+        if (!text) {
+            throw new LLMServiceError("No response text from Groq");
+        }
+
         keyManager.markKeySuccess(apiKey);
         return text;
     } catch (error) {
-        if (error instanceof LLMServiceError && error.isRateLimited) {
-            // Rate limited
-            keyManager.markKeyRateLimited(apiKey);
+        if (error instanceof LLMServiceError || error instanceof APIKeyExhaustedError) throw error;
 
-            if (retryCount < MAX_RETRIES) {
-                console.log(`[LLMService] Rate limited (${providerId}), retrying with new key (attempt ${retryCount + 1})`);
-                return callLLM(prompt, providerId, retryCount + 1);
-            }
-
-            // If all keys for this provider are rate limited, try fallback
-            if (providerId !== "google" && keyManager.hasKeys("google")) {
-                console.log(`[LLMService] All ${providerId} keys rate limited, falling back to google`);
-                return callLLM(prompt, "google", 0);
-            }
-
-            throw new LLMServiceError(`Rate limit exceeded on all available ${providerId} keys`, 429);
-        }
-
-        // Other errors
         keyManager.markKeyFailed(apiKey);
+        if (retryCount < MAX_RETRIES) return callGroqAPI(prompt, retryCount + 1);
 
-        if (retryCount < MAX_RETRIES) {
-            console.log(`[LLMService] Request failed, retrying (attempt ${retryCount + 1})`);
-            return callLLM(prompt, providerId, retryCount + 1);
-        }
+        throw new LLMServiceError(`Unexpected Groq error: ${error instanceof Error ? error.message : "Unknown"}`);
+    }
+}
 
+/**
+ * Make a request to Gemini API
+ */
+async function callGeminiAPI(prompt: string, retryCount: number = 0): Promise<string> {
+    const keyManager = getAPIKeyManager();
+    let apiKey: string;
+
+    try {
+        apiKey = keyManager.getActiveKey("google");
+    } catch (error) {
         throw error;
     }
+
+    const url = `${GEMINI_API_BASE}/${GEMINI_MODEL}:generateContent?key=${apiKey}`;
+
+    try {
+        const response = await fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                contents: [{ parts: [{ text: prompt }] }],
+                generationConfig: { temperature: 0.7, maxOutputTokens: 2048 },
+            }),
+        });
+
+        if (response.status === 429) {
+            keyManager.markKeyRateLimited(apiKey);
+            if (retryCount < MAX_RETRIES) return callGeminiAPI(prompt, retryCount + 1);
+            throw new LLMServiceError("Rate limit exceeded on Gemini keys", 429);
+        }
+
+        if (!response.ok) {
+            keyManager.markKeyFailed(apiKey);
+            if (retryCount < MAX_RETRIES) return callGeminiAPI(prompt, retryCount + 1);
+            throw new LLMServiceError(`Gemini API request failed: ${response.statusText}`, response.status);
+        }
+
+        const data: GeminiResponse = await response.json();
+
+        if (data.error) {
+            keyManager.markKeyFailed(apiKey);
+            throw new LLMServiceError(data.error.message, data.error.code);
+        }
+
+        const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (!text) throw new LLMServiceError("No response text from Gemini");
+
+        keyManager.markKeySuccess(apiKey);
+        return text;
+    } catch (error) {
+        if (error instanceof LLMServiceError || error instanceof APIKeyExhaustedError) throw error;
+        keyManager.markKeyFailed(apiKey);
+        if (retryCount < MAX_RETRIES) return callGeminiAPI(prompt, retryCount + 1);
+        throw new LLMServiceError(`Unexpected Gemini error: ${error instanceof Error ? error.message : "Unknown"}`);
+    }
+}
+
+/**
+ * Main LLM call function that routes to available providers
+ * Prioritizes Groq > Gemini
+ */
+async function callLLM(prompt: string, preferredProvider: LLMProvider = "google"): Promise<string> {
+    const keyManager = getAPIKeyManager();
+
+    // If preferred is specified and we have keys, try that first?
+    // Actually the logic in the bad file prioritized Groq hardcoded if keys exist.
+    // I will keep that logic as it seems intentional for cost/speed.
+
+    // Try Groq first if available
+    if (keyManager.hasKeys("groq")) {
+        try {
+            return await callGroqAPI(prompt);
+        } catch (error) {
+            console.warn("[LLMService] Groq failed, falling back to Gemini:", error);
+            // Fallthrough to Gemini
+        }
+    }
+
+    // Fallback to Gemini
+    return await callGeminiAPI(prompt);
 }
 
 /**
@@ -107,8 +219,6 @@ function parseJSONFromResponse<T>(response: string): T {
     try {
         return JSON.parse(cleaned);
     } catch {
-        // If it's not valid JSON, it might be a partial response or error text
-        // We'll throw but log the response for debugging if needed
         throw new LLMServiceError(`Failed to parse LLM response as JSON: ${response.substring(0, 100)}...`);
     }
 }

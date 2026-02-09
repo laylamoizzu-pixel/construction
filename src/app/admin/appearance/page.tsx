@@ -7,6 +7,7 @@ import { getSiteConfig, updateSiteConfig } from "@/app/actions/site-config";
 import { SiteConfig } from "@/types/site-config";
 import { ArrowLeft, Save, Loader2, Upload } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { storage } from "@/lib/firebase";
 
@@ -127,9 +128,9 @@ export default function AppearancePage() {
                             <div className="md:col-span-2">
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Logo</label>
                                 <div className="flex items-center gap-4">
-                                    <div className="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center border border-gray-200">
+                                    <div className="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center border border-gray-200 relative">
                                         {config.branding.logoUrl ? (
-                                            <img src={config.branding.logoUrl} alt="Logo" className="w-full h-full object-contain" />
+                                            <Image src={config.branding.logoUrl} alt="Logo" fill className="object-contain" unoptimized />
                                         ) : (
                                             <span className="text-xs text-gray-400">No Logo</span>
                                         )}
@@ -259,7 +260,7 @@ export default function AppearancePage() {
                                 <div className="flex flex-col gap-4">
                                     <div className="w-full h-48 bg-gray-100 rounded-lg overflow-hidden border border-gray-200 relative">
                                         {config.hero.backgroundImageUrl ? (
-                                            <img src={config.hero.backgroundImageUrl} alt="Hero Background" className="w-full h-full object-cover" />
+                                            <Image src={config.hero.backgroundImageUrl} alt="Hero Background" fill className="object-cover" unoptimized />
                                         ) : (
                                             <div className="w-full h-full flex items-center justify-center text-gray-400">No Image Selected</div>
                                         )}

@@ -150,6 +150,51 @@ export class AnthropicProvider implements LLMProviderInterface {
     }
 }
 
+// ==================== GROQ PROVIDER ====================
+
+export class GroqProvider implements LLMProviderInterface {
+    id: LLMProvider = "groq";
+    name = "Groq Llama 3";
+    private baseUrl = "https://api.groq.com/openai/v1/chat/completions";
+    private model = "llama3-70b-8192";
+
+    async generateContent(prompt: string, apiKey: string): Promise<string> {
+        const response = await fetch(this.baseUrl, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${apiKey}`,
+            },
+            body: JSON.stringify({
+                model: this.model,
+                messages: [
+                    { role: "user", content: prompt }
+                ],
+                temperature: 0.7,
+                max_tokens: 2048,
+            }),
+        });
+
+        if (response.status === 429) {
+            throw new LLMServiceError("Rate limit exceeded", 429);
+        }
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new LLMServiceError(`API request failed: ${response.status} - ${errorText}`, response.status);
+        }
+
+        const data = await response.json();
+        const text = data.choices?.[0]?.message?.content;
+
+        if (!text) {
+            throw new LLMServiceError("No response text from Groq");
+        }
+
+        return text;
+    }
+}
+
 //Factory to get provider
 export function getProvider(id: LLMProvider): LLMProviderInterface {
     switch (id) {
@@ -159,6 +204,8 @@ export function getProvider(id: LLMProvider): LLMProviderInterface {
             return new OpenAIProvider();
         case "anthropic":
             return new AnthropicProvider();
+        case "groq":
+            return new GroqProvider();
         default:
             throw new Error(`Unknown provider: ${id}`);
     }

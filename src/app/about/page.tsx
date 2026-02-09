@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { CheckCircle2, Globe, Heart, ShieldCheck, Users, Zap, TrendingUp } from "lucide-react";
+import { CheckCircle2, Globe, ShieldCheck, Users, Zap, TrendingUp } from "lucide-react";
 import Image from "next/image";
 
 export default function AboutPage() {
