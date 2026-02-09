@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/auth-context";
 import { getSiteConfig, updateSiteConfig } from "@/app/actions/site-config";
 import { SiteConfig } from "@/types/site-config";
-import { ArrowLeft, Save, Loader2, Upload, RotateCcw } from "lucide-react";
+import { ArrowLeft, Save, Loader2, Upload } from "lucide-react";
 import Link from "next/link";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { storage } from "@/lib/firebase";
@@ -95,7 +95,7 @@ export default function AppearancePage() {
                     </Link>
                     <div className="flex-1">
                         <h1 className="text-2xl font-bold text-gray-800">Site Appearance</h1>
-                        <p className="text-gray-500">Customize your website's look and feel</p>
+                        <p className="text-gray-500">Customize your website&apos;s look and feel</p>
                     </div>
                 </div>
 

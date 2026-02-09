@@ -53,12 +53,11 @@ function setPersistedAuth(isLoggedIn: boolean) {
 
 export function AuthProvider({ children }: { children: ReactNode }) {
     // Initialize with persisted state for instant UI
-    const [_hasPersistedAuth] = useState(() => getPersistedAuth());
     const [user, setUser] = useState<User | null>(null);
     const [role, setRole] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
     const [initializing, setInitializing] = useState(true);
-    const [persistedAuth, setPersistedAuthState] = useState(false); // Renamed to avoid conflict with function
+    const [, setPersistedAuthState] = useState(false); // Renamed to avoid conflict with function
 
     useEffect(() => {
         // Check local storage for persisted auth state to avoid flash of login screen

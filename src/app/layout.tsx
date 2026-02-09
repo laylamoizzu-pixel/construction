@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Playfair_Display } from "next/font/google";
+import { Inter, Outfit } from "next/font/google";
 import ClientLayout from "@/components/ClientLayout";
 import "./globals.css";
 
@@ -8,8 +8,9 @@ const inter = Inter({
   subsets: ["latin"],
 });
 
-const playfair = Playfair_Display({
-  variable: "--font-playfair",
+// Using Outfit as it's geometric and matches modern tech/retail logos better than Playfair
+const outfit = Outfit({
+  variable: "--font-outfit",
   subsets: ["latin"],
 });
 
@@ -87,7 +88,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${inter.variable} ${playfair.variable} antialiased bg-slate-50 text-slate-900 flex flex-col min-h-screen`}
+        className={`${inter.variable} ${outfit.variable} antialiased bg-slate-50 text-slate-900 flex flex-col min-h-screen`}
       >
         <ClientLayout>{children}</ClientLayout>
       </body>

@@ -18,6 +18,16 @@ const SiteConfigContext = createContext<SiteConfigContextType>({
 
 export const useSiteConfig = () => useContext(SiteConfigContext);
 
+const applyTheme = (theme: SiteConfig["theme"]) => {
+    if (typeof window === "undefined") return;
+    const root = document.documentElement;
+    root.style.setProperty("--primary", theme.primaryColor);
+    root.style.setProperty("--secondary", theme.secondaryColor);
+    root.style.setProperty("--accent", theme.accentColor);
+    root.style.setProperty("--background", theme.backgroundColor);
+    root.style.setProperty("--foreground", theme.textColor);
+};
+
 export function SiteConfigProvider({
     children,
     initialConfig,
@@ -28,17 +38,7 @@ export function SiteConfigProvider({
     const [config, setConfig] = useState<SiteConfig>(initialConfig || DEFAULT_SITE_CONFIG);
     const [isLoading, setIsLoading] = useState(!initialConfig);
 
-    const applyTheme = (theme: SiteConfig["theme"]) => {
-        if (typeof window === "undefined") return;
-        const root = document.documentElement;
-        root.style.setProperty("--primary", theme.primaryColor);
-        root.style.setProperty("--secondary", theme.secondaryColor);
-        root.style.setProperty("--accent", theme.accentColor);
-        root.style.setProperty("--background", theme.backgroundColor);
-        root.style.setProperty("--foreground", theme.textColor);
-    };
-
-    const fetchConfig = async () => {
+    const fetchConfig = React.useCallback(async () => {
         setIsLoading(true);
         try {
             const newConfig = await getSiteConfig();
@@ -49,7 +49,7 @@ export function SiteConfigProvider({
         } finally {
             setIsLoading(false);
         }
-    };
+    }, []);
 
     useEffect(() => {
         if (!initialConfig) {
@@ -57,7 +57,7 @@ export function SiteConfigProvider({
         } else {
             applyTheme(initialConfig.theme);
         }
-    }, [initialConfig]);
+    }, [initialConfig, fetchConfig]);
 
     return (
         <SiteConfigContext.Provider value={{ config, isLoading, refreshConfig: fetchConfig }}>

@@ -7,41 +7,52 @@
   --color-secondary: var(--secondary);
   --color-accent: var(--accent);
   --font-sans: var(--font-inter);
-  --font-serif: var(--font-playfair);
+  --font-serif: var(--font-inter);
+  /* Switched to Sans for Modern Tech feel */
 
-  /* Custom Colors - Premium International Brand Palette (Defaults) */
-  --color-brand-green: var(--primary);
-  --color-brand-gold: var(--secondary);
-  --color-brand-gold-light: #E6C888;
-  --color-brand-dark: #121212;
-  --color-brand-sand: #F5F2EA;
-  --color-brand-gray: #8E8E8E;
+  /* Custom Colors - Modern Tech Retail Palette */
+  --color-brand-blue: #0ea5e9;
+  /* Cyan 500 */
+  --color-brand-lime: #84cc16;
+  /* Lime 500 */
+  --color-brand-dark: #0f172a;
+  /* Slate 900 */
+  --color-brand-light: #f8fafc;
+  /* Slate 50 */
+  --color-brand-gray: #64748b;
+  /* Slate 500 */
 }
 
 :root {
-  --primary: #064e3b;
-  --secondary: #d4af37;
-  --accent: #10b981;
+  /* Logo-aligned Palette */
+  --primary: #0284c7;
+  /* Sky 600 - Main Brand Blue */
+  --secondary: #84cc16;
+  /* Lime 500 - Accent/Action */
+  --accent: #06b6d4;
+  /* Cyan 500 */
   --background: #ffffff;
   --foreground: #0f172a;
-  --brand-dark: #0F281E;
-  --brand-gold: #C5A059;
-  --brand-green: #0F281E;
-  --brand-sand: #FDFBF7;
-  /* Cream/Sand background for premium feel */
+
+  --brand-blue: #0284c7;
+  --brand-lime: #84cc16;
+  --brand-dark: #020617;
+  /* Slate 950 */
+  --brand-sand: #f1f5f9;
+  /* Slate 100 - Cool Gray instead of warm sand */
 }
 
-/* Glassmorphism Utilities */
+/* Modern Glassmorphism (Frosted) */
 .glass-panel {
-  @apply bg-white/70 backdrop-blur-lg border border-white/40 shadow-xl;
+  @apply bg-white/80 backdrop-blur-xl border border-white/50 shadow-2xl;
 }
 
 .glass-header {
-  @apply bg-white/80 backdrop-blur-md border-b border-gray-100/50 supports-[backdrop-filter]:bg-white/60;
+  @apply bg-white/90 backdrop-blur-2xl border-b border-gray-200/50 shadow-sm supports-[backdrop-filter]:bg-white/80;
 }
 
-.text-gold-gradient {
-  @apply bg-gradient-to-r from-yellow-600 via-yellow-500 to-yellow-600 bg-clip-text text-transparent;
+.text-gradient {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-brand-blue to-brand-lime;
 }
 
 body {
@@ -54,5 +65,8 @@ h3,
 h4,
 h5,
 h6 {
-  font-family: var(--font-serif);
+  font-family: var(--font-sans);
+  /* Modern Sans for Headings */
+  letter-spacing: -0.025em;
+  /* Tight tracking for premium feel */
 }

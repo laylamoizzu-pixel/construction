@@ -1,7 +1,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { Facebook, Instagram, Twitter, MapPin, Phone, Mail, MessageCircle } from "lucide-react";
+import { Facebook, Instagram, Twitter, MapPin, Phone, Mail } from "lucide-react";
 
 import { useSiteConfig } from "@/context/SiteConfigContext";
 
