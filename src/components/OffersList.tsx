@@ -2,11 +2,12 @@
 
 import { motion } from "framer-motion";
 import { Download, ShoppingBag, Clock, Tag } from "lucide-react";
-import { useBranding } from "@/context/branding-context";
+import { useSiteConfig } from "@/context/SiteConfigContext";
 import { Offer } from "@/app/actions";
 
 export default function OffersList({ offers }: { offers: Offer[] }) {
-    const { branding } = useBranding();
+    const { config } = useSiteConfig();
+    const { contact } = config;
 
     return (
         <>
@@ -67,9 +68,9 @@ export default function OffersList({ offers }: { offers: Offer[] }) {
 
             <div className="mt-12 text-center">
                 <p className="text-gray-500 mb-4">Want to order directly?</p>
-                {branding.whatsappUrl && (
+                {contact.whatsappUrl && (
                     <a
-                        href={branding.whatsappUrl}
+                        href={contact.whatsappUrl}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="px-8 py-3 bg-green-600 text-white rounded-full font-bold hover:bg-green-700 transition-colors shadow-lg shadow-green-600/20 inline-flex items-center gap-2"

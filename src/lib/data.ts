@@ -1,10 +1,9 @@
 export const NAV_LINKS = [
     { label: "Home", href: "/" },
     { label: "Departments", href: "/departments" },
-    { label: "The Smart Club", href: "/club" },
+    { label: "Products", href: "/products" },
     { label: "Offers", href: "/offers" },
-    { label: "Gallery", href: "/gallery" },
-    { label: "Contact", href: "/contact" },
+    { label: "About Us", href: "/about" },
 ];
 
 export const DEPARTMENTS = [

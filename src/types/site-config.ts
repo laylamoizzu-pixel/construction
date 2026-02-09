@@ -33,6 +33,7 @@ export interface SiteConfig {
         facebookUrl?: string;
         instagramUrl?: string;
         twitterUrl?: string;
+        whatsappUrl?: string;
     };
 }
 

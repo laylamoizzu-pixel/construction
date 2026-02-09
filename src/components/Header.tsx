@@ -7,7 +7,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, Search } from "lucide-react";
 import { NAV_LINKS } from "@/lib/data";
-import { useBranding } from "@/context/branding-context";
+import { useSiteConfig } from "@/context/SiteConfigContext";
 
 export default function Header() {
     const [isScrolled, setIsScrolled] = useState(false);
@@ -17,7 +17,7 @@ export default function Header() {
     const searchInputRef = useRef<HTMLInputElement>(null);
     const pathname = usePathname();
     const router = useRouter();
-    const { branding } = useBranding();
+    const { config } = useSiteConfig();
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
@@ -54,8 +54,8 @@ export default function Header() {
                 <Link href="/" className="flex items-center gap-2 group">
                     <div className="relative w-40 h-12">
                         <Image
-                            src={branding.logoUrl || "/logo.png"}
-                            alt={branding.siteName || "Smart Avenue"}
+                            src={config.branding.logoUrl || "/logo.png"}
+                            alt={config.branding.siteName || "Smart Avenue"}
                             fill
                             className="object-contain"
                             priority
@@ -102,8 +102,8 @@ export default function Header() {
                                         onChange={(e) => setSearchQuery(e.target.value)}
                                         placeholder="Search products..."
                                         className={`w-full px-4 py-2 rounded-full text-sm outline-none transition-colors ${isScrolled
-                                                ? 'bg-gray-100 text-gray-800 placeholder-gray-400'
-                                                : 'bg-white/20 text-white placeholder-white/70'
+                                            ? 'bg-gray-100 text-gray-800 placeholder-gray-400'
+                                            : 'bg-white/20 text-white placeholder-white/70'
                                             }`}
                                         onKeyDown={(e) => {
                                             if (e.key === 'Escape') {

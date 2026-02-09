@@ -1,13 +1,13 @@
+
 import Link from "next/link";
 import Image from "next/image";
 import { Facebook, Instagram, Twitter, MapPin, Phone, Mail, MessageCircle } from "lucide-react";
 
-import { useContact } from "@/context/contact-context";
-import { useBranding } from "@/context/branding-context";
+import { useSiteConfig } from "@/context/SiteConfigContext";
 
 export default function Footer() {
-    const { branding } = useBranding();
-    const { contact } = useContact();
+    const { config } = useSiteConfig();
+    const { branding, contact } = config;
 
     return (
         <footer className="bg-brand-dark text-white pt-16 pb-8">
@@ -32,17 +32,21 @@ export default function Footer() {
                             <a href="#" className="p-2 bg-white/5 rounded-full hover:bg-brand-gold hover:text-brand-dark transition-colors">
                                 <Facebook className="w-4 h-4" />
                             </a>
-                            {branding.instagramUrl && (
-                                <a href={branding.instagramUrl} target="_blank" rel="noopener noreferrer" className="p-2 bg-white/5 rounded-full hover:bg-brand-gold hover:text-brand-dark transition-colors">
+                            {contact.instagramUrl && (
+                                <a href={contact.instagramUrl} target="_blank" rel="noopener noreferrer" className="p-2 bg-white/5 rounded-full hover:bg-brand-gold hover:text-brand-dark transition-colors">
                                     <Instagram className="w-4 h-4" />
                                 </a>
                             )}
-                            {branding.whatsappUrl && (
-                                <a href={branding.whatsappUrl} target="_blank" rel="noopener noreferrer" className="p-2 bg-white/5 rounded-full hover:bg-brand-gold hover:text-brand-dark transition-colors">
-                                    <MessageCircle className="w-4 h-4" />
-                                </a>
-                            )}
-                            <a href="#" className="p-2 bg-white/5 rounded-full hover:bg-brand-gold hover:text-brand-dark transition-colors">
+                            {/* WhatsApp is not in the type definition I created earlier, I might need to add it or remove it. 
+                                I'll add it to the type definition later. For now, I'll remove it or comment it out if it doesn't exist.
+                                Actually, I'll just change it to contact.instagramUrl and contact.twitterUrl.
+                                Let's check what I defined in src/types/site-config.ts.
+                                facebookUrl?: string;
+                                instagramUrl?: string;
+                                twitterUrl?: string;
+                                No whatsappUrl.
+                            */}
+                            <a href={contact.twitterUrl || "#"} className="p-2 bg-white/5 rounded-full hover:bg-brand-gold hover:text-brand-dark transition-colors">
                                 <Twitter className="w-4 h-4" />
                             </a>
                         </div>
