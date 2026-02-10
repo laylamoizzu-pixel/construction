@@ -68,7 +68,7 @@ export async function getRecommendations(
         // Handle product request
         // @ts-ignore - requestProduct is added in extended interface in llm-service
         if (intentResponse.requestProduct) {
-            const { createProductRequest } = await import("@/app/actions");
+            const { createProductRequest } = await import("@/app/actions/product-requests");
             // @ts-ignore
             await createProductRequest(intentResponse.requestProduct.name, intentResponse.requestProduct.description);
 

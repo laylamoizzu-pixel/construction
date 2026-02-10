@@ -140,9 +140,22 @@ class APIKeyManager {
                 envKeys.push({ key: process.env.ANTHROPIC_API_KEY.trim(), provider: "anthropic" });
             }
 
-            if (process.env.GROQ_API_KEY) {
-                envKeys.push({ key: process.env.GROQ_API_KEY.trim(), provider: "groq" });
-            }
+            // Groq keys - support GROQ_API_KEY_1 through GROQ_API_KEY_10 for rotation
+            const groqKeyNames = [
+                "GROQ_API_KEY",
+                "GROQ_API_KEY_1", "GROQ_API_KEY_2", "GROQ_API_KEY_3",
+                "GROQ_API_KEY_4", "GROQ_API_KEY_5", "GROQ_API_KEY_6",
+                "GROQ_API_KEY_7", "GROQ_API_KEY_8", "GROQ_API_KEY_9",
+                "GROQ_API_KEY_10",
+            ];
+            const seenGroqKeys = new Set<string>();
+            groqKeyNames.forEach(name => {
+                const val = process.env[name];
+                if (val && val.trim() !== "" && !seenGroqKeys.has(val.trim())) {
+                    seenGroqKeys.add(val.trim());
+                    envKeys.push({ key: val.trim(), provider: "groq" });
+                }
+            });
 
             this.rebuildKeyList(envKeys, validKeys);
         }

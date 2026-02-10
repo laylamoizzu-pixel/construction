@@ -787,31 +787,6 @@ export async function getAllReviews(): Promise<(Review & { productName?: string 
 }
 
 
-// ==================== DASHBOARD ====================
 
-export async function getDashboardStats() {
-    try {
-        // Use count() aggregations for performance
-        // Note: count() might require specific Firebase Admin SDK version.
-        // If it fails, fallback to retrieving snapshots (slower but works universally)
-
-        const offersSnapshot = await getAdminDb().collection("offers").get();
-        const productsSnapshot = await getAdminDb().collection("products").get();
-        const categoriesSnapshot = await getAdminDb().collection("categories").get();
-
-        return {
-            offersCount: offersSnapshot.size,
-            productsCount: productsSnapshot.size,
-            categoriesCount: categoriesSnapshot.size,
-        };
-    } catch (error) {
-        console.error("Error fetching dashboard stats:", error);
-        return {
-            offersCount: 0,
-            productsCount: 0,
-            categoriesCount: 0,
-        };
-    }
-}
 
 
