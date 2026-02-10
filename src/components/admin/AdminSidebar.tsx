@@ -9,7 +9,6 @@ import {
     ShoppingBag,
     Megaphone,
     Tag,
-    Image,
     Star,
     Zap,
     MousePointerClick,

@@ -96,7 +96,7 @@ export default function ReviewsManagement() {
                                         </div>
 
                                         <p className="text-gray-700 leading-relaxed bg-gray-50/50 p-3 rounded-lg border border-gray-100">
-                                            "{review.comment}"
+                                            &quot;{review.comment}&quot;
                                         </p>
                                     </div>
 

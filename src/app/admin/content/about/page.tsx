@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/auth-context";
 import { getSiteContent, updateSiteContent, AboutPageContent } from "@/app/actions";
-import { Loader2, ArrowLeft, Save, Plus, Trash2 } from "lucide-react";
+import { Loader2, ArrowLeft, Save, Plus } from "lucide-react";
 import Link from "next/link";
 import ImageUpload from "@/components/ImageUpload";
 
