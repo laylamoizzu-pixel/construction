@@ -353,6 +353,45 @@ Write a brief, friendly 1-2 sentence summary to introduce the recommendations. B
 }
 
 /**
+ * Generate a response when no products are found
+ * The AI should offer to take a request and ask for details like price
+ */
+export async function generateNoProductFoundResponse(
+    query: string,
+    intent: LLMIntentResponse,
+    provider: LLMProvider = "google"
+): Promise<string> {
+    const prompt = `You are an expert sales associate for Smart Avenue, known for being helpful and proactive.
+
+CRITICAL INSTRUCTION:
+- You MUST detect the language of the Customer Query.
+- You MUST reply in the SAME language as the query.
+- If the user asks in Hindi, reply in Hindi.
+- If the user asks in Urdu, reply in Urdu.
+- If the user asks in Hinglish, reply in Hinglish.
+- If the user asks in English, reply in English.
+
+Customer query: "${query}"
+
+Intent analysis:
+- Product wanted: ${intent.category || intent.subcategory || "unknown product"}
+- Use case: ${intent.useCase}
+- Requirements: ${intent.requirements.join(", ") || "none specified"}
+
+We do NOT have this product in stock right now.
+Your goal is to offer to take a "Product Request" for them.
+1. Apologize that we don't have it currently.
+2. Offer to note down their request so we can stock it.
+3. Crucially, ask for their TARGET PRICE or BUDGET for this item if they haven't provided it.
+4. Ask for any other specific details (color, size, brand) if relevant.
+
+Keep the tone professional, helpful, and encouraging. Keep it concise (2-3 sentences max).`;
+
+    const response = await callLLM(prompt, provider);
+    return response.trim().replace(/```/g, "").replace(/^["']|["']$/g, "");
+}
+
+/**
  * Combined ranking and summary generation in a single LLM call
  * Reduces API calls from 3 to 2 for better performance
  */

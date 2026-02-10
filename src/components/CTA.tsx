@@ -7,7 +7,7 @@ export default function CTA({ content }: { content?: CTAContent }) {
     const defaultContent: CTAContent = {
         title: "Ready to experience the new standard?",
         text: "Join thousands of smart shoppers transforming their lifestyle with Smart Avenue.",
-        ctaPrimary: "Start Shopping",
+        ctaPrimary: "Browse Catalog",
         ctaSecondary: "Chat with Us",
         backgroundImage: "" // Default gradient used
     };

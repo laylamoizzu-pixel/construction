@@ -101,8 +101,8 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
                             <div className="flex items-start gap-3 p-4 bg-white rounded-xl border border-slate-100">
                                 <Truck className="w-5 h-5 text-brand-blue shrink-0" />
                                 <div>
-                                    <h4 className="font-bold text-sm text-brand-dark">Fast Delivery</h4>
-                                    <p className="text-xs text-slate-500 mt-1">Get it by tomorrow</p>
+                                    <h4 className="font-bold text-sm text-brand-dark">Store Pickup</h4>
+                                    <p className="text-xs text-slate-500 mt-1">Available at P&M Mall</p>
                                 </div>
                             </div>
                             <div className="flex items-start gap-3 p-4 bg-white rounded-xl border border-slate-100">

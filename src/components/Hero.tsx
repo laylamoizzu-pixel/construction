@@ -8,8 +8,8 @@ import { useSiteConfig } from "@/context/SiteConfigContext";
 
 const DEFAULT_HERO = {
     title: "Experience the Future of Retail",
-    subtitle: "Curated premium essentials delivered with speed and precision.",
-    ctaText: "Shop Now",
+    subtitle: "Curated premium essentials available at our exclusive location.",
+    ctaText: "View Collection",
     ctaLink: "/products",
     backgroundImageUrl: "https://images.unsplash.com/photo-1481437156560-3205f6a55735?q=80&w=2695&auto=format&fit=crop",
     overlayOpacity: 0.5,

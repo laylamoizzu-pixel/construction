@@ -24,13 +24,13 @@ export default function Features({ content }: { content?: FeaturesContent }) {
                 icon: "ShieldCheck"
             },
             {
-                title: "Smart Logistics",
-                desc: "Next-day delivery across Patna with live tracking.",
+                title: "Personal Shopping",
+                desc: "Expert assistance to help you find exactly what you need.",
                 icon: "Zap"
             },
             {
                 title: "Global Standards",
-                desc: "International shopping experience right at your doorstep.",
+                desc: "International shopping experience right in your city.",
                 icon: "Globe"
             },
             {

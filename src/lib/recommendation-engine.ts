@@ -9,7 +9,7 @@
  */
 
 import { getProducts, getCategories, Product } from "@/app/actions";
-import { analyzeIntent, rankAndSummarize } from "./llm-service";
+import { analyzeIntent, rankAndSummarize, generateNoProductFoundResponse } from "./llm-service";
 import { getSearchCache, hashQuery } from "./search-cache";
 import {
     RecommendationRequest,
@@ -86,11 +86,14 @@ export async function getRecommendations(
         const products = await queryProducts(intent, request.context);
 
         if (products.length === 0) {
+            // Generate a dynamic "no products found" response that offers to take a request
+            const noProductSummary = await generateNoProductFoundResponse(query, intentResponse);
+
             return {
                 success: true,
                 intent,
                 recommendations: [],
-                summary: "I couldn't find any products matching your criteria. Try broadening your search or exploring our categories.",
+                summary: noProductSummary,
                 processingTime: Date.now() - startTime,
             };
         }

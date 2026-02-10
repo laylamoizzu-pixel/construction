@@ -19,14 +19,20 @@ export function Reviews({ productId, reviews, averageRating = 0, reviewCount = 0
     const [rating, setRating] = useState(0);
     const [hoverRating, setHoverRating] = useState(0);
     const [comment, setComment] = useState("");
+    const [guestName, setGuestName] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState("");
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!user) return;
+
         if (rating === 0) {
             setError("Please select a rating");
+            return;
+        }
+
+        if (!user && !guestName.trim()) {
+            setError("Please enter your name");
             return;
         }
 
@@ -34,15 +40,23 @@ export function Reviews({ productId, reviews, averageRating = 0, reviewCount = 0
         setError("");
 
         try {
-            // Use user's name or fallback to "User" if not available in auth context (depends on auth provider)
-            // Ideally auth context should provide display name. For now using email part or "Verified User"
-            const userName = user.email ? user.email.split("@")[0] : "Verified User";
+            let userId = "";
+            let userName = "";
 
-            const result = await addReview(productId, user.uid, userName, rating, comment);
+            if (user) {
+                userId = user.uid;
+                userName = user.displayName || (user.email ? user.email.split("@")[0] : "Verified User");
+            } else {
+                userId = `guest-${Date.now()}`;
+                userName = guestName.trim();
+            }
+
+            const result = await addReview(productId, userId, userName, rating, comment);
 
             if (result.success) {
                 setRating(0);
                 setComment("");
+                setGuestName("");
                 router.refresh();
             } else {
                 setError(result.error as string);
@@ -80,65 +94,67 @@ export function Reviews({ productId, reviews, averageRating = 0, reviewCount = 0
             </div>
 
             {/* Write Review Form */}
-            {user ? (
-                <form onSubmit={handleSubmit} className="mb-10 border-b border-slate-100 pb-10">
-                    <h3 className="font-bold text-lg mb-4">Write a Review</h3>
+            <form onSubmit={handleSubmit} className="mb-10 border-b border-slate-100 pb-10">
+                <h3 className="font-bold text-lg mb-4">Write a Review</h3>
 
+                {!user && (
                     <div className="mb-4">
-                        <label className="block text-sm font-medium text-slate-700 mb-2">Rating</label>
-                        <div className="flex gap-1">
-                            {[1, 2, 3, 4, 5].map((star) => (
-                                <button
-                                    key={star}
-                                    type="button"
-                                    onMouseEnter={() => setHoverRating(star)}
-                                    onMouseLeave={() => setHoverRating(0)}
-                                    onClick={() => setRating(star)}
-                                    className="focus:outline-none"
-                                >
-                                    <Star
-                                        className={`w-6 h-6 transition-colors ${star <= (hoverRating || rating)
-                                            ? "text-yellow-400 fill-current"
-                                            : "text-slate-300"
-                                            }`}
-                                    />
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-
-                    <div className="mb-4">
-                        <label className="block text-sm font-medium text-slate-700 mb-2">Review</label>
-                        <textarea
-                            value={comment}
-                            onChange={(e) => setComment(e.target.value)}
-                            className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-brand-blue/20 focus:border-brand-blue outline-none transition-all resize-none h-32"
-                            placeholder="What did you like or dislike?"
+                        <label className="block text-sm font-medium text-slate-700 mb-2">Name</label>
+                        <input
+                            type="text"
+                            value={guestName}
+                            onChange={(e) => setGuestName(e.target.value)}
+                            className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-brand-blue/20 focus:border-brand-blue outline-none transition-all"
+                            placeholder="Your Name"
                             required
                         />
                     </div>
+                )}
 
-                    {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
-
-                    <button
-                        type="submit"
-                        disabled={isSubmitting}
-                        className="px-6 py-2 bg-brand-dark text-white font-bold rounded-lg hover:bg-brand-blue transition-colors disabled:opacity-50"
-                    >
-                        {isSubmitting ? "Submitting..." : "Submit Review"}
-                    </button>
-                </form>
-            ) : (
-                <div className="bg-brand-blue/5 border border-brand-blue/10 rounded-xl p-6 mb-10 text-center">
-                    <p className="text-brand-dark font-medium mb-2">Please log in to write a review</p>
-                    <button
-                        onClick={() => router.push('/login?redirect=' + window.location.pathname)}
-                        className="text-brand-blue font-bold hover:underline"
-                    >
-                        Log In Now
-                    </button>
+                <div className="mb-4">
+                    <label className="block text-sm font-medium text-slate-700 mb-2">Rating</label>
+                    <div className="flex gap-1">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                            <button
+                                key={star}
+                                type="button"
+                                onMouseEnter={() => setHoverRating(star)}
+                                onMouseLeave={() => setHoverRating(0)}
+                                onClick={() => setRating(star)}
+                                className="focus:outline-none"
+                            >
+                                <Star
+                                    className={`w-6 h-6 transition-colors ${star <= (hoverRating || rating)
+                                        ? "text-yellow-400 fill-current"
+                                        : "text-slate-300"
+                                        }`}
+                                />
+                            </button>
+                        ))}
+                    </div>
                 </div>
-            )}
+
+                <div className="mb-4">
+                    <label className="block text-sm font-medium text-slate-700 mb-2">Review</label>
+                    <textarea
+                        value={comment}
+                        onChange={(e) => setComment(e.target.value)}
+                        className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-brand-blue/20 focus:border-brand-blue outline-none transition-all resize-none h-32"
+                        placeholder="What did you like or dislike?"
+                        required
+                    />
+                </div>
+
+                {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+
+                <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="px-6 py-2 bg-brand-dark text-white font-bold rounded-lg hover:bg-brand-blue transition-colors disabled:opacity-50"
+                >
+                    {isSubmitting ? "Submitting..." : "Submit Review"}
+                </button>
+            </form>
 
             {/* Review List */}
             <div className="space-y-6">
