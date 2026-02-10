@@ -2,7 +2,22 @@
 
 import { useState, useEffect } from "react";
 import { getAllReviews, deleteReview, Review } from "@/app/actions";
-import { Trash2, Star, AlertCircle, ExternalLink, MessageSquare, Loader2 } from "lucide-react";
+import {
+    Star,
+    MessageSquare,
+    Filter,
+    CheckCircle2,
+    XCircle,
+    MoreVertical,
+    ChevronLeft,
+    ChevronRight,
+    Search,
+    Trash2,
+    ThumbsUp,
+    Flag,
+    ExternalLink,
+    Loader2
+} from "lucide-react";
 import Link from "next/link";
 
 export default function ReviewsManagement() {
