@@ -84,59 +84,6 @@ export async function getDashboardStats() {
     }
 }
 
-// ==================== GALLERY ====================
-
-export interface GalleryImage {
-    id: string;
-    imageUrl: string;
-    storagePath: string;
-    createdAt: Date;
-}
-
-export async function addGalleryImage(imageUrl: string, storagePath: string) {
-    try {
-        const docRef = await getAdminDb().collection("gallery").add({
-            imageUrl,
-            storagePath,
-            createdAt: admin.firestore.FieldValue.serverTimestamp(),
-        });
-
-        revalidatePath("/gallery");
-        revalidatePath("/admin/content/gallery");
-
-        return { success: true, id: docRef.id };
-    } catch (error: unknown) {
-        return { success: false, error: error instanceof Error ? error.message : "Unknown error" };
-    }
-}
-
-export async function getGalleryImages(): Promise<GalleryImage[]> {
-    try {
-        const snapshot = await getAdminDb().collection("gallery").orderBy("createdAt", "desc").get();
-        return snapshot.docs.map((doc: admin.firestore.QueryDocumentSnapshot) => ({
-            id: doc.id,
-            ...doc.data(),
-            createdAt: (doc.data().createdAt as admin.firestore.Timestamp)?.toDate() || new Date(),
-        })) as GalleryImage[];
-    } catch (error) {
-        console.error("Error fetching gallery images:", error);
-        return [];
-    }
-}
-
-export async function deleteGalleryImage(id: string) {
-    try {
-        await getAdminDb().collection("gallery").doc(id).delete();
-
-        revalidatePath("/gallery");
-        revalidatePath("/admin/content/gallery");
-
-        return { success: true };
-    } catch (error: unknown) {
-        return { success: false, error: error instanceof Error ? error.message : "Unknown error" };
-    }
-}
-
 // ==================== TEST CONNECTION ====================
 
 export async function testFirebaseConnection() {
