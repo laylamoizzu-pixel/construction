@@ -8,12 +8,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, Search } from "lucide-react";
 import { useSiteConfig } from "@/context/SiteConfigContext";
 
-const NAV_LINKS = [
-    { label: "Home", href: "/" },
-    { label: "Products", href: "/products" },
-    { label: "Departments", href: "/departments" },
-    { label: "About Us", href: "/about" },
-    { label: "Contact", href: "/contact" },
+{ label: "Home", href: "/" },
+{ label: "Products", href: "/products" },
+{ label: "Offers", href: "/offers" },
+{ label: "Departments", href: "/departments" },
+{ label: "About Us", href: "/about" },
 ];
 
 export default function Header() {
