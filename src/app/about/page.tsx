@@ -27,7 +27,7 @@ export default function AboutPage() {
                             Smart <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-lime to-brand-blue">Avenue</span>
                         </h1>
                         <p className="text-xl md:text-2xl text-slate-300 max-w-3xl mx-auto font-light leading-relaxed">
-                            Building the future of retail, delivered to your doorstep.
+                            Building the future of retail, right here in your city.
                         </p>
                     </motion.div>
                 </div>
@@ -103,8 +103,8 @@ export default function AboutPage() {
                             },
                             {
                                 icon: Zap,
-                                title: "Rapid Delivery",
-                                desc: "Same-day processing and optimized logistics.",
+                                title: "Instant Service",
+                                desc: "Efficient billing and personalized assistance.",
                                 color: "text-orange-500"
                             },
                             {
