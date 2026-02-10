@@ -11,7 +11,8 @@ import { useSiteConfig } from "@/context/SiteConfigContext";
 const NAV_LINKS = [
     { label: "Home", href: "/" },
     { label: "Products", href: "/products" },
-    { label: "About", href: "/about" },
+    { label: "Departments", href: "/departments" },
+    { label: "About Us", href: "/about" },
     { label: "Contact", href: "/contact" },
 ];
 
