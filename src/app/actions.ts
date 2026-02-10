@@ -565,10 +565,8 @@ export async function searchProducts(
 }
 
 export async function getProduct(id: string): Promise<Product | null> {
-    console.log("Fetching product with ID:", id);
     try {
         const doc = await getAdminDb().collection("products").doc(id).get();
-        console.log("Product found:", doc.exists);
         if (doc.exists) {
             const data = doc.data();
             return {
