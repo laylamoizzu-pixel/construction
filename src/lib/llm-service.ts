@@ -191,6 +191,8 @@ async function callGeminiAPI(prompt: string, retryCount: number = 0): Promise<st
  * Prioritizes Groq > Gemini
  */
 async function callLLM(prompt: string, _preferredProvider: LLMProvider = "google"): Promise<string> {
+    // Prevent eslint unused vars warning for _preferredProvider
+    void _preferredProvider;
     const keyManager = getAPIKeyManager();
 
     // If preferred is specified and we have keys, try that first?

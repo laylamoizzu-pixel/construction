@@ -47,7 +47,7 @@ export function Reviews({ productId, reviews, averageRating = 0, reviewCount = 0
             } else {
                 setError(result.error as string);
             }
-        } catch (err) {
+        } catch (_) {
             setError("Failed to submit review");
         } finally {
             setIsSubmitting(false);
@@ -98,8 +98,8 @@ export function Reviews({ productId, reviews, averageRating = 0, reviewCount = 0
                                 >
                                     <Star
                                         className={`w-6 h-6 transition-colors ${star <= (hoverRating || rating)
-                                                ? "text-yellow-400 fill-current"
-                                                : "text-slate-300"
+                                            ? "text-yellow-400 fill-current"
+                                            : "text-slate-300"
                                             }`}
                                     />
                                 </button>
