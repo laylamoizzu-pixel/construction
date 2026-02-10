@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Send, Sparkles, ShoppingBag, ChevronRight } from "lucide-react";
+import { X, Send, Sparkles, Package, ChevronRight } from "lucide-react";
 import { Product } from "@/app/actions";
 import Image from "next/image";
 import Link from "next/link";
@@ -81,7 +81,8 @@ export default function AssistantChat() {
         return () => window.removeEventListener("open-assistant-chat", handleOpenChat);
     }, []);
 
-    const handleSend = async () => {
+    const handleSend = async (e?: React.FormEvent) => {
+        if (e) e.preventDefault();
         if (!inputValue.trim() || isLoading) return;
 
         const userMessage: Message = {
@@ -228,7 +229,7 @@ export default function AssistantChat() {
                                                             />
                                                         ) : (
                                                             <div className="w-full h-full flex items-center justify-center">
-                                                                <ShoppingBag className="w-6 h-6 text-slate-300" />
+                                                                <Package className="w-6 h-6 text-slate-300" />
                                                             </div>
                                                         )}
                                                     </div>

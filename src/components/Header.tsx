@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Search, ShoppingBag } from "lucide-react";
+import { Menu, X, Search } from "lucide-react";
 import { useSiteConfig } from "@/context/SiteConfigContext";
 
 const NAV_LINKS = [
@@ -137,15 +137,6 @@ export default function Header() {
                         </button>
                     </div>
 
-                    {/* Cart/Bag */}
-                    <Link href="/cart">
-                        <button className={`w-10 h-10 flex items-center justify-center rounded-full transition-colors ${isScrolled
-                            ? "hover:bg-slate-100 text-slate-700"
-                            : "bg-white/10 hover:bg-white/20 text-white backdrop-blur-md"
-                            }`}>
-                            <ShoppingBag className="w-4 h-4" />
-                        </button>
-                    </Link>
                 </div>
 
                 {/* Mobile Menu Toggle */}

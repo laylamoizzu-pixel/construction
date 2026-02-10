@@ -2,7 +2,7 @@ import { getProduct, getReviews } from "@/app/actions";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { ChevronLeft, ShoppingBag, Truck, ShieldCheck, Zap } from "lucide-react";
+import { ChevronLeft, Truck, ShieldCheck, Zap } from "lucide-react";
 import { Reviews } from "@/components/Reviews";
 
 export const dynamic = "force-dynamic";
@@ -94,15 +94,6 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
 
                         <div className="prose prose-slate mb-8 text-slate-600">
                             <p>{product.description}</p>
-                        </div>
-
-                        {/* Actions */}
-                        <div className="flex flex-col sm:flex-row gap-4 mb-10 pb-10 border-b border-slate-200">
-                            <button className="flex-1 bg-brand-dark text-white font-bold py-4 px-8 rounded-xl hover:bg-brand-blue transition-all shadow-lg shadow-brand-blue/20 flex items-center justify-center gap-2">
-                                <ShoppingBag className="w-5 h-5" />
-                                Add to Cart
-                            </button>
-                            {/* Wishlist button could go here */}
                         </div>
 
                         {/* Features */}

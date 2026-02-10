@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Download, ShoppingBag, Clock, Tag, Zap, ArrowRight } from "lucide-react";
+import { Download, MessageSquare, Clock, Tag, Zap, ArrowRight } from "lucide-react";
 import { useSiteConfig } from "@/context/SiteConfigContext";
 import { Offer } from "@/app/actions";
 
@@ -110,7 +110,7 @@ export default function OffersList({ offers }: { offers: Offer[] }) {
                         rel="noopener noreferrer"
                         className="inline-flex items-center gap-3 px-8 py-4 bg-[#25D366] text-white rounded-full font-bold hover:bg-[#128C7E] transition-colors shadow-lg shadow-[#25D366]/30 hover:scale-105 transform duration-300"
                     >
-                        <ShoppingBag className="w-5 h-5" /> Chat on WhatsApp
+                        <MessageSquare className="w-5 h-5" /> Chat on WhatsApp
                     </a>
                 )}
             </div>
