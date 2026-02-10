@@ -1,8 +1,7 @@
 import { getProduct, getReviews } from "@/app/actions";
 import { notFound } from "next/navigation";
-import Image from "next/image";
 import Link from "next/link";
-import { ChevronLeft, Truck, ShieldCheck, Zap, Film, Camera } from "lucide-react";
+import { ChevronLeft, Truck, ShieldCheck } from "lucide-react";
 import ImageGallery from "@/components/ImageGallery";
 import { Reviews } from "@/components/Reviews";
 

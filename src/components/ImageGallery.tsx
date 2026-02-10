@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { Film, Image as ImageIcon, Zap, Play } from "lucide-react";
+import { Film, Zap, Play } from "lucide-react";
 
 interface ImageGalleryProps {
     images: string[];
@@ -20,7 +20,6 @@ export default function ImageGallery({
     isFeatured = false
 }: ImageGalleryProps) {
     const [activeIndex, setActiveIndex] = useState(0);
-    const [showVideo, setShowVideo] = useState(false);
 
     const allMedia = [
         ...images.map(url => ({ type: "image" as const, url })),
