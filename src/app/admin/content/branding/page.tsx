@@ -3,8 +3,8 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/auth-context";
-import { getSiteContent, updateSiteContent } from "@/app/actions";
-import { useBranding } from "@/context/branding-context";
+import { getSiteConfig, updateSiteConfig } from "@/app/actions/site-config";
+import { SiteConfig } from "@/types/site-config";
 import {
     Loader2,
     ArrowLeft,
@@ -17,35 +17,10 @@ import {
 import Link from "next/link";
 import ImageUpload from "@/components/ImageUpload";
 
-interface BrandingContent {
-    logoUrl: string;
-    faviconUrl: string;
-    posterUrl: string;
-    siteName: string;
-    tagline: string;
-    primaryColor: string;
-    secondaryColor: string;
-    instagramUrl?: string;
-    whatsappUrl?: string;
-}
-
-const defaultBranding: BrandingContent = {
-    logoUrl: "/logo.png",
-    faviconUrl: "/favicon.ico",
-    posterUrl: "",
-    siteName: "Smart Avenue",
-    tagline: "All your home needs, simplified.",
-    primaryColor: "#f59e0b",
-    secondaryColor: "#1e293b",
-    instagramUrl: "https://instagram.com",
-    whatsappUrl: "https://wa.me/"
-};
-
 export default function BrandingEditor() {
     const { user, loading: authLoading } = useAuth();
     const router = useRouter();
-    const { refreshBranding } = useBranding(); // Fix: Destructure refreshBranding
-    const [content, setContent] = useState<BrandingContent>(defaultBranding);
+    const [config, setConfig] = useState<SiteConfig | null>(null);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [saved, setSaved] = useState(false);
@@ -58,20 +33,17 @@ export default function BrandingEditor() {
 
     useEffect(() => {
         if (user) {
-            loadContent();
+            loadConfig();
         }
     }, [user]);
 
-    const loadContent = async () => {
+    const loadConfig = async () => {
         setLoading(true);
         try {
-            const data = await getSiteContent<BrandingContent>("branding");
-            if (data) {
-                setContent({ ...defaultBranding, ...data });
-            }
+            const data = await getSiteConfig();
+            setConfig(data);
         } catch (error) {
             console.error("Failed to load branding content:", error);
-            // Optional: Add toast or error state here
         } finally {
             setLoading(false);
         }
@@ -79,13 +51,18 @@ export default function BrandingEditor() {
 
     const handleSave = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!config) return;
+
         setSaving(true);
         setSaved(false);
-        const result = await updateSiteContent("branding", content as unknown as Record<string, unknown>);
+
+        const result = await updateSiteConfig(config);
+
         if (result.success) {
             setSaved(true);
-            await refreshBranding(); // Called refreshBranding after successful save
             setTimeout(() => setSaved(false), 3000);
+        } else {
+            alert("Failed to save changes: " + (result.error || "Unknown error"));
         }
         setSaving(false);
     };
@@ -112,7 +89,7 @@ export default function BrandingEditor() {
                     </div>
                 </div>
 
-                {loading ? (
+                {loading || !config ? (
                     <div className="bg-white rounded-xl p-8 shadow-sm border border-gray-100 text-center">
                         <Loader2 className="w-8 h-8 animate-spin text-amber-600 mx-auto" />
                     </div>
@@ -131,15 +108,24 @@ export default function BrandingEditor() {
                                         <ImageUpload
                                             folder="branding/logo"
                                             multiple={false}
-                                            currentImages={content.logoUrl ? [content.logoUrl] : []}
-                                            onUpload={(files) => files[0] && setContent({ ...content, logoUrl: files[0].url })}
-                                            onRemove={() => setContent({ ...content, logoUrl: "" })}
+                                            currentImages={config.branding.logoUrl ? [config.branding.logoUrl] : []}
+                                            onUpload={(files) => files[0] && setConfig({
+                                                ...config,
+                                                branding: { ...config.branding, logoUrl: files[0].url }
+                                            })}
+                                            onRemove={() => setConfig({
+                                                ...config,
+                                                branding: { ...config.branding, logoUrl: "" }
+                                            })}
                                         />
                                     </div>
                                     <input
                                         type="text"
-                                        value={content.logoUrl}
-                                        onChange={(e) => setContent({ ...content, logoUrl: e.target.value })}
+                                        value={config.branding.logoUrl}
+                                        onChange={(e) => setConfig({
+                                            ...config,
+                                            branding: { ...config.branding, logoUrl: e.target.value }
+                                        })}
                                         placeholder="Or enter URL manually..."
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 text-sm"
                                     />
@@ -150,15 +136,24 @@ export default function BrandingEditor() {
                                         <ImageUpload
                                             folder="branding/favicon"
                                             multiple={false}
-                                            currentImages={content.faviconUrl ? [content.faviconUrl] : []}
-                                            onUpload={(files) => files[0] && setContent({ ...content, faviconUrl: files[0].url })}
-                                            onRemove={() => setContent({ ...content, faviconUrl: "" })}
+                                            currentImages={config.branding.faviconUrl ? [config.branding.faviconUrl] : []}
+                                            onUpload={(files) => files[0] && setConfig({
+                                                ...config,
+                                                branding: { ...config.branding, faviconUrl: files[0].url }
+                                            })}
+                                            onRemove={() => setConfig({
+                                                ...config,
+                                                branding: { ...config.branding, faviconUrl: "" }
+                                            })}
                                         />
                                     </div>
                                     <input
                                         type="text"
-                                        value={content.faviconUrl}
-                                        onChange={(e) => setContent({ ...content, faviconUrl: e.target.value })}
+                                        value={config.branding.faviconUrl}
+                                        onChange={(e) => setConfig({
+                                            ...config,
+                                            branding: { ...config.branding, faviconUrl: e.target.value }
+                                        })}
                                         placeholder="Or enter URL manually..."
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 text-sm"
                                     />
@@ -179,15 +174,24 @@ export default function BrandingEditor() {
                                     <ImageUpload
                                         folder="branding/poster"
                                         multiple={false}
-                                        currentImages={content.posterUrl ? [content.posterUrl] : []}
-                                        onUpload={(files) => files[0] && setContent({ ...content, posterUrl: files[0].url })}
-                                        onRemove={() => setContent({ ...content, posterUrl: "" })}
+                                        currentImages={config.branding.posterUrl ? [config.branding.posterUrl] : []}
+                                        onUpload={(files) => files[0] && setConfig({
+                                            ...config,
+                                            branding: { ...config.branding, posterUrl: files[0].url }
+                                        })}
+                                        onRemove={() => setConfig({
+                                            ...config,
+                                            branding: { ...config.branding, posterUrl: "" }
+                                        })}
                                     />
                                 </div>
                                 <input
                                     type="text"
-                                    value={content.posterUrl}
-                                    onChange={(e) => setContent({ ...content, posterUrl: e.target.value })}
+                                    value={config.branding.posterUrl}
+                                    onChange={(e) => setConfig({
+                                        ...config,
+                                        branding: { ...config.branding, posterUrl: e.target.value }
+                                    })}
                                     placeholder="Or enter URL manually..."
                                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 text-sm"
                                 />
@@ -205,8 +209,11 @@ export default function BrandingEditor() {
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Site Name</label>
                                     <input
                                         type="text"
-                                        value={content.siteName}
-                                        onChange={(e) => setContent({ ...content, siteName: e.target.value })}
+                                        value={config.branding.siteName}
+                                        onChange={(e) => setConfig({
+                                            ...config,
+                                            branding: { ...config.branding, siteName: e.target.value }
+                                        })}
                                         placeholder="Smart Avenue"
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500"
                                     />
@@ -215,27 +222,47 @@ export default function BrandingEditor() {
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Tagline</label>
                                     <input
                                         type="text"
-                                        value={content.tagline}
-                                        onChange={(e) => setContent({ ...content, tagline: e.target.value })}
+                                        value={config.branding.tagline}
+                                        onChange={(e) => setConfig({
+                                            ...config,
+                                            branding: { ...config.branding, tagline: e.target.value }
+                                        })}
                                         placeholder="All your home needs, simplified."
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500"
                                     />
                                 </div>
                             </div>
+                            {/* Color settings should generally be in Appearance, but ok to keep here if desired. 
+                                For consistency with SiteConfig, we should update both places or decide on one.
+                                Let's mirror what was there but map to theme config if needed, or keep branding colors if they exist in branding object.
+                                Looking at legacy file, primaryColor/secondaryColor existed on branding object.
+                                Looking at SiteConfig type in appearance page: config.theme.primaryColor.
+                                Let's check if branding has colors in SiteConfig definition. 
+                                Appearance page uses config.theme.
+                                Let's see if we can consolidate. The user wants it user friendly. 
+                                Duplicating color controls might be confusing if they don't sync.
+                                I'll leave them here for now but map them to config.theme to ensure they update the actual theme.
+                            */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Primary Color</label>
                                     <div className="flex gap-2">
                                         <input
                                             type="color"
-                                            value={content.primaryColor}
-                                            onChange={(e) => setContent({ ...content, primaryColor: e.target.value })}
+                                            value={config.theme.primaryColor}
+                                            onChange={(e) => setConfig({
+                                                ...config,
+                                                theme: { ...config.theme, primaryColor: e.target.value }
+                                            })}
                                             className="w-12 h-10 rounded border border-gray-300 cursor-pointer"
                                         />
                                         <input
                                             type="text"
-                                            value={content.primaryColor}
-                                            onChange={(e) => setContent({ ...content, primaryColor: e.target.value })}
+                                            value={config.theme.primaryColor}
+                                            onChange={(e) => setConfig({
+                                                ...config,
+                                                theme: { ...config.theme, primaryColor: e.target.value }
+                                            })}
                                             className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500"
                                         />
                                     </div>
@@ -245,14 +272,20 @@ export default function BrandingEditor() {
                                     <div className="flex gap-2">
                                         <input
                                             type="color"
-                                            value={content.secondaryColor}
-                                            onChange={(e) => setContent({ ...content, secondaryColor: e.target.value })}
+                                            value={config.theme.secondaryColor}
+                                            onChange={(e) => setConfig({
+                                                ...config,
+                                                theme: { ...config.theme, secondaryColor: e.target.value }
+                                            })}
                                             className="w-12 h-10 rounded border border-gray-300 cursor-pointer"
                                         />
                                         <input
                                             type="text"
-                                            value={content.secondaryColor}
-                                            onChange={(e) => setContent({ ...content, secondaryColor: e.target.value })}
+                                            value={config.theme.secondaryColor}
+                                            onChange={(e) => setConfig({
+                                                ...config,
+                                                theme: { ...config.theme, secondaryColor: e.target.value }
+                                            })}
                                             className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500"
                                         />
                                     </div>
@@ -271,8 +304,11 @@ export default function BrandingEditor() {
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Instagram URL</label>
                                     <input
                                         type="text"
-                                        value={content.instagramUrl || ""}
-                                        onChange={(e) => setContent({ ...content, instagramUrl: e.target.value })}
+                                        value={config.branding.instagramUrl || ""}
+                                        onChange={(e) => setConfig({
+                                            ...config,
+                                            branding: { ...config.branding, instagramUrl: e.target.value }
+                                        })}
                                         placeholder="https://instagram.com/..."
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500"
                                     />
@@ -281,8 +317,11 @@ export default function BrandingEditor() {
                                     <label className="block text-sm font-medium text-gray-700 mb-1">WhatsApp URL</label>
                                     <input
                                         type="text"
-                                        value={content.whatsappUrl || ""}
-                                        onChange={(e) => setContent({ ...content, whatsappUrl: e.target.value })}
+                                        value={config.branding.whatsappUrl || ""}
+                                        onChange={(e) => setConfig({
+                                            ...config,
+                                            branding: { ...config.branding, whatsappUrl: e.target.value }
+                                        })}
                                         placeholder="https://wa.me/..."
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500"
                                     />

@@ -9,6 +9,12 @@ The Smart Avenue premium retail website has been successfully implemented using 
 - [x] **Responsive Header**: Glassmorphism effect on scroll, mobile hamburger menu, and sticky positioning.
 - [x] **Footer**: Contains quick links, contact info, and store location details.
 - [x] **Navigation**: Hover effects with gold underscores for active states.
+- [x] **Admin Sidebar**: Reorganized and nested navigation structure for better usability.
+
+### Navigation Updates (Admin)
+- [x] **Grouped Navigation**: Replaced flat list with logical groups (Store Design, Pages, Catalog).
+- [x] **Nested Sub-items**: Implemented collapsible sub-menus for complex sections like Homepage.
+- [x] **Clearer Labels**: Renamed generic "Products Page" to "Shop Page" and "Offers Page" to "Special Offers".
 
 ### Pages Implementation
 - [x] **Home Page**: Hero section with video background placeholder and Department highlights.
@@ -38,4 +44,5 @@ $ npm run build
    - Department cards expand/collapse smoothly.
    - Gallery images open in a lightbox.
    - Mobile menu toggles correctly.
+   - **Admin Sidebar**: Nested groups expand/collapse correctly. Links navigate to correct pages.
 3. **Linting**: Fixed all ESLint errors related to unused variables and unescaped characters.
