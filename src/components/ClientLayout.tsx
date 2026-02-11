@@ -1,8 +1,6 @@
 "use client";
 
-import { BrandingProvider } from "@/context/branding-context";
 import { AuthProvider } from "@/context/auth-context";
-import { ContactProvider } from "@/context/contact-context";
 import { SiteConfigProvider } from "@/context/SiteConfigContext";
 import Header from "./Header";
 import Footer from "./Footer";
@@ -18,14 +16,10 @@ export default function ClientLayout({
         <ErrorBoundary>
             <AuthProvider>
                 <SiteConfigProvider>
-                    <BrandingProvider>
-                        <ContactProvider>
-                            <Header />
-                            {children}
-                            <AssistantChat />
-                            <Footer />
-                        </ContactProvider>
-                    </BrandingProvider>
+                    <Header />
+                    {children}
+                    <AssistantChat />
+                    <Footer />
                 </SiteConfigProvider>
             </AuthProvider>
         </ErrorBoundary>
