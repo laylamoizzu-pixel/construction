@@ -23,6 +23,7 @@ export async function POST(request: NextRequest) {
         const recommendationRequest: RecommendationRequest = {
             query: body.query,
             context: body.context,
+            messages: body.messages,
             maxResults: body.maxResults,
         };
 

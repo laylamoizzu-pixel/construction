@@ -6,17 +6,30 @@ export interface ProductRequest {
     id: string;
     productName: string;
     description?: string;
+    category?: string;
+    maxBudget?: number;
+    specifications?: string[];
     status: "pending" | "reviewed" | "fulfilled";
     createdAt: Date;
     userContact?: string;
 }
 
-export async function createProductRequest(productName: string, description: string = "", userContact: string = "") {
+export async function createProductRequest(
+    productName: string,
+    description: string = "",
+    userContact: string = "",
+    category: string = "",
+    maxBudget: number = 0,
+    specifications: string[] = []
+) {
     try {
         const docRef = await getAdminDb().collection("product_requests").add({
             productName,
             description,
             userContact,
+            category,
+            maxBudget,
+            specifications,
             status: "pending",
             createdAt: admin.firestore.FieldValue.serverTimestamp(),
         });

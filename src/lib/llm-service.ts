@@ -242,13 +242,18 @@ function parseJSONFromResponse<T>(response: string): T {
 export async function analyzeIntent(
     query: string,
     categories: Category[],
+    messages: Array<{ role: string; content: string }> = [],
     provider: LLMProvider = "google"
 ): Promise<LLMIntentResponse> {
     const categoryList = categories.map(c => `- ${c.name} (ID: ${c.id})`).join("\n");
 
+    const history = messages.length > 0
+        ? `Conversation History:\n${messages.map(m => `${m.role.toUpperCase()}: ${m.content}`).join("\n")}\n\n`
+        : "";
+
     const prompt = `You are a product recommendation assistant for a retail store called "Smart Avenue" in India.
 
-Analyze the following customer query and extract their intent.
+${history}Analyze the following customer query and extract their intent.
 
 Available product categories:
 ${categoryList}
@@ -268,7 +273,12 @@ Respond with a JSON object (and nothing else) in this exact format:
   "preferences": ["any stated preferences like 'premium', 'simple', 'colorful', etc."],
   "useCase": "brief description of what they want to use the product for",
   "confidence": 0.0 to 1.0 indicating how confident you are in understanding their intent,
-  "requestProduct": null or { "name": "product name", "description": "details" } if they are requesting a new item
+  "productRequestData": null or {
+      "name": "product name",
+      "category": "probable category",
+      "maxBudget": number or null,
+      "specifications": ["list of specs"]
+  } if they are requesting a new item. Only populate this if the intent is clearly to request something you don't have.
 }`;
 
     const response = await callLLM(prompt, provider);
@@ -389,6 +399,64 @@ Keep the tone professional, helpful, and encouraging. Keep it concise (2-3 sente
 
     const response = await callLLM(prompt, provider);
     return response.trim().replace(/```/g, "").replace(/^["']|["']$/g, "");
+}
+
+/**
+ * Handle scenarios where a requested product is missing.
+ * Determine if we have enough info to request it, or if we need to ask the user.
+ */
+export async function handleMissingProduct(
+    query: string,
+    intent: LLMIntentResponse,
+    messages: Array<{ role: string; content: string }> = [],
+    provider: LLMProvider = "google"
+): Promise<{
+    action: "request" | "ask_details";
+    response: string;
+    requestData?: {
+        name: string;
+        category?: string;
+        maxBudget?: number;
+        specifications?: string[];
+    };
+}> {
+    const history = messages.length > 0
+        ? `Conversation History:\n${messages.map(m => `${m.role.toUpperCase()}: ${m.content}`).join("\n")}\n\n`
+        : "";
+
+    const productName = intent.productRequestData?.name || intent.category || intent.subcategory || query;
+
+    const prompt = `You are a helpful sales assistant for Smart Avenue.
+    
+${history}Customer Query: "${query}"
+
+Context: The customer is interested in "${productName}", but we DO NOT have this product in stock.
+We want to take a "Product Request" to stock it for them.
+
+To submit a request, we IDEALLY want:
+1. Product Name (We have this: "${productName}")
+2. Specifics (Color, size, brand, etc.)
+3. Target Price / Budget
+
+Current Knowledge:
+- Budget: ${intent.budgetMax || intent.productRequestData?.maxBudget ? "Known" : "Unknown"}
+- Specs: ${intent.requirements.length > 0 || intent.productRequestData?.specifications?.length ? "Known" : "Unknown"}
+
+Decision Logic:
+1. If the user has ALREADY provided a budget OR specific details in the history/query, we have enough to submit.
+2. If the user has explicitly said "requests it" or "order it", submit.
+3. If this is the FIRST time they mentioned it and gave NO details (just "do you have gucci bags?"), we should ASK for details first.
+4. If they just answered a question about details (e.g. "My budget is 5k"), submit.
+
+Output a JSON object:
+{
+  "action": "request" (if we have enough to log it) OR "ask_details" (if we should ask for budget/specs first),
+  "response": "The text response to the user. If requesting, say 'I've noted your request for [Product] [Details]...'. If asking, say 'We don't have [Product]. What is your budget/preference so I can request it?'",
+  "requestData": { "name": "...", "category": "...", "maxBudget": number, "specifications": ["..."] } (Required if action is 'request')
+}`;
+
+    const rawResponse = await callLLM(prompt, provider);
+    return parseJSONFromResponse(rawResponse);
 }
 
 /**

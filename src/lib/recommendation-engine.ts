@@ -9,7 +9,7 @@
  */
 
 import { getProducts, getCategories, Product } from "@/app/actions";
-import { analyzeIntent, rankAndSummarize, generateNoProductFoundResponse } from "./llm-service";
+import { analyzeIntent, rankAndSummarize, handleMissingProduct, generateNoProductFoundResponse } from "./llm-service";
 import { getSearchCache, hashQuery } from "./search-cache";
 import {
     RecommendationRequest,
@@ -62,38 +62,79 @@ export async function getRecommendations(
         const categories = await getCategories();
 
         // Step 2: Analyze user intent (1st LLM call)
-        const intentResponse = await analyzeIntent(query, categories);
+        const intentResponse = await analyzeIntent(query, categories, request.messages);
         const intent = mapIntentResponse(intentResponse);
 
-        // Handle product request
-        // @ts-expect-error - requestProduct is added in extended interface in llm-service
-        if (intentResponse.requestProduct) {
+        // Handle explicit product request (using new structure)
+        if (intentResponse.productRequestData) {
             const { createProductRequest } = await import("@/app/actions/product-requests");
-            // @ts-expect-error - dynamic import needs type assertion
-            await createProductRequest(intentResponse.requestProduct.name, intentResponse.requestProduct.description);
+            const reqData = intentResponse.productRequestData;
 
-            return {
-                success: true,
-                intent,
-                recommendations: [],
-                summary: `I've noted your request for "${// @ts-expect-error - intentResponse type intersection issue
-                    intentResponse.requestProduct.name}". I've sent this to our team, and we'll look into adding it to our inventory!`,
-                processingTime: Date.now() - startTime,
-            };
+            // Check if we have enough info to submit immediately
+            const decision = await handleMissingProduct(query, intentResponse, request.messages);
+
+            if (decision.action === "request" && decision.requestData) {
+                await createProductRequest(
+                    decision.requestData.name,
+                    "", // description
+                    "", // userContact
+                    decision.requestData.category || "",
+                    decision.requestData.maxBudget || 0,
+                    decision.requestData.specifications || []
+                );
+
+                return {
+                    success: true,
+                    intent,
+                    recommendations: [],
+                    summary: decision.response, // "I've sent your request..."
+                    processingTime: Date.now() - startTime,
+                };
+            } else {
+                // Determine we need more info
+                return {
+                    success: true,
+                    intent,
+                    recommendations: [],
+                    summary: decision.response, // "What is your budget?"
+                    processingTime: Date.now() - startTime,
+                };
+            }
         }
 
         // Step 3: Query relevant products (cached in getProducts)
         const products = await queryProducts(intent, request.context);
 
         if (products.length === 0) {
-            // Generate a dynamic "no products found" response that offers to take a request
-            const noProductSummary = await generateNoProductFoundResponse(query, intentResponse);
+            // Check if this looks like a missing product scenario that we should handle
+            const decision = await handleMissingProduct(query, intentResponse, request.messages);
 
+            if (decision.action === "request" && decision.requestData) {
+                const { createProductRequest } = await import("@/app/actions/product-requests");
+                await createProductRequest(
+                    decision.requestData.name,
+                    "",
+                    "",
+                    decision.requestData.category || "",
+                    decision.requestData.maxBudget || 0,
+                    decision.requestData.specifications || []
+                );
+
+                return {
+                    success: true,
+                    intent,
+                    recommendations: [],
+                    summary: decision.response,
+                    processingTime: Date.now() - startTime,
+                };
+            }
+
+            // Otherwise, just return the question/response from handleMissingProduct (or fallback to old one)
             return {
                 success: true,
                 intent,
                 recommendations: [],
-                summary: noProductSummary,
+                summary: decision.response,
                 processingTime: Date.now() - startTime,
             };
         }

@@ -1,25 +1,34 @@
+export interface BrandingConfig {
+    siteName: string;
+    tagline: string;
+    logoUrl: string;
+    faviconUrl: string;
+    posterUrl?: string;
+    instagramUrl?: string;
+    whatsappUrl?: string;
+}
+
+export interface ThemeConfig {
+    primaryColor: string;
+    secondaryColor: string;
+    accentColor: string;
+    backgroundColor: string;
+    textColor: string;
+}
+
+export interface HeroConfig {
+    title: string;
+    subtitle: string;
+    ctaText: string;
+    ctaLink: string;
+    backgroundImageUrl: string;
+    overlayOpacity: number;
+}
+
 export interface SiteConfig {
-    branding: {
-        siteName: string;
-        tagline: string;
-        logoUrl: string;
-        faviconUrl: string;
-    };
-    theme: {
-        primaryColor: string; // e.g., #064e3b (Emerald Green)
-        secondaryColor: string; // e.g., #d4af37 (Rich Gold)
-        accentColor: string;
-        backgroundColor: string;
-        textColor: string;
-    };
-    hero: {
-        title: string;
-        subtitle: string;
-        ctaText: string;
-        ctaLink: string;
-        backgroundImageUrl: string;
-        overlayOpacity: number; // 0 to 1
-    };
+    branding: BrandingConfig;
+    theme: ThemeConfig;
+    hero: HeroConfig;
     sections: {
         showSmartClub: boolean;
         showWeeklyOffers: boolean;
@@ -27,9 +36,10 @@ export interface SiteConfig {
         showTestimonials: boolean;
     };
     contact: {
-        phone: string;
         email: string;
+        phone: string;
         address: string;
+        mapEmbedUrl: string;
         facebookUrl?: string;
         instagramUrl?: string;
         twitterUrl?: string;
@@ -43,6 +53,9 @@ export const DEFAULT_SITE_CONFIG: SiteConfig = {
         tagline: "Where Luxury Meets Convenience",
         logoUrl: "/logo.png",
         faviconUrl: "/favicon.ico",
+        posterUrl: "",
+        instagramUrl: "",
+        whatsappUrl: ""
     },
     theme: {
         primaryColor: "#064e3b", // Deep Emerald Green
@@ -69,5 +82,6 @@ export const DEFAULT_SITE_CONFIG: SiteConfig = {
         phone: "+91 12345 67890",
         email: "contact@smartavenue.com",
         address: "Patna, Bihar, India",
+        mapEmbedUrl: "",
     },
 };

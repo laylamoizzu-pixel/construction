@@ -97,8 +97,15 @@ export default function AssistantChat() {
         setIsLoading(true);
 
         try {
+            // Get last 6 messages for context (excluding the current one we just added)
+            const history = messages.slice(-6).map(m => ({
+                role: m.role,
+                content: m.content
+            }));
+
             const reqBody: RecommendationRequest = {
                 query: userMessage.content,
+                messages: history,
                 maxResults: 5
             };
 

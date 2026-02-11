@@ -72,6 +72,7 @@ export interface RecommendationRequest {
         preferences?: string[];
         excludeProductIds?: string[];
     };
+    messages?: Array<{ role: string; content: string }>; // Conversation history
     maxResults?: number;
 }
 
@@ -95,6 +96,12 @@ export interface LLMIntentResponse {
     preferences: string[];
     useCase: string;
     confidence: number;
+    productRequestData?: {
+        name: string;
+        category?: string;
+        maxBudget?: number;
+        specifications?: string[];
+    } | null;
 }
 
 export interface LLMRecommendationResponse {
