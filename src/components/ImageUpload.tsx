@@ -3,7 +3,8 @@
 import { useState, useRef } from "react";
 import { Upload, X, Loader2 } from "lucide-react";
 import Image from "next/image";
-import { uploadFile } from "@/app/actions/upload";
+import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import { storage } from "@/lib/firebase";
 
 export interface UploadedFile {
     url: string;
@@ -56,9 +57,9 @@ export default function ImageUpload({
         try {
             for (let i = 0; i < files.length; i++) {
                 const file = files[i];
-                // Check file size (max 10MB)
-                if (file.size > 10 * 1024 * 1024) {
-                    throw new Error(`File ${file.name} is too large (max 10MB)`);
+                // Check file size (max 20MB)
+                if (file.size > 20 * 1024 * 1024) {
+                    throw new Error(`File ${file.name} is too large (max 20MB)`);
                 }
 
                 // Check file type
@@ -66,23 +67,32 @@ export default function ImageUpload({
                     throw new Error(`File ${file.name} is not an image`);
                 }
 
-                // Show indeterminate progress for server side upload
-                setProgress(10);
+                const timestamp = Date.now();
+                const safeName = file.name.replace(/[^a-zA-Z0-9.]/g, "_");
+                const fullPath = `${folder}/${timestamp}_${safeName}`;
 
-                const formData = new FormData();
-                formData.append("file", file);
-                formData.append("folder", folder);
+                // Use Client-Side SDK Reference
+                const storageRef = ref(storage, fullPath);
+                const uploadTask = uploadBytesResumable(storageRef, file);
 
-                setProgress(30);
-                const result = await uploadFile(formData);
-                setProgress(90);
-
-                if (result.success && result.url) {
-                    newFiles.push({ url: result.url, path: result.path || "" });
-                    setProgress(100);
-                } else {
-                    throw new Error(result.error || "Failed to upload file");
-                }
+                await new Promise<void>((resolve, reject) => {
+                    uploadTask.on(
+                        "state_changed",
+                        (snapshot) => {
+                            const p = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                            setProgress(Math.round(p));
+                        },
+                        (err) => {
+                            console.error("Firebase Storage Upload Error:", err);
+                            reject(err);
+                        },
+                        async () => {
+                            const url = await getDownloadURL(uploadTask.snapshot.ref);
+                            newFiles.push({ url, path: fullPath });
+                            resolve();
+                        }
+                    );
+                });
             }
 
             onUpload(newFiles);
@@ -92,7 +102,7 @@ export default function ImageUpload({
                 fileInputRef.current.value = "";
             }
         } catch (err) {
-            console.error("Upload error:", err);
+            console.error("Upload process error:", err);
             setError(err instanceof Error ? err.message : "Failed to upload image");
         } finally {
             setUploading(false);
