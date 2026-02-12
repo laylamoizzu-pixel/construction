@@ -17,10 +17,7 @@ export async function importProductsFromExcel(formData: FormData) {
         }
 
         const buffer = await file.arrayBuffer();
-
-        // Dynamically import xlsx
         const XLSX = await import('xlsx');
-
         const workbook = XLSX.read(buffer, { type: 'buffer' });
         const sheetName = workbook.SheetNames[0];
         const sheet = workbook.Sheets[sheetName];
@@ -31,11 +28,8 @@ export async function importProductsFromExcel(formData: FormData) {
         }
 
         const db = getAdminDb();
-        let batch = db.batch();
-        let operationCount = 0;
-        const BATCH_SIZE = 450;
 
-        // Fetch Categories & Offers for mapping
+        // 1. Prefetch master data (Categories & Offers)
         const [categoriesSnap, offersSnap] = await Promise.all([
             db.collection("categories").get(),
             db.collection("offers").get()
@@ -56,26 +50,57 @@ export async function importProductsFromExcel(formData: FormData) {
             offerMap.set(doc.id, doc.id);
         });
 
-        let totalImported = 0;
+        // 2. Prepare data & Identify duplicates
+        const validRows: Record<string, unknown>[] = [];
+        const productNames = new Set<string>();
 
         for (const rawRow of rows) {
-            // Normalize keys to lowercase
             const row: Record<string, unknown> = {};
             Object.keys(rawRow).forEach(key => {
                 row[key.trim().toLowerCase()] = rawRow[key];
             });
 
-            // Extract fields using normalized keys
             const Name = row['name'];
             const Price = row['price'];
 
-            // Skip invalid rows
-            if (!Name || !Price) {
-                // Optional: log or track skipped rows
-                continue;
+            if (Name && Price) {
+                validRows.push(row);
+                productNames.add(String(Name).trim());
             }
+        }
 
-            // Other fields
+        if (validRows.length === 0) {
+            return { success: false, error: "No valid products found. Ensure columns 'Name' and 'Price' exist." };
+        }
+
+        // 3. Batched check for existing products (Firestore limit: 30 items per 'in' query)
+        const productNameArray = Array.from(productNames);
+        const existingProductMap = new Map<string, admin.firestore.DocumentReference>(); // Name -> Ref
+
+        const CHUNK_SIZE = 30;
+        const nameChunks = [];
+        for (let i = 0; i < productNameArray.length; i += CHUNK_SIZE) {
+            nameChunks.push(productNameArray.slice(i, i + CHUNK_SIZE));
+        }
+
+        await Promise.all(nameChunks.map(async (chunk) => {
+            const snapshot = await db.collection("products").where("name", "in", chunk).get();
+            snapshot.docs.forEach(doc => {
+                existingProductMap.set(doc.data().name, doc.ref);
+            });
+        }));
+
+        // 4. Batch Writes
+        let batch = db.batch();
+        let operationCount = 0;
+        const BATCH_SIZE = 450; // Firestore limit 500
+        let totalImported = 0;
+
+        for (const row of validRows) {
+            const Name = String(row['name']).trim();
+            const Price = row['price'];
+
+            // Extract other fields
             const Category = row['category'];
             const Subcategory = row['subcategory'];
             const OfferTitle = row['offertitle'];
@@ -86,41 +111,32 @@ export async function importProductsFromExcel(formData: FormData) {
             const Featured = row['featured'];
             const Tags = row['tags'];
 
-            // Resolve Category
+            // Resolve References
             let categoryId = "";
             let subcategoryId = "";
 
             if (Category) {
                 const catKey = String(Category).trim().toLowerCase();
-                if (categoryMap.has(catKey)) {
-                    categoryId = categoryMap.get(catKey)!;
-                }
+                if (categoryMap.has(catKey)) categoryId = categoryMap.get(catKey)!;
             }
-
             if (Subcategory) {
                 const subKey = String(Subcategory).trim().toLowerCase();
-                if (categoryMap.has(subKey)) {
-                    subcategoryId = categoryMap.get(subKey)!;
-                }
+                if (categoryMap.has(subKey)) subcategoryId = categoryMap.get(subKey)!;
             }
 
-            // Resolve Offer
             let offerId = "";
             if (OfferTitle) {
                 const offerKey = String(OfferTitle).trim().toLowerCase();
-                if (offerMap.has(offerKey)) {
-                    offerId = offerMap.get(offerKey)!;
-                }
+                if (offerMap.has(offerKey)) offerId = offerMap.get(offerKey)!;
             }
 
-            // Resolve Product ID (Update vs Create)
-            const existingProductSnap = await db.collection("products").where("name", "==", Name).limit(1).get();
-
+            // Determine Ref (Update vs Create)
             let productRef: admin.firestore.DocumentReference;
-            const isUpdate = !existingProductSnap.empty;
+            const existingRef = existingProductMap.get(Name);
+            const isUpdate = !!existingRef;
 
             if (isUpdate) {
-                productRef = existingProductSnap.docs[0].ref;
+                productRef = existingRef!;
             } else {
                 productRef = db.collection("products").doc();
             }
@@ -133,19 +149,11 @@ export async function importProductsFromExcel(formData: FormData) {
                 updatedAt: admin.firestore.FieldValue.serverTimestamp(),
             };
 
-            // Only add optional fields if they exist in Excel OR if it's a new product
-            // If it's an update, we DON'T want to overwrite existing data with empty strings/nulls
-            // unless the Excel file explicitly has an empty column (which we can't easily distinguish from "missing column" without more complex logic,
-            // but for now, the user request "previous product details... got removed" implies we should safeguard existing data).
-
+            // Conditional updates for optional fields
             if (Description || !isUpdate) productData.description = Description || "";
             if (OriginalPrice || !isUpdate) productData.originalPrice = OriginalPrice ? Number(OriginalPrice) : null;
             if (subcategoryId || !isUpdate) productData.subcategoryId = subcategoryId || null;
 
-            // Image logic: 
-            // 1. If ImageUrl is provided in Excel, use it.
-            // 2. If NOT provided, and it's an update, LEAVE EXISTING IMAGES ALONE.
-            // 3. If new product, default to empty.
             if (ImageUrl) {
                 productData.imageUrl = ImageUrl;
                 productData.images = [ImageUrl];
@@ -164,7 +172,6 @@ export async function importProductsFromExcel(formData: FormData) {
                 productData.averageRating = 0;
             }
 
-            // Add to batch
             if (isUpdate) {
                 batch.update(productRef, productData as Partial<admin.firestore.DocumentData>);
             } else {
@@ -194,16 +201,13 @@ export async function importProductsFromExcel(formData: FormData) {
             getSearchCache().clearPrefix("products");
             getSearchCache().clearPrefix("query");
         } catch {
-            // ignore cache errors
-        }
-
-        if (totalImported === 0) {
-            return { success: false, error: "No valid products found. Ensure columns 'Name' and 'Price' exist." };
+            // ignore
         }
 
         return { success: true, count: totalImported };
 
     } catch (error: unknown) {
+        console.error("Import Error:", error);
         return { success: false, error: error instanceof Error ? error.message : "Unknown import error" };
     }
 }

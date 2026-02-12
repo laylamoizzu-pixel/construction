@@ -54,6 +54,7 @@ export default function ProductsManager() {
     const [categories, setCategories] = useState<Category[]>([]);
     const [offers, setOffers] = useState<Offer[]>([]);
     const [loading, setLoading] = useState(true);
+    const [loadingMore, setLoadingMore] = useState(false);
     const [saving, setSaving] = useState(false);
     const [showForm, setShowForm] = useState(false);
     const [showImportModal, setShowImportModal] = useState(false);
@@ -139,7 +140,11 @@ export default function ProductsManager() {
     };
 
     const loadProducts = React.useCallback(async (isLoadMore: boolean = false) => {
-        if (!isLoadMore) setLoading(true);
+        if (isLoadMore) {
+            setLoadingMore(true);
+        } else {
+            setLoading(true);
+        }
 
         const categoryFilter = filterCategory || undefined;
         const availableFilter = filterAvailable === "" ? undefined : filterAvailable === "true";
@@ -162,6 +167,7 @@ export default function ProductsManager() {
             setProducts(data);
         }
         setLoading(false);
+        setLoadingMore(false);
     }, [filterCategory, filterAvailable, searchQuery, products]);
 
 
@@ -849,15 +855,15 @@ export default function ProductsManager() {
                                 <div className="p-6 border-t border-gray-100 text-center">
                                     <button
                                         onClick={() => loadProducts(true)}
-                                        disabled={loading}
+                                        disabled={loadingMore}
                                         className="flex items-center gap-2 px-6 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors disabled:opacity-50"
                                     >
-                                        {loading ? (
+                                        {loadingMore ? (
                                             <Loader2 className="w-4 h-4 animate-spin" />
                                         ) : (
                                             <Plus className="w-4 h-4" />
                                         )}
-                                        Load More Products
+                                        {loadingMore ? "Loading..." : "Load More Products"}
                                     </button>
                                 </div>
                             )}
