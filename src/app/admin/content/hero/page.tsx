@@ -18,7 +18,7 @@ import {
     ChevronDown
 } from "lucide-react";
 import Link from "next/link";
-import ImageUpload from "@/components/ImageUpload";
+import CloudinaryUpload from "@/components/CloudinaryUpload";
 
 // Fallback for generating unique IDs without external dependency
 const generateId = () => {
@@ -292,12 +292,12 @@ export default function HeroEditor() {
                                             <h3 className="font-semibold text-sm text-gray-500 uppercase mb-4 flex items-center gap-2">
                                                 <ImageIcon className="w-4 h-4" /> Background Image
                                             </h3>
-                                            <ImageUpload
+                                            <CloudinaryUpload
                                                 folder="hero"
                                                 multiple={false}
                                                 currentImages={slide.backgroundImageUrl ? [slide.backgroundImageUrl] : []}
                                                 onUpload={(files) => files[0] && updateSlide(slide.id, { backgroundImageUrl: files[0].url })}
-                                                onRemove={() => updateSlide(slide.id, { backgroundImageUrl: "" })}
+                                                onRemoveImage={() => updateSlide(slide.id, { backgroundImageUrl: "" })}
                                             />
                                             <div className="mt-4">
                                                 <label className="block text-xs font-medium text-gray-500 mb-1">Image URL Override</label>
