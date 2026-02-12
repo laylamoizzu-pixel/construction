@@ -19,16 +19,16 @@ export default function Hero({ content }: { content?: HeroContent }) {
     const { config } = useSiteConfig();
 
     // Mapping content (Action Type) to Config (Context Type)
-    // Priority: SiteConfig > Content > Default
-    const title = config?.hero?.title || content?.title || DEFAULT_HERO.title;
-    const subtitle = config?.hero?.subtitle || content?.subtitle || DEFAULT_HERO.subtitle;
+    // Priority: Content (Specific) > SiteConfig (Global) > Default
+    const title = content?.title || config?.hero?.title || DEFAULT_HERO.title;
+    const subtitle = content?.subtitle || config?.hero?.subtitle || DEFAULT_HERO.subtitle;
 
     // Handle type mismatch between HeroContent (ctaPrimary) and SiteConfig (ctaText)
-    const ctaText = config?.hero?.ctaText || content?.ctaPrimary || DEFAULT_HERO.ctaText;
+    const ctaText = content?.ctaPrimary || config?.hero?.ctaText || DEFAULT_HERO.ctaText;
     const ctaLink = config?.hero?.ctaLink || DEFAULT_HERO.ctaLink;
 
     // Handle type mismatch for background image
-    const bgImage = config?.hero?.backgroundImageUrl || content?.backgroundImage || DEFAULT_HERO.backgroundImageUrl;
+    const bgImage = content?.backgroundImage || config?.hero?.backgroundImageUrl || DEFAULT_HERO.backgroundImageUrl;
     const overlayOpacity = config?.hero?.overlayOpacity ?? DEFAULT_HERO.overlayOpacity;
 
     return (
