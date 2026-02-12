@@ -337,23 +337,36 @@ export async function deleteStaffMember(id: string) {
     }
 }
 
-// Get staff role by email
-export async function getStaffRole(email: string): Promise<string | null> {
+// Get staff data (role and permissions) by email
+export async function getStaffData(email: string) {
     try {
         // Hardcoded super admin
-        if (email === "admin@smartavenue99.com") return "Admin";
+        if (email === "admin@smartavenue99.com") {
+            return {
+                role: "Admin",
+                permissions: ["*"] // All permissions
+            };
+        }
 
         const snapshot = await getAdminDb().collection("staff").where("email", "==", email).limit(1).get();
         if (!snapshot.empty) {
             const data = snapshot.docs[0].data();
-            // Capitalize first letter for consistency (admin -> Admin)
-            return data.role ? data.role.charAt(0).toUpperCase() + data.role.slice(1) : "Staff";
+            return {
+                role: data.role ? data.role.charAt(0).toUpperCase() + data.role.slice(1) : "Staff",
+                permissions: data.permissions || []
+            };
         }
         return null;
     } catch (error) {
-        console.error("Error fetching staff role:", error);
+        console.error("Error fetching staff data:", error);
         return null;
     }
+}
+
+// Keep for compatibility or replace usages
+export async function getStaffRole(email: string): Promise<string | null> {
+    const data = await getStaffData(email);
+    return data ? data.role : null;
 }
 
 // ==================== CATEGORIES ====================

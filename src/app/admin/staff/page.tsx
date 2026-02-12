@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/auth-context";
-import { getStaffMembers, createStaffMember, deleteStaffMember, StaffMember } from "@/app/actions";
+import { getStaffMembers, createStaffMember, updateStaffMember, deleteStaffMember, StaffMember } from "@/app/actions";
 import {
     Loader2,
     ArrowLeft,
@@ -19,19 +19,28 @@ import Link from "next/link";
 
 const sections = [
     { id: "hero", label: "Hero Section" },
+    { id: "highlights", label: "Highlights" },
+    { id: "promotions", label: "Promotions" },
+    { id: "features", label: "Features" },
+    { id: "cta", label: "CTA Section" },
+    { id: "products", label: "Products" },
+    { id: "categories", label: "Categories" },
     { id: "offers", label: "Offers" },
     { id: "reviews", label: "Reviews" },
     { id: "contact", label: "Contact Info" },
     { id: "departments", label: "Departments" },
+    { id: "staff", label: "Staff Management" },
+    { id: "api-keys", label: "AI & System Settings" },
 ];
 
 export default function StaffManagement() {
-    const { user, role, loading: authLoading } = useAuth();
+    const { user, role, permissions, loading: authLoading } = useAuth();
     const router = useRouter();
     const [staff, setStaff] = useState<StaffMember[]>([]);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [showForm, setShowForm] = useState(false);
+    const [editingId, setEditingId] = useState<string | null>(null);
     const [newStaff, setNewStaff] = useState({
         name: "",
         email: "",
@@ -43,11 +52,15 @@ export default function StaffManagement() {
         if (!authLoading) {
             if (!user) {
                 router.push("/admin/login");
-            } else if (role !== "Admin") {
-                router.push("/admin");
+            } else {
+                // Check if user is Admin or has 'staff' permission
+                const hasStaffPermission = role === "Admin" || (permissions && (permissions.includes("staff") || permissions.includes("*")));
+                if (!hasStaffPermission) {
+                    router.push("/admin");
+                }
             }
         }
-    }, [authLoading, user, role, router]);
+    }, [authLoading, user, role, permissions, router]);
 
     useEffect(() => {
         if (user) {
@@ -62,21 +75,52 @@ export default function StaffManagement() {
         setLoading(false);
     };
 
-    const handleCreateStaff = async (e: React.FormEvent) => {
+    const handleSaveStaff = async (e: React.FormEvent) => {
         e.preventDefault();
         setSaving(true);
-        const result = await createStaffMember(
-            newStaff.email,
-            newStaff.name,
-            newStaff.role,
-            newStaff.permissions
-        );
+
+        let result;
+        if (editingId) {
+            result = await updateStaffMember(editingId, {
+                name: newStaff.name,
+                email: newStaff.email,
+                role: newStaff.role,
+                permissions: newStaff.permissions
+            });
+        } else {
+            result = await createStaffMember(
+                newStaff.email,
+                newStaff.name,
+                newStaff.role,
+                newStaff.permissions
+            );
+        }
+
         if (result.success) {
             setNewStaff({ name: "", email: "", role: "editor", permissions: [] });
             setShowForm(false);
+            setEditingId(null);
             await loadStaff();
         }
         setSaving(false);
+    };
+
+    const handleEditClick = (member: StaffMember) => {
+        setNewStaff({
+            name: member.name,
+            email: member.email,
+            role: member.role,
+            permissions: member.permissions || []
+        });
+        setEditingId(member.id);
+        setShowForm(true);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    const handleCancel = () => {
+        setShowForm(false);
+        setEditingId(null);
+        setNewStaff({ name: "", email: "", role: "editor", permissions: [] });
     };
 
     const handleDeleteStaff = async (id: string) => {
@@ -138,11 +182,13 @@ export default function StaffManagement() {
                     </button>
                 </div>
 
-                {/* Create form */}
+                {/* Create/Edit form */}
                 {showForm && (
-                    <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-6">
-                        <h3 className="font-semibold text-gray-800 mb-4">Add New Staff Member</h3>
-                        <form onSubmit={handleCreateStaff} className="space-y-4">
+                    <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-6 transition-all animate-in fade-in slide-in-from-top-4">
+                        <h3 className="font-semibold text-gray-800 mb-4">
+                            {editingId ? "Edit Staff Member" : "Add New Staff Member"}
+                        </h3>
+                        <form onSubmit={handleSaveStaff} className="space-y-4">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
@@ -205,7 +251,7 @@ export default function StaffManagement() {
                             <div className="flex justify-end gap-3 pt-4">
                                 <button
                                     type="button"
-                                    onClick={() => setShowForm(false)}
+                                    onClick={handleCancel}
                                     className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
                                 >
                                     Cancel
@@ -216,7 +262,7 @@ export default function StaffManagement() {
                                     className="flex items-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg transition-colors disabled:opacity-50"
                                 >
                                     {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                                    Add Staff
+                                    {editingId ? "Save Changes" : "Add Staff"}
                                 </button>
                             </div>
                         </form>
@@ -264,12 +310,22 @@ export default function StaffManagement() {
                                             </div>
                                         )}
                                     </div>
-                                    <button
-                                        onClick={() => handleDeleteStaff(member.id)}
-                                        className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                                    >
-                                        <Trash2 className="w-5 h-5" />
-                                    </button>
+                                    <div className="flex gap-2">
+                                        <button
+                                            onClick={() => handleEditClick(member)}
+                                            className="p-2 text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"
+                                            title="Edit member"
+                                        >
+                                            <Pencil className="w-5 h-5" />
+                                        </button>
+                                        <button
+                                            onClick={() => handleDeleteStaff(member.id)}
+                                            className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                            title="Remove member"
+                                        >
+                                            <Trash2 className="w-5 h-5" />
+                                        </button>
+                                    </div>
                                 </div>
                             ))}
                         </div>

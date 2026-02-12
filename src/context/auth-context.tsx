@@ -8,11 +8,12 @@ import {
     signOut
 } from "firebase/auth";
 import { auth } from "@/lib/firebase";
-import { getStaffRole } from "@/app/actions";
+import { getStaffData } from "@/app/actions";
 
 interface AuthContextType {
     user: User | null;
     role: string | null;
+    permissions: string[];
     loading: boolean;
     login: (email: string, password: string) => Promise<void>;
     logout: () => Promise<void>;
@@ -21,6 +22,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType>({
     user: null,
     role: null,
+    permissions: [],
     loading: true,
     login: async () => { },
     logout: async () => { },
@@ -47,6 +49,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Initialize with persisted state for instant UI
     const [user, setUser] = useState<User | null>(null);
     const [role, setRole] = useState<string | null>(null);
+    const [permissions, setPermissions] = useState<string[]>([]);
     const [loading, setLoading] = useState(true);
     const [initializing, setInitializing] = useState(true);
     const [, setPersistedAuthState] = useState(false); // Renamed to avoid conflict with function
@@ -72,17 +75,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setPersistedAuthState(!!user);
 
             if (user && user.email) {
-                // Fetch role from server action in background without blocking UI
-                getStaffRole(user.email)
-                    .then((userRole) => {
-                        setRole(userRole || "Staff");
+                // Fetch staff data from server action in background without blocking UI
+                getStaffData(user.email)
+                    .then((data) => {
+                        if (data) {
+                            setRole(data.role);
+                            setPermissions(data.permissions);
+                        } else {
+                            setRole("Staff");
+                            setPermissions([]);
+                        }
                     })
                     .catch((e) => {
-                        console.error("Error fetching role", e);
+                        console.error("Error fetching staff data", e);
                         setRole("Staff");
+                        setPermissions([]);
                     });
             } else {
                 setRole(null);
+                setPermissions([]);
             }
         });
 
@@ -113,7 +124,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
 
     return (
-        <AuthContext.Provider value={{ user, role, loading: loading || initializing, login, logout }}>
+        <AuthContext.Provider value={{ user, role, permissions, loading: loading || initializing, login, logout }}>
             {!initializing && children}
         </AuthContext.Provider>
     );

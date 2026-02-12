@@ -25,11 +25,13 @@ type NavItem = {
     name: string;
     href?: string;
     icon: React.ComponentType<{ className?: string }>;
-    subItems?: { name: string; href: string }[];
+    subItems?: { name: string; href: string; permission?: string }[];
+    permission?: string;
 };
 
 type NavGroup = {
     title: string;
+    permission?: string;
     items: NavItem[];
 };
 
@@ -43,9 +45,9 @@ const navGroups: NavGroup[] = [
     {
         title: "Catalog",
         items: [
-            { name: "Products", href: "/admin/content/products", icon: ShoppingBag },
-            { name: "Categories", href: "/admin/content/categories", icon: Tag },
-            { name: "Offers", href: "/admin/content/offers", icon: Megaphone },
+            { name: "Products", href: "/admin/content/products", icon: ShoppingBag, permission: "products" },
+            { name: "Categories", href: "/admin/content/categories", icon: Tag, permission: "categories" },
+            { name: "Offers", href: "/admin/content/offers", icon: Megaphone, permission: "offers" },
         ]
     },
     {
@@ -55,38 +57,39 @@ const navGroups: NavGroup[] = [
                 name: "Homepage",
                 icon: Home,
                 href: "/admin/storefront",
+                permission: "storefront",
                 subItems: [
-                    { name: "Hero Section", href: "/admin/content/hero" },
-                    { name: "Highlights", href: "/admin/content/highlights" },
-                    { name: "Promotions", href: "/admin/content/promotions" },
-                    { name: "Features", href: "/admin/content/features" },
-                    { name: "CTA Section", href: "/admin/content/cta" },
+                    { name: "Hero Section", href: "/admin/content/hero", permission: "hero" },
+                    { name: "Highlights", href: "/admin/content/highlights", permission: "highlights" },
+                    { name: "Promotions", href: "/admin/content/promotions", permission: "promotions" },
+                    { name: "Features", href: "/admin/content/features", permission: "features" },
+                    { name: "CTA Section", href: "/admin/content/cta", permission: "cta" },
                 ]
             },
-            { name: "About Us", href: "/admin/content/about", icon: Users },
-            { name: "Departments", href: "/admin/content/departments-page", icon: Tag },
-            { name: "Shop Page", href: "/admin/content/products-page", icon: Store },
-            { name: "Special Offers", href: "/admin/content/offers-page", icon: Megaphone },
+            { name: "About Us", href: "/admin/content/about", icon: Users, permission: "about" },
+            { name: "Departments", href: "/admin/content/departments-page", icon: Tag, permission: "departments" },
+            { name: "Shop Page", href: "/admin/content/products-page", icon: Store, permission: "products-page" },
+            { name: "Special Offers", href: "/admin/content/offers-page", icon: Megaphone, permission: "offers-page" },
         ]
     },
     {
         title: "Content",
         items: [
-            { name: "Reviews", href: "/admin/content/reviews", icon: MessageSquare },
-            { name: "Requests", href: "/admin/requests", icon: MessageSquare },
+            { name: "Reviews", href: "/admin/content/reviews", icon: MessageSquare, permission: "reviews" },
+            { name: "Requests", href: "/admin/requests", icon: MessageSquare, permission: "requests" },
         ]
     },
     {
         title: "System",
         items: [
-            { name: "Staff", href: "/admin/staff", icon: Users },
-            { name: "AI Assistant", href: "/admin/api-keys", icon: Bot },
+            { name: "Staff", href: "/admin/staff", icon: Users, permission: "staff" },
+            { name: "AI Assistant", href: "/admin/api-keys", icon: Bot, permission: "api-keys" },
         ]
     }
 ];
 
 export default function AdminSidebar({ mobileOpen, setMobileOpen }: { mobileOpen: boolean, setMobileOpen: (open: boolean) => void }) {
-    const { user, logout, role } = useAuth();
+    const { user, logout, role, permissions } = useAuth();
     const router = useRouter();
     const pathname = usePathname();
 
@@ -152,13 +155,33 @@ export default function AdminSidebar({ mobileOpen, setMobileOpen }: { mobileOpen
                 {/* Navigation */}
                 <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-6">
                     {navGroups.map((group) => {
-                        // Filter entire groups based on role
-                        if (role !== "Admin" && group.title === "System") {
-                            return null;
-                        }
+                        // Helper to check if a user has access
+                        const hasAccess = (permission?: string) => {
+                            if (role === "Admin" || (permissions && permissions.includes("*"))) return true;
+                            if (!permission) return true;
+                            return permissions && permissions.includes(permission);
+                        };
 
-                        // Filter items based on role within groups
-                        // Note: Keeping it simple for now, if more granular permission is needed, logic goes here.
+                        // Filter items within groups based on permissions
+                        const accessibleItems = group.items.filter(item => {
+                            // If it's a parent with subitems, check if any subitem is accessible
+                            if (item.subItems && item.subItems.length > 0) {
+                                const accessibleSubItems = item.subItems.filter(sub => hasAccess(sub.permission));
+                                // We'll modify the item to only include accessible subitems
+                                if (accessibleSubItems.length > 0) {
+                                    item.subItems = accessibleSubItems;
+                                    return true;
+                                }
+                                return hasAccess(item.permission);
+                            }
+                            return hasAccess(item.permission);
+                        });
+
+                        if (accessibleItems.length === 0) return null;
+
+                        // Special case: Only Admin can see System group for now, 
+                        // unless we want to allow Managers with "staff" permission.
+                        // Let's rely on the permission check above which handles "staff" and "api-keys".
 
                         return (
                             <div key={group.title}>
@@ -172,7 +195,7 @@ export default function AdminSidebar({ mobileOpen, setMobileOpen }: { mobileOpen
 
                                 {expandedGroups[group.title] && (
                                     <div className="space-y-0.5">
-                                        {group.items.map((item) => {
+                                        {accessibleItems.map((item) => {
                                             const Icon = item.icon;
                                             const hasSubItems = item.subItems && item.subItems.length > 0;
 
