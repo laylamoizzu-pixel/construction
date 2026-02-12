@@ -5,7 +5,7 @@ import { Download, MessageSquare, Clock, Tag, Zap, ArrowRight } from "lucide-rea
 import { useSiteConfig } from "@/context/SiteConfigContext";
 import { Offer } from "@/app/actions";
 
-export default function OffersList({ offers }: { offers: Offer[] }) {
+export default function OffersList({ offers, catalogueUrl }: { offers: Offer[], catalogueUrl?: string }) {
     const { config } = useSiteConfig();
     const { contact } = config;
 
@@ -30,9 +30,15 @@ export default function OffersList({ offers }: { offers: Offer[] }) {
                     <p className="text-slate-300 max-w-md mb-8 leading-relaxed">
                         Access our complete digital inventory, exclusive bundles, and member pricing.
                     </p>
-                    <button className="px-8 py-4 bg-brand-lime text-brand-dark rounded-full font-bold hover:bg-lime-400 transition-all flex items-center justify-center gap-3 shadow-[0_0_20px_rgba(132,204,22,0.3)] hover:shadow-[0_0_30px_rgba(132,204,22,0.5)]">
-                        <Download className="w-5 h-5" /> Download PDF <span className="opacity-60 text-xs font-normal ml-1">4.5 MB</span>
-                    </button>
+                    {catalogueUrl ? (
+                        <a href={catalogueUrl} target="_blank" rel="noopener noreferrer" className="px-8 py-4 bg-brand-lime text-brand-dark rounded-full font-bold hover:bg-lime-400 transition-all flex items-center justify-center gap-3 shadow-[0_0_20px_rgba(132,204,22,0.3)] hover:shadow-[0_0_30px_rgba(132,204,22,0.5)]">
+                            <Download className="w-5 h-5" /> Download PDF
+                        </a>
+                    ) : (
+                        <button disabled className="px-8 py-4 bg-gray-600 text-gray-400 rounded-full font-bold cursor-not-allowed flex items-center justify-center gap-3">
+                            <Download className="w-5 h-5" /> Catalogue Unavailable
+                        </button>
+                    )}
                 </div>
 
                 {/* Abstract Visual */}

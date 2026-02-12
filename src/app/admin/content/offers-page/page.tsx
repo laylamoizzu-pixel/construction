@@ -117,6 +117,27 @@ export default function OffersPageEditor() {
                             </div>
                         </div>
 
+                        <div className="pt-6 border-t border-gray-100">
+                            <h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                                <FileText className="w-5 h-5 text-amber-500" />
+                                Smart Catalogue PDF
+                            </h3>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Upload Catalogue (PDF)</label>
+                                <FileUpload
+                                    folder="catalogues"
+                                    accept="application/pdf"
+                                    multiple={false}
+                                    currentFiles={content.catalogueUrl ? [content.catalogueUrl] : []}
+                                    onUpload={(files) => setContent({ ...content, catalogueUrl: files[0].url })}
+                                    onRemove={() => setContent({ ...content, catalogueUrl: "" })}
+                                />
+                                <p className="text-xs text-gray-500 mt-2">
+                                    This PDF will be available for download on the public offers page.
+                                </p>
+                            </div>
+                        </div>
+
                         <div className="flex items-center justify-between mt-6 pt-6 border-t border-gray-100">
                             {saved && (
                                 <span className="text-green-600 text-sm">✓ Changes saved successfully!</span>

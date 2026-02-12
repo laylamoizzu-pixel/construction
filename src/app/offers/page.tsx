@@ -48,7 +48,7 @@ export default async function OffersPage() {
             </div>
 
             <div className="container mx-auto px-4 md:px-6 py-16 -mt-10 relative z-20">
-                <OffersList offers={offers} />
+                <OffersList offers={offers} catalogueUrl={pageContent?.catalogueUrl} />
             </div>
         </div>
     );
