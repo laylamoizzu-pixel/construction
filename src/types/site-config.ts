@@ -34,6 +34,30 @@ export interface PromotionItem {
     active: boolean;
 }
 
+export interface FooterLink {
+    name: string;
+    href: string;
+}
+
+export interface FooterSection {
+    title: string;
+    links: FooterLink[];
+}
+
+export interface FooterConfig {
+    tagline: string;
+    socialLinks: {
+        facebook: string;
+        instagram: string;
+        twitter: string;
+    };
+    navigation: {
+        shop: FooterSection;
+        company: FooterSection;
+    };
+    bottomLinks: FooterLink[];
+}
+
 export interface PromotionsConfig {
     enabled: boolean;
     title: string;
@@ -45,6 +69,7 @@ export interface SiteConfig {
     theme: ThemeConfig;
     hero: HeroConfig;
     promotions: PromotionsConfig;
+    footer: FooterConfig;
     sections: {
         showSmartClub: boolean;
         showWeeklyOffers: boolean;
@@ -98,6 +123,39 @@ export const DEFAULT_SITE_CONFIG: SiteConfig = {
         showWeeklyOffers: true,
         showDepartments: true,
         showTestimonials: true,
+    },
+    footer: {
+        tagline: "Patna's premier destination for modern living. Elevating your lifestyle with curated tech, home, and fashion.",
+        socialLinks: {
+            facebook: "#",
+            instagram: "#",
+            twitter: "#",
+        },
+        navigation: {
+            shop: {
+                title: "Shop",
+                links: [
+                    { name: "Departments", href: "/departments" },
+                    { name: "All Products", href: "/products" },
+                    { name: "Weekly Offers", href: "/offers" },
+                    { name: "New Arrivals", href: "/new-arrivals" },
+                ]
+            },
+            company: {
+                title: "Company",
+                links: [
+                    { name: "Our Story", href: "/about" },
+                    { name: "Careers", href: "/careers" },
+                    { name: "Contact Us", href: "/contact" },
+                    { name: "Store Locator", href: "/stores" },
+                ]
+            }
+        },
+        bottomLinks: [
+            { name: "Privacy Policy", href: "/privacy" },
+            { name: "Terms of Service", href: "/terms" },
+            { name: "Sitemap", href: "/sitemap" },
+        ]
     },
     contact: {
         phone: "+91 12345 67890",
