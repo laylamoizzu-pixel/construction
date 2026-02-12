@@ -23,6 +23,8 @@ export function Reviews({ productId, reviews, averageRating = 0, reviewCount = 0
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState("");
 
+    console.log(`[Reviews] Rendering for product ${productId}. Received ${reviews.length} reviews.`);
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 

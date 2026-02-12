@@ -734,19 +734,45 @@ export async function addReview(productId: string, userId: string, userName: str
 
 export async function getReviews(productId: string): Promise<Review[]> {
     try {
-        const snapshot = await getAdminDb()
-            .collection("reviews")
-            .where("productId", "==", productId)
-            .orderBy("createdAt", "desc")
-            .get();
+        console.log(`[getReviews] Fetching reviews for product: ${productId}`);
+        const db = getAdminDb();
 
-        return snapshot.docs.map((doc: admin.firestore.QueryDocumentSnapshot) => ({
-            id: doc.id,
-            ...doc.data(),
-            createdAt: (doc.data().createdAt as admin.firestore.Timestamp)?.toDate() || new Date(),
-        })) as Review[];
+        try {
+            // First attempt: with orderBy (requires index)
+            const snapshot = await db
+                .collection("reviews")
+                .where("productId", "==", productId)
+                .orderBy("createdAt", "desc")
+                .get();
+
+            console.log(`[getReviews] Found ${snapshot.size} reviews (ordered)`);
+            return snapshot.docs.map((doc: admin.firestore.QueryDocumentSnapshot) => ({
+                id: doc.id,
+                ...doc.data(),
+                createdAt: (doc.data().createdAt as admin.firestore.Timestamp)?.toDate() || new Date(),
+            })) as Review[];
+        } catch (orderError) {
+            console.warn(`[getReviews] Ordered query failed (possibly missing index), attempting fallback:`, orderError instanceof Error ? orderError.message : String(orderError));
+
+            // Fallback: without orderBy
+            const snapshot = await db
+                .collection("reviews")
+                .where("productId", "==", productId)
+                .get();
+
+            console.log(`[getReviews] Found ${snapshot.size} reviews (fallback unordered)`);
+
+            // Sort in-memory if possible or just return as is
+            const reviews = snapshot.docs.map((doc: admin.firestore.QueryDocumentSnapshot) => ({
+                id: doc.id,
+                ...doc.data(),
+                createdAt: (doc.data().createdAt as admin.firestore.Timestamp)?.toDate() || new Date(),
+            })) as Review[];
+
+            return reviews.sort((a, b) => (b.createdAt?.getTime() || 0) - (a.createdAt?.getTime() || 0));
+        }
     } catch (error) {
-        console.error("Error fetching reviews:", error);
+        console.error("[getReviews] Fatal error fetching reviews:", error);
         return [];
     }
 }
