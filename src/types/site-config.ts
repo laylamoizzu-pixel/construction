@@ -61,6 +61,7 @@ export interface FooterSection {
 
 export interface FooterConfig {
     logoUrl?: string;
+    logoPublicId?: string;
     tagline: string;
     socialLinks: {
         facebook: string;

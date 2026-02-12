@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
-import ImageUpload from "@/components/ImageUpload";
+import CloudinaryUpload from "@/components/CloudinaryUpload";
 
 export default function FooterEditor() {
     const { user, permissions, role, loading: authLoading } = useAuth();
@@ -156,17 +156,18 @@ export default function FooterEditor() {
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Upload Logo</label>
                                     <div className="mb-2">
-                                        <ImageUpload
+                                        <CloudinaryUpload
                                             folder="branding/footer-logo"
                                             multiple={false}
+                                            accept="image/*"
                                             currentImages={config.footer.logoUrl ? [config.footer.logoUrl] : []}
                                             onUpload={(files) => files[0] && setConfig({
                                                 ...config,
-                                                footer: { ...config.footer, logoUrl: files[0].url }
+                                                footer: { ...config.footer, logoUrl: files[0].url, logoPublicId: files[0].publicId }
                                             })}
-                                            onRemove={() => setConfig({
+                                            onRemoveImage={() => setConfig({
                                                 ...config,
-                                                footer: { ...config.footer, logoUrl: "" }
+                                                footer: { ...config.footer, logoUrl: "", logoPublicId: "" }
                                             })}
                                         />
                                     </div>
