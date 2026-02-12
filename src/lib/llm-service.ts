@@ -214,7 +214,7 @@ async function callLLM(prompt: string, _preferredProvider: LLMProvider = "google
 }
 
 /**
- * Parse JSON from LLM response, handling markdown code blocks
+ * Parse JSON from LLM response, handling markdown code blocks and text around JSON
  */
 function parseJSONFromResponse<T>(response: string): T {
     // Remove markdown code blocks if present
@@ -229,10 +229,48 @@ function parseJSONFromResponse<T>(response: string): T {
     }
     cleaned = cleaned.trim();
 
+    // Attempt 1: Direct parse
     try {
         return JSON.parse(cleaned);
     } catch {
-        throw new LLMServiceError(`Failed to parse LLM response as JSON: ${response.substring(0, 100)}...`);
+        // Attempt 2: Try to find a JSON object { ... } or array [ ... ] in the response
+        const jsonObjectMatch = cleaned.match(/\{[\s\S]*\}/);
+        if (jsonObjectMatch) {
+            try {
+                return JSON.parse(jsonObjectMatch[0]);
+            } catch { /* fall through */ }
+        }
+
+        const jsonArrayMatch = cleaned.match(/\[[\s\S]*\]/);
+        if (jsonArrayMatch) {
+            try {
+                return JSON.parse(jsonArrayMatch[0]);
+            } catch { /* fall through */ }
+        }
+
+        throw new LLMServiceError(`Failed to parse LLM response as JSON: ${response.substring(0, 200)}...`);
+    }
+}
+
+/**
+ * Call LLM expecting JSON output. Retries once with a stricter prompt on parse failure.
+ */
+async function callLLMForJSON<T>(prompt: string, provider: LLMProvider = "google"): Promise<T> {
+    // First attempt
+    try {
+        const response = await callLLM(prompt, provider);
+        return parseJSONFromResponse<T>(response);
+    } catch (firstError) {
+        if (!(firstError instanceof LLMServiceError) || !String(firstError.message).includes("Failed to parse")) {
+            throw firstError;
+        }
+
+        console.warn("[LLMService] JSON parse failed on first attempt, retrying with stricter prompt");
+
+        // Retry with a much stricter prompt
+        const stricterPrompt = `${prompt}\n\nIMPORTANT: You MUST respond with ONLY a valid JSON object. No explanation text before or after. No markdown. Just the raw JSON.`;
+        const retryResponse = await callLLM(stricterPrompt, provider);
+        return parseJSONFromResponse<T>(retryResponse);
     }
 }
 
@@ -281,8 +319,7 @@ Respond with a JSON object (and nothing else) in this exact format:
   } if they are requesting a new item. Only populate this if the intent is clearly to request something you don't have.
 }`;
 
-    const response = await callLLM(prompt, provider);
-    return parseJSONFromResponse<GenericIntentResponse>(response);
+    return await callLLMForJSON<GenericIntentResponse>(prompt, provider);
 }
 
 /**
@@ -333,8 +370,7 @@ Respond with a JSON array (and nothing else) in this exact format:
 
 Only include products that are relevant. If no products match well, return an empty array.`;
 
-    const response = await callLLM(prompt, provider);
-    return parseJSONFromResponse<Array<{ productId: string; matchScore: number; highlights: string[]; whyRecommended: string }>>(response);
+    return await callLLMForJSON<Array<{ productId: string; matchScore: number; highlights: string[]; whyRecommended: string }>>(prompt, provider);
 }
 
 /**
@@ -456,38 +492,49 @@ Output a JSON object:
   "requestData": { "name": "...", "category": "...", "maxBudget": number | 0 (use 0 if unknown), "specifications": ["..."] } (Required if action is 'request')
 }`;
 
-    const rawResponse = await callLLM(prompt, provider);
-    const result = parseJSONFromResponse<{
-        action: "request" | "ask_details";
-        response: string;
-        requestData?: {
-            name: string;
-            category?: string;
-            maxBudget?: number | string;
-            specifications?: string[];
-        };
-    }>(rawResponse);
+    try {
+        const result = await callLLMForJSON<{
+            action: "request" | "ask_details";
+            response: string;
+            requestData?: {
+                name: string;
+                category?: string;
+                maxBudget?: number | string;
+                specifications?: string[];
+            };
+        }>(prompt, provider);
 
-    // Sanitize maxBudget to ensure it's a number
-    if (result.requestData) {
-        if (typeof result.requestData.maxBudget === 'string') {
-            const parsed = parseFloat(result.requestData.maxBudget);
-            result.requestData.maxBudget = isNaN(parsed) ? 0 : parsed;
-        } else if (typeof result.requestData.maxBudget !== 'number') {
-            result.requestData.maxBudget = 0;
+        // Sanitize maxBudget to ensure it's a number
+        if (result.requestData) {
+            if (typeof result.requestData.maxBudget === 'string') {
+                const parsed = parseFloat(result.requestData.maxBudget);
+                result.requestData.maxBudget = isNaN(parsed) ? 0 : parsed;
+            } else if (typeof result.requestData.maxBudget !== 'number') {
+                result.requestData.maxBudget = 0;
+            }
         }
-    }
 
-    return result as {
-        action: "request" | "ask_details";
-        response: string;
-        requestData?: {
-            name: string;
-            category?: string;
-            maxBudget?: number;
-            specifications?: string[];
+        return result as {
+            action: "request" | "ask_details";
+            response: string;
+            requestData?: {
+                name: string;
+                category?: string;
+                maxBudget?: number;
+                specifications?: string[];
+            };
         };
-    };
+    } catch (error) {
+        // Graceful fallback: if JSON parsing completely fails, return a helpful response
+        // instead of crashing the entire recommendation pipeline
+        console.error("[handleMissingProduct] Failed to parse LLM response, using fallback:", error);
+
+        const fallbackProductName = intent.productRequestData?.name || intent.category || intent.subcategory || query;
+        return {
+            action: "ask_details" as const,
+            response: `We don't currently have "${fallbackProductName}" in stock, but I'd love to help you get it! Could you share your preferred budget and any specific details (like brand, color, or size) so I can note down a product request for you?`,
+        };
+    }
 }
 
 /**
@@ -559,9 +606,8 @@ Respond with a JSON object (and nothing else) in this exact format:
 
 Only include relevant products. If no products match well, return empty rankings.`;
 
-    const response = await callLLM(prompt);
-    return parseJSONFromResponse<{
+    return await callLLMForJSON<{
         rankings: Array<{ productId: string; matchScore: number; highlights: string[]; whyRecommended: string }>;
         summary: string;
-    }>(response);
+    }>(prompt);
 }

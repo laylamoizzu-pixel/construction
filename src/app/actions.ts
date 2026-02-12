@@ -542,15 +542,17 @@ export async function getProducts(
 export async function searchProducts(
     searchQuery: string,
     categoryId?: string,
-    subcategoryId?: string
+    subcategoryId?: string,
+    includeUnavailable: boolean = false
 ): Promise<Product[]> {
     // For admin/global search, we want to fetch a larger batch to find items
     const allProducts = await getProducts(undefined, undefined, 1000);
 
     const searchLower = searchQuery.toLowerCase().trim();
 
-    // Filter to available products first
-    let filtered = allProducts.filter(p => p.available);
+    // Filter to available products first (unless includeUnavailable is true)
+    let filtered = includeUnavailable ? allProducts : allProducts.filter(p => p.available);
+
 
     // Text search filter
     if (searchLower) {

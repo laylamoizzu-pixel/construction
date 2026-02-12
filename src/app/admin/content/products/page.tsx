@@ -58,6 +58,7 @@ export default function ProductsManager() {
     const [filterCategory, setFilterCategory] = useState<string>("");
     const [filterAvailable, setFilterAvailable] = useState<string>("");
     const [searchQuery, setSearchQuery] = useState("");
+    const [hasMore, setHasMore] = useState(false);
 
     // Dynamic filtering logic
     const filteredProducts = React.useMemo(() => {
@@ -137,12 +138,13 @@ export default function ProductsManager() {
         let data: Product[] = [];
 
         if (searchQuery.trim()) {
-            data = await searchProducts(searchQuery, categoryFilter);
+            data = await searchProducts(searchQuery, categoryFilter, undefined, true);
+            setHasMore(false); // Search fetches a large batch, don't paginate for now
         } else {
-            const limit = 50;
+            const limit = 100;
             const startAfter = isLoadMore ? products[products.length - 1]?.id : undefined;
             data = await getProducts(categoryFilter, availableFilter, limit, startAfter);
-
+            setHasMore(data.length === limit);
         }
 
         if (isLoadMore) {
@@ -152,6 +154,7 @@ export default function ProductsManager() {
         }
         setLoading(false);
     }, [filterCategory, filterAvailable, searchQuery, products]);
+
 
     useEffect(() => {
         if (user) {
@@ -732,6 +735,22 @@ export default function ProductsManager() {
                                     );
                                 })}
                             </div>
+                            {hasMore && !searchQuery && (
+                                <div className="p-6 border-t border-gray-100 text-center">
+                                    <button
+                                        onClick={() => loadProducts(true)}
+                                        disabled={loading}
+                                        className="flex items-center gap-2 px-6 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors disabled:opacity-50"
+                                    >
+                                        {loading ? (
+                                            <Loader2 className="w-4 h-4 animate-spin" />
+                                        ) : (
+                                            <Plus className="w-4 h-4" />
+                                        )}
+                                        Load More Products
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>
