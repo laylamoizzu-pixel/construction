@@ -4,8 +4,9 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/auth-context";
 import { getSiteContent, updateSiteContent, OffersPageContent } from "@/app/actions";
-import { Loader2, ArrowLeft, Save } from "lucide-react";
+import { Loader2, ArrowLeft, Save, FileText } from "lucide-react";
 import Link from "next/link";
+import FileUpload from "@/components/FileUpload";
 
 const defaultContent: OffersPageContent = {
     heroTitle: "Weekly Offers",
