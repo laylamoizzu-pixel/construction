@@ -70,6 +70,7 @@ const navGroups: NavGroup[] = [
                 subItems: [
                     { name: "Hero Section", href: "/admin/content/hero" },
                     { name: "Highlights", href: "/admin/content/highlights" },
+                    { name: "Promotions", href: "/admin/content/promotions" },
                     { name: "Features", href: "/admin/content/features" },
                     { name: "CTA Section", href: "/admin/content/cta" },
                 ]
