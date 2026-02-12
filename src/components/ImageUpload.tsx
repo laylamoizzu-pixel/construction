@@ -1,11 +1,9 @@
-
 "use client";
 
 import { useState, useRef } from "react";
 import { Upload, X, Loader2 } from "lucide-react";
 import Image from "next/image";
-import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
-import { storage } from "@/lib/firebase";
+import { uploadFile } from "@/app/actions/upload";
 
 export interface UploadedFile {
     url: string;
@@ -58,7 +56,7 @@ export default function ImageUpload({
         try {
             for (let i = 0; i < files.length; i++) {
                 const file = files[i];
-                // Check file size (max 10MB) - increased from 5MB
+                // Check file size (max 10MB)
                 if (file.size > 10 * 1024 * 1024) {
                     throw new Error(`File ${file.name} is too large (max 10MB)`);
                 }
@@ -68,30 +66,23 @@ export default function ImageUpload({
                     throw new Error(`File ${file.name} is not an image`);
                 }
 
-                const timestamp = Date.now();
-                const safeName = file.name.replace(/[^a-zA-Z0-9.]/g, "_");
-                const fullPath = `${folder}/${timestamp}_${safeName}`;
-                const storageRef = ref(storage, fullPath);
+                // Show indeterminate progress for server side upload
+                setProgress(10);
 
-                // Use resumable upload for better feedback
-                const uploadTask = uploadBytesResumable(storageRef, file);
+                const formData = new FormData();
+                formData.append("file", file);
+                formData.append("folder", folder);
 
-                await new Promise<void>((resolve, reject) => {
-                    uploadTask.on('state_changed',
-                        (snapshot) => {
-                            const p = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                            setProgress(Math.round(p));
-                        },
-                        (error) => {
-                            reject(error);
-                        },
-                        async () => {
-                            const url = await getDownloadURL(uploadTask.snapshot.ref);
-                            newFiles.push({ url, path: fullPath });
-                            resolve();
-                        }
-                    );
-                });
+                setProgress(30);
+                const result = await uploadFile(formData);
+                setProgress(90);
+
+                if (result.success && result.url) {
+                    newFiles.push({ url: result.url, path: result.path || "" });
+                    setProgress(100);
+                } else {
+                    throw new Error(result.error || "Failed to upload file");
+                }
             }
 
             onUpload(newFiles);
