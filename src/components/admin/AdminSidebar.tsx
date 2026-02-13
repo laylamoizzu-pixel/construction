@@ -79,8 +79,6 @@ const navGroups: NavGroup[] = [
     {
         title: "Content",
         items: [
-            { name: "Products", href: "/admin/content/products", icon: ShoppingBag, permission: "products", uploadFolder: "products" },
-            { name: "Categories", href: "/admin/content/categories", icon: Tag, permission: "categories", uploadFolder: "categories" },
             { name: "Reviews", href: "/admin/content/reviews", icon: MessageSquare, permission: "reviews", uploadFolder: "reviews" },
             { name: "Requests", href: "/admin/requests", icon: MessageSquare, permission: "requests" },
         ]
@@ -260,16 +258,6 @@ export default function AdminSidebar({ mobileOpen, setMobileOpen }: { mobileOpen
                                                             <Icon className={`w-4 h-4 ${isActive ? "text-brand-gold" : "text-white/50"}`} />
                                                             <span className="flex-1">{item.name}</span>
 
-                                                            {item.uploadFolder && (
-                                                                <button
-                                                                    onClick={(e) => openUpload(e, item.uploadFolder!, item.name)}
-                                                                    className="p-1 hover:bg-white/20 rounded-md text-white/40 hover:text-brand-gold transition-colors opacity-0 group-hover:opacity-100 lg:opacity-100 mr-1"
-                                                                    title={`Upload to ${item.name}`}
-                                                                >
-                                                                    <Upload className="w-3.5 h-3.5" />
-                                                                </button>
-                                                            )}
-
                                                             {hasSubItems && (
                                                                 <button
                                                                     onClick={(e) => toggleItem(item.name, e)}
@@ -304,15 +292,6 @@ export default function AdminSidebar({ mobileOpen, setMobileOpen }: { mobileOpen
                                                                     >
                                                                         <div className="flex items-center justify-between group/sub">
                                                                             <span>{sub.name}</span>
-                                                                            {sub.uploadFolder && (
-                                                                                <button
-                                                                                    onClick={(e) => openUpload(e, sub.uploadFolder!, sub.name)}
-                                                                                    className="p-1 hover:bg-white/20 rounded-md text-white/30 hover:text-brand-gold transition-colors opacity-0 group-hover/sub:opacity-100"
-                                                                                    title={`Upload to ${sub.name}`}
-                                                                                >
-                                                                                    <Upload className="w-3 h-3" />
-                                                                                </button>
-                                                                            )}
                                                                         </div>
                                                                     </Link>
                                                                 );
