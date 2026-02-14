@@ -166,6 +166,12 @@ export interface ProductsPageContent {
     heroTitle: string;
     heroSubtitle: string;
     heroImage: string;
+    // Filter visibility
+    showSearch?: boolean;
+    showSort?: boolean;
+    showPriceRange?: boolean;
+    showCategories?: boolean;
+    showAvailability?: boolean;
 }
 
 export interface OffersPageContent {
