@@ -52,7 +52,7 @@ export default function AppearancePage() {
         }
     };
 
-    const handleImageUpload = async (file: File, path: string, field: "hero.backgroundImageUrl" | "branding.logoUrl") => {
+    const handleImageUpload = async (file: File, path: string, field: "branding.logoUrl") => {
         setUploading(true);
         try {
             // Convert file to base64 for server action
@@ -70,9 +70,7 @@ export default function AppearancePage() {
                 setConfig(prev => {
                     if (!prev) return null;
                     const newConfig = { ...prev };
-                    if (field === "hero.backgroundImageUrl") {
-                        newConfig.hero.backgroundImageUrl = result.url;
-                    } else if (field === "branding.logoUrl") {
+                    if (field === "branding.logoUrl") {
                         newConfig.branding.logoUrl = result.url;
                     }
                     return newConfig;
@@ -221,91 +219,7 @@ export default function AppearancePage() {
                         </div>
                     </section>
 
-                    {/* Hero Section */}
-                    <section className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-                        <h2 className="text-lg font-serif font-bold text-gray-800 mb-4 pb-2 border-b border-gray-100">
-                            Hero Section
-                        </h2>
-                        <div className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Hero Title</label>
-                                <input
-                                    type="text"
-                                    value={config.hero.title}
-                                    onChange={(e) => setConfig({ ...config, hero: { ...config.hero, title: e.target.value } })}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Subtitle</label>
-                                <textarea
-                                    value={config.hero.subtitle}
-                                    onChange={(e) => setConfig({ ...config, hero: { ...config.hero, subtitle: e.target.value } })}
-                                    rows={2}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500"
-                                />
-                            </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">CTA Text</label>
-                                    <input
-                                        type="text"
-                                        value={config.hero.ctaText}
-                                        onChange={(e) => setConfig({ ...config, hero: { ...config.hero, ctaText: e.target.value } })}
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">CTA Link</label>
-                                    <input
-                                        type="text"
-                                        value={config.hero.ctaLink}
-                                        onChange={(e) => setConfig({ ...config, hero: { ...config.hero, ctaLink: e.target.value } })}
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500"
-                                    />
-                                </div>
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Hero Background Image</label>
-                                <div className="flex flex-col gap-4">
-                                    <div className="w-full h-48 bg-gray-100 rounded-lg overflow-hidden border border-gray-200 relative">
-                                        {config.hero.backgroundImageUrl ? (
-                                            <Image src={config.hero.backgroundImageUrl} alt="Hero Background" fill className="object-cover" unoptimized />
-                                        ) : (
-                                            <div className="w-full h-full flex items-center justify-center text-gray-400">No Image Selected</div>
-                                        )}
-                                        <div className="absolute inset-0 bg-black pointer-events-none" style={{ opacity: config.hero.overlayOpacity }} />
-                                    </div>
-                                    <div className="flex items-center gap-4">
-                                        <label className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg cursor-pointer transition-colors text-sm flex items-center gap-2">
-                                            {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
-                                            Upload Image
-                                            <input
-                                                type="file"
-                                                accept="image/*"
-                                                onChange={(e) => e.target.files?.[0] && handleImageUpload(e.target.files[0], "hero", "hero.backgroundImageUrl")}
-                                                className="hidden"
-                                                disabled={uploading}
-                                            />
-                                        </label>
-                                        <div className="flex items-center gap-2 flex-1">
-                                            <span className="text-sm text-gray-600">Overlay Opacity:</span>
-                                            <input
-                                                type="range"
-                                                min="0"
-                                                max="1"
-                                                step="0.1"
-                                                value={config.hero.overlayOpacity}
-                                                onChange={(e) => setConfig({ ...config, hero: { ...config.hero, overlayOpacity: parseFloat(e.target.value) } })}
-                                                className="flex-1"
-                                            />
-                                            <span className="text-sm font-mono w-8">{config.hero.overlayOpacity}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
+
 
                     {/* Features Visibility */}
                     <section className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
