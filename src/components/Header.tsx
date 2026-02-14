@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, Search } from "lucide-react";
 import { useSiteConfig } from "@/context/SiteConfigContext";
 
-const NAV_LINKS = [
+const DEFAULT_NAV_LINKS = [
     { label: "Home", href: "/" },
     { label: "Products", href: "/products" },
     { label: "Offers", href: "/offers" },
@@ -25,6 +25,9 @@ export default function Header() {
     const pathname = usePathname();
     const router = useRouter();
     const { config } = useSiteConfig();
+
+    // Use dynamic header links from config, fallback to defaults
+    const NAV_LINKS = (config as typeof config & { headerLinks?: { label: string; href: string }[] })?.headerLinks || DEFAULT_NAV_LINKS;
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();

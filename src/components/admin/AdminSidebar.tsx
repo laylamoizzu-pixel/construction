@@ -24,7 +24,10 @@ import {
     Smartphone,
     Settings,
     ClipboardList,
-    Phone
+    Phone,
+    FileText,
+    Navigation2,
+    Search
 } from "lucide-react";
 import UploadModal from "@/components/admin/UploadModal";
 
@@ -100,6 +103,10 @@ const navGroups: NavGroup[] = [
         title: "Miscellaneous",
         items: [
             { name: "Contact Info", href: "/admin/content/contact", icon: Phone, permission: "contact" },
+            { name: "Privacy Policy", href: "/admin/content/privacy", icon: FileText, permission: "privacy" },
+            { name: "Terms of Service", href: "/admin/content/terms", icon: FileText, permission: "terms" },
+            { name: "Navigation", href: "/admin/content/navigation", icon: Navigation2, permission: "navigation" },
+            { name: "SEO & Metadata", href: "/admin/content/seo", icon: Search, permission: "seo" },
         ]
     },
     {
