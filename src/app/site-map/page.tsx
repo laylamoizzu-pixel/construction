@@ -1,7 +1,11 @@
 import Link from "next/link";
 import { ChevronRight, MapPin, Phone, Mail } from "lucide-react";
+import { getSiteConfig } from "@/app/actions/site-config";
 
-export default function SitemapPage() {
+export default async function SitemapPage() {
+    const config = await getSiteConfig();
+    const { contact } = config;
+
     const sitemapGroups = [
         {
             title: "Main Sections",
@@ -11,7 +15,6 @@ export default function SitemapPage() {
                 { name: "Departments", href: "/departments" },
                 { name: "All Products", href: "/products" },
                 { name: "Weekly Offers", href: "/offers" },
-                { name: "Contact Us", href: "/contact" },
             ]
         },
         {
@@ -71,19 +74,19 @@ export default function SitemapPage() {
                                     <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-brand-blue">
                                         <MapPin className="w-5 h-5" />
                                     </div>
-                                    <span className="text-sm">Patna, Bihar</span>
+                                    <span className="text-sm">{contact.address}</span>
                                 </div>
                                 <div className="flex items-center gap-4 text-slate-600">
                                     <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-brand-blue">
                                         <Phone className="w-5 h-5" />
                                     </div>
-                                    <span className="text-sm">+91 12345 67890</span>
+                                    <span className="text-sm">{contact.phone}</span>
                                 </div>
                                 <div className="flex items-center gap-4 text-slate-600">
                                     <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-brand-blue">
                                         <Mail className="w-5 h-5" />
                                     </div>
-                                    <span className="text-sm">contact@smartavenue.com</span>
+                                    <span className="text-sm">{contact.email}</span>
                                 </div>
                             </div>
                         </div>

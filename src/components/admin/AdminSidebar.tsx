@@ -23,7 +23,8 @@ import {
     Palette,
     Smartphone,
     Settings,
-    ClipboardList
+    ClipboardList,
+    Phone
 } from "lucide-react";
 import UploadModal from "@/components/admin/UploadModal";
 
@@ -85,13 +86,20 @@ const navGroups: NavGroup[] = [
         title: "Content",
         items: [
             { name: "Reviews", href: "/admin/content/reviews", icon: MessageSquare, permission: "reviews", uploadFolder: "reviews" },
-            { name: "Product Request", href: "/admin/content/product-request", icon: ClipboardList, permission: "product-request" },
+            { name: "Product Request", href: "/admin/requests", icon: ClipboardList, permission: "product-request" },
         ]
     },
     {
         title: "Design",
         items: [
             { name: "Mobile App", href: "/admin/branding", icon: Smartphone, permission: "branding" },
+            { name: "Appearance", href: "/admin/appearance", icon: Palette, permission: "appearance" },
+        ]
+    },
+    {
+        title: "Miscellaneous",
+        items: [
+            { name: "Contact Info", href: "/admin/content/contact", icon: Phone, permission: "contact" },
         ]
     },
     {
@@ -116,6 +124,7 @@ export default function AdminSidebar({ mobileOpen, setMobileOpen }: { mobileOpen
         "Pages": true,
         "Content": false,
         "Design": true,
+        "Miscellaneous": false,
         "System": false
     });
 
