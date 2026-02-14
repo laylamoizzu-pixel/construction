@@ -19,18 +19,21 @@ const iconMap: Record<string, LucideIcon> = {
 export default function DepartmentsGrid({ departments }: { departments: DepartmentContent[] }) {
     const [selectedId, setSelectedId] = useState<string | null>(null);
 
-    // Fallback if no departments
-    const displayDepartments = departments.length > 0 ? departments : [
-        { id: "tech", title: "Smart Tech", description: "Latest gadgets and smart home devices for the connected life.", icon: "Cpu", image: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?q=80&w=2670&auto=format&fit=crop" },
-        { id: "home", title: "Modern Home", description: "Minimalist furniture and contemporary decor.", icon: "Home", image: "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=2600&auto=format&fit=crop" },
-        { id: "lifestyle", title: "Lifestyle & Accessories", description: "Curated premium accessories for everyday elegance.", icon: "Smile", image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=2599&auto=format&fit=crop" },
-        { id: "kitchen", title: "Gourmet Kitchen", description: "Professional grade utilities for the home chef.", icon: "Utensils", image: "https://images.unsplash.com/photo-1556910638-6cdac31d44dc?q=80&w=2590&auto=format&fit=crop" },
-    ];
+    // If no departments exist in the database, show empty state
+    if (departments.length === 0) {
+        return (
+            <div className="text-center py-16">
+                <Package className="w-16 h-16 mx-auto mb-4 text-slate-300" />
+                <p className="text-slate-500 text-lg">No departments available yet.</p>
+                <p className="text-slate-400 text-sm mt-1">Departments can be added from the admin panel.</p>
+            </div>
+        );
+    }
 
     return (
         <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-[400px]">
-                {displayDepartments.map((dept, i) => {
+                {departments.map((dept, i) => {
                     const Icon = iconMap[dept.icon] || Package;
                     // Make some items span 2 columns/rows for masonry effect
                     const isLarge = i === 0 || i === 3;
@@ -89,7 +92,7 @@ export default function DepartmentsGrid({ departments }: { departments: Departme
                             className="absolute inset-0 bg-black/80 backdrop-blur-md"
                         />
 
-                        {displayDepartments.map((dept, i) => {
+                        {departments.map((dept, i) => {
                             const id = dept.id || `dept-${i}`;
                             if (id !== selectedId) return null;
                             const Icon = iconMap[dept.icon] || Package;
@@ -132,13 +135,7 @@ export default function DepartmentsGrid({ departments }: { departments: Departme
                                         </p>
 
                                         <div className="mt-auto space-y-6">
-                                            <div className="flex flex-wrap gap-2">
-                                                {["New Arrivals", "Best Sellers", "Premium", "Deals"].map((tag) => (
-                                                    <span key={tag} className="px-3 py-1 rounded-full bg-slate-100 text-slate-600 text-xs font-medium uppercase tracking-wider">
-                                                        {tag}
-                                                    </span>
-                                                ))}
-                                            </div>
+
 
                                             <button className="w-full py-4 bg-brand-dark text-white rounded-xl font-bold hover:bg-brand-blue transition-colors flex items-center justify-center gap-2 shadow-lg shadow-brand-dark/20 hover:shadow-brand-blue/30">
                                                 Browse {dept.title} <ArrowRight className="w-5 h-5" />

@@ -16,12 +16,10 @@ const iconMap: Record<string, LucideIcon> = {
 export default async function Highlights({ content }: { content?: HighlightsContent }) {
     const departments = await getDepartments();
 
-    // Fallback if no departments
-    const displayDepartments = departments.length > 0 ? departments : [
-        { id: "tech", title: "Smart Tech", description: "Latest gadgets and smart home devices.", icon: "Cpu", image: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?q=80&w=2670&auto=format&fit=crop" },
-        { id: "home", title: "Modern Home", description: "Contemporary furniture and decor.", icon: "Home", image: "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=2600&auto=format&fit=crop" },
-        { id: "lifestyle", title: "Lifestyle", description: "Premium accessories for everyday.", icon: "Smile", image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=2599&auto=format&fit=crop" },
-    ];
+    // If no departments exist in the database, don't render the section
+    if (departments.length === 0) {
+        return null;
+    }
 
     const defaultContent: HighlightsContent = {
         title: "Curated Zones",
@@ -59,7 +57,7 @@ export default async function Highlights({ content }: { content?: HighlightsCont
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {displayDepartments.slice(0, 3).map((item, idx) => {
+                    {departments.slice(0, 3).map((item, idx) => {
                         const Icon = iconMap[item.icon] || Package;
 
                         return (
