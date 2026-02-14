@@ -15,13 +15,23 @@ if (fs.existsSync(envPath)) {
 function getAdminAuth() {
     if (!admin.apps.length) {
         try {
+            // Check for private key
+            const privateKey = process.env.FIREBASE_PRIVATE_KEY
+                ? process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n")
+                : undefined;
+
+            if (!privateKey) {
+                console.error("Missing FIREBASE_PRIVATE_KEY");
+                process.exit(1);
+            }
+
             const firebaseAdminConfig = {
                 projectId: process.env.FIREBASE_PROJECT_ID,
                 clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-                privateKey: process.env.FIREBASE_PRIVATE_KEY ? process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n") : undefined,
+                privateKey: privateKey,
             };
 
-            if (!firebaseAdminConfig.projectId || !firebaseAdminConfig.clientEmail || !firebaseAdminConfig.privateKey) {
+            if (!firebaseAdminConfig.projectId || !firebaseAdminConfig.clientEmail) {
                 console.error("Missing Firebase Admin environment variables");
                 process.exit(1);
             }
