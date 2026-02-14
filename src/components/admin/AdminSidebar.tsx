@@ -18,19 +18,9 @@ import {
     ChevronDown,
     ChevronRight,
     Store,
-    Upload,
-    Paintbrush,
-    Palette,
-    Smartphone,
-    Settings,
-    ClipboardList,
-    Phone,
-    FileText,
-    Navigation2,
     Search,
     PanelBottom
 } from "lucide-react";
-import UploadModal from "@/components/admin/UploadModal";
 
 // Define generic type for nav items to avoid TS errors in the component
 type NavItem = {
@@ -107,7 +97,7 @@ const navGroups: NavGroup[] = [
         ]
     },
     {
-        title: "Content",
+        title: "Feedback",
         items: [
             { name: "Reviews", href: "/admin/content/reviews", icon: MessageSquare, permission: "reviews", uploadFolder: "reviews" },
             { name: "Product Request", href: "/admin/requests", icon: ClipboardList, permission: "product-request" },
@@ -118,12 +108,6 @@ const navGroups: NavGroup[] = [
         items: [
             { name: "Mobile App", href: "/admin/branding", icon: Smartphone, permission: "branding" },
             { name: "Appearance", href: "/admin/appearance", icon: Palette, permission: "appearance" },
-        ]
-    },
-    {
-        title: "Miscellaneous",
-        items: [
-
             { name: "SEO & Metadata", href: "/admin/content/seo", icon: Search, permission: "seo" },
         ]
     },
@@ -147,9 +131,8 @@ export default function AdminSidebar({ mobileOpen, setMobileOpen }: { mobileOpen
         "Overview": true,
         "Catalog": true,
         "Pages": true,
-        "Content": false,
+        "Feedback": false,
         "Design": true,
-        "Miscellaneous": false,
         "System": false
     });
 
@@ -158,26 +141,6 @@ export default function AdminSidebar({ mobileOpen, setMobileOpen }: { mobileOpen
         "Homepage": true
     });
 
-    // Upload Modal State
-    const [uploadConfig, setUploadConfig] = useState<{
-        isOpen: boolean;
-        folder: string;
-        title: string;
-    }>({
-        isOpen: false,
-        folder: "",
-        title: ""
-    });
-
-    const openUpload = (e: React.MouseEvent, folder: string, title: string) => {
-        e.preventDefault();
-        e.stopPropagation();
-        setUploadConfig({
-            isOpen: true,
-            folder,
-            title: `Upload to ${title}`
-        });
-    };
 
     const handleLogout = async () => {
         await logout();
@@ -376,12 +339,6 @@ export default function AdminSidebar({ mobileOpen, setMobileOpen }: { mobileOpen
                 </div>
             </aside>
 
-            <UploadModal
-                isOpen={uploadConfig.isOpen}
-                onClose={() => setUploadConfig(prev => ({ ...prev, isOpen: false }))}
-                folder={uploadConfig.folder}
-                title={uploadConfig.title}
-            />
         </>
     );
 }
