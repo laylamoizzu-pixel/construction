@@ -99,6 +99,8 @@ export default function ProductsManager() {
         featured: boolean;
         offerId: string;
         tags: string;
+        highlights: string;
+        specifications: { key: string; value: string }[];
     }>({
         name: "",
         description: "",
@@ -112,7 +114,9 @@ export default function ProductsManager() {
         available: true,
         featured: false,
         offerId: "",
-        tags: ""
+        tags: "",
+        highlights: "",
+        specifications: [] as { key: string; value: string }[]
     });
 
     useEffect(() => {
@@ -212,7 +216,9 @@ export default function ProductsManager() {
             available: true,
             featured: false,
             offerId: "",
-            tags: ""
+            tags: "",
+            highlights: "",
+            specifications: []
         });
         setEditingId(null);
     };
@@ -259,7 +265,9 @@ export default function ProductsManager() {
             available: formData.available,
             featured: formData.featured,
             offerId: formData.offerId || undefined,
-            tags: formData.tags.split(",").map(t => t.trim()).filter(Boolean)
+            tags: formData.tags.split(",").map(t => t.trim()).filter(Boolean),
+            highlights: formData.highlights.split("\n").map(h => h.trim()).filter(Boolean),
+            specifications: formData.specifications.filter(s => s.key.trim() && s.value.trim())
         };
 
         let result;
@@ -291,7 +299,9 @@ export default function ProductsManager() {
             available: product.available,
             featured: product.featured,
             offerId: product.offerId || "",
-            tags: product.tags.join(", ")
+            tags: product.tags.join(", "),
+            highlights: product.highlights ? product.highlights.join("\n") : "",
+            specifications: product.specifications || []
         });
         setEditingId(product.id);
         setShowForm(true);
@@ -749,6 +759,68 @@ export default function ProductsManager() {
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500"
                                     />
                                 </div>
+                            </div>
+
+                            {/* Highlights */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Highlights (One per line)</label>
+                                <textarea
+                                    value={formData.highlights}
+                                    onChange={(e) => setFormData({ ...formData, highlights: e.target.value })}
+                                    rows={4}
+                                    placeholder="• Premium quality material&#10;• 5-year warranty&#10;• Easy installation"
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 font-mono text-sm"
+                                />
+                            </div>
+
+                            {/* Specifications */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Specifications</label>
+                                <div className="space-y-2 mb-2">
+                                    {formData.specifications.map((spec, index) => (
+                                        <div key={index} className="flex gap-2">
+                                            <input
+                                                type="text"
+                                                placeholder="Key (e.g. Material)"
+                                                value={spec.key}
+                                                onChange={(e) => {
+                                                    const newSpecs = [...formData.specifications];
+                                                    newSpecs[index].key = e.target.value;
+                                                    setFormData({ ...formData, specifications: newSpecs });
+                                                }}
+                                                className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-lg"
+                                            />
+                                            <input
+                                                type="text"
+                                                placeholder="Value (e.g. 100% Cotton)"
+                                                value={spec.value}
+                                                onChange={(e) => {
+                                                    const newSpecs = [...formData.specifications];
+                                                    newSpecs[index].value = e.target.value;
+                                                    setFormData({ ...formData, specifications: newSpecs });
+                                                }}
+                                                className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-lg"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    const newSpecs = formData.specifications.filter((_, i) => i !== index);
+                                                    setFormData({ ...formData, specifications: newSpecs });
+                                                }}
+                                                className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => setFormData({ ...formData, specifications: [...formData.specifications, { key: "", value: "" }] })}
+                                    className="text-sm text-amber-600 hover:text-amber-700 font-medium flex items-center gap-1"
+                                >
+                                    <Plus className="w-4 h-4" /> Add Specification
+                                </button>
                             </div>
 
                             <div className="flex items-center gap-6">

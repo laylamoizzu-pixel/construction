@@ -501,6 +501,8 @@ export interface Product {
     reviewCount?: number;
     createdAt: Date;
     updatedAt?: Date;
+    highlights?: string[];
+    specifications?: { key: string; value: string }[];
 }
 
 export const getProducts = cache(async function getProducts(
