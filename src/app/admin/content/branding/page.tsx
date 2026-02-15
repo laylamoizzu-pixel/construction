@@ -231,6 +231,19 @@ export default function BrandingEditor() {
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500"
                                     />
                                 </div>
+                                <div className="md:col-span-2">
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Search Placeholder</label>
+                                    <input
+                                        type="text"
+                                        value={config.branding.searchPlaceholder || ""}
+                                        onChange={(e) => setConfig({
+                                            ...config,
+                                            branding: { ...config.branding, searchPlaceholder: e.target.value }
+                                        })}
+                                        placeholder="e.g. Search collections..."
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500"
+                                    />
+                                </div>
                             </div>
                             {/* Color settings should generally be in Appearance, but ok to keep here if desired. 
                                 For consistency with SiteConfig, we should update both places or decide on one.
@@ -297,9 +310,47 @@ export default function BrandingEditor() {
                         <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
                             <h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
                                 <Share2 className="w-5 h-5 text-amber-500" />
-                                Social Media Links
+                                Social Media & Footer Labels
                             </h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="md:col-span-2 border-b border-gray-100 pb-2 mb-2">
+                                    <h4 className="text-sm font-semibold text-gray-700">Social Section</h4>
+                                </div>
+                                <div className="md:col-span-2">
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Social Section Title</label>
+                                    <input
+                                        type="text"
+                                        value={config.footer.socialSectionTitle || ""}
+                                        onChange={(e) => setConfig({
+                                            ...config,
+                                            footer: { ...config.footer, socialSectionTitle: e.target.value }
+                                        })}
+                                        placeholder="e.g. Connect"
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500"
+                                    />
+                                </div>
+                                <div className="md:col-span-2 border-b border-gray-100 pb-2 my-2">
+                                    <h4 className="text-sm font-semibold text-gray-700">Newsletter Section</h4>
+                                </div>
+                                <div className="md:col-span-2">
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Newsletter Subtext</label>
+                                    <input
+                                        type="text"
+                                        value={config.footer.newsletter.subtext || ""}
+                                        onChange={(e) => setConfig({
+                                            ...config,
+                                            footer: {
+                                                ...config.footer,
+                                                newsletter: { ...config.footer.newsletter, subtext: e.target.value }
+                                            }
+                                        })}
+                                        placeholder="e.g. No spam, unsubscribe anytime"
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500"
+                                    />
+                                </div>
+                                <div className="md:col-span-2 border-b border-gray-100 pb-2 my-2">
+                                    <h4 className="text-sm font-semibold text-gray-700">Social Links</h4>
+                                </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Instagram URL</label>
                                     <input

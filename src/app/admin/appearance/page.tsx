@@ -134,6 +134,16 @@ export default function AppearancePage() {
                                 />
                             </div>
                             <div className="md:col-span-2">
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Search Placeholder</label>
+                                <input
+                                    type="text"
+                                    value={config.branding.searchPlaceholder || ""}
+                                    onChange={(e) => setConfig({ ...config, branding: { ...config.branding, searchPlaceholder: e.target.value } })}
+                                    placeholder="e.g. Search collections..."
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500"
+                                />
+                            </div>
+                            <div className="md:col-span-2">
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Logo</label>
                                 <div className="flex items-center gap-4">
                                     <div className="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center border border-gray-200 relative">
