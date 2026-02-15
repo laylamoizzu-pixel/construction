@@ -147,12 +147,14 @@ export default function ProductsManager() {
         }
 
         const categoryFilter = filterCategory || undefined;
+        // Correctly parse available filter: "true" -> true, "false" -> false, "" -> undefined
         const availableFilter = filterAvailable === "" ? undefined : filterAvailable === "true";
 
         let data: Product[] = [];
 
         if (searchQuery.trim()) {
-            data = await searchProducts(searchQuery, categoryFilter, undefined, true);
+            // Pass the availableFilter directly instead of hardcoded true (which was includeUnavailable)
+            data = await searchProducts(searchQuery, categoryFilter, undefined, availableFilter);
             setHasMore(false); // Search fetches a large batch, don't paginate for now
         } else {
             const limit = 20000;
