@@ -48,7 +48,8 @@ async function run() {
 
         // Create product in Sub Category
         console.log("Creating test product...");
-        const productRes = await createProduct({
+        const productsCollection = db.collection("products");
+        const productRef = await productsCollection.add({
             name: "TestProduct_" + Date.now(),
             description: "A test product",
             price: 100,
@@ -57,10 +58,11 @@ async function run() {
             available: true,
             images: [],
             imageUrl: "",
-            tags: ["test"]
+            tags: ["test"],
+            createdAt: new Date(),
+            updatedAt: new Date()
         });
-        if (!productRes.success || !productRes.id) throw new Error("Failed to create product");
-        productId = productRes.id;
+        productId = productRef.id;
         console.log(`Created Product: ${productId} in Sub Cat ${subCatId}`);
 
         // --- Test 1: Availability (Previous Issue) ---
