@@ -23,7 +23,8 @@ import {
     ClipboardList,
     Smartphone,
     Palette,
-    Settings
+    Settings,
+    Image
 } from "lucide-react";
 
 // Define generic type for nav items to avoid TS errors in the component
@@ -129,8 +130,15 @@ const navGroups: NavGroup[] = [
         title: "System",
         items: [
             { name: "Staff", href: "/admin/staff", icon: Users, permission: "staff" },
-            { name: "AI Assistant", href: "/admin/api-keys", icon: Bot, permission: "api-keys" },
             { name: "Settings", href: "/admin/settings", icon: Settings },
+        ]
+    },
+    {
+        title: "Miscellaneous",
+        items: [
+            { name: "Global Branding", href: "/admin/content/branding", icon: Image, permission: "branding" },
+            { name: "PWA Assets", href: "/admin/branding", icon: Smartphone, permission: "branding" },
+            { name: "AI Assistant", href: "/admin/api-keys", icon: Bot, permission: "api-keys" },
         ]
     }
 ];
@@ -147,7 +155,8 @@ export default function AdminSidebar({ mobileOpen, setMobileOpen }: { mobileOpen
         "Pages": true,
         "Feedback": false,
         "Design": true,
-        "System": false
+        "System": false,
+        "Miscellaneous": false
     });
 
     // Manage expanded state for nested items (like Homepage)
