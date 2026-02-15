@@ -1,4 +1,5 @@
 "use server";
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { getAdminDb } from "@/lib/firebase-admin";
 import { SiteConfig, DEFAULT_SITE_CONFIG } from "@/types/site-config";

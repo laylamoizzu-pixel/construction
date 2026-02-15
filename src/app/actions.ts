@@ -590,6 +590,26 @@ export const getProducts = cache(async function getProducts(
 });
 
 /**
+ * Get ALL products for export (no pagination/limit)
+ * Warning: heavy operation, use sparingly
+ */
+export async function getAllProductsForExport(): Promise<Product[]> {
+    try {
+        const snapshot = await getAdminDb().collection("products").orderBy("createdAt", "desc").get();
+        return snapshot.docs.map((doc: admin.firestore.QueryDocumentSnapshot) => ({
+            id: doc.id,
+            ...doc.data(),
+            createdAt: (doc.data().createdAt as admin.firestore.Timestamp)?.toDate() || new Date(),
+            updatedAt: (doc.data().updatedAt as admin.firestore.Timestamp)?.toDate() || undefined,
+        })) as Product[];
+    } catch (error) {
+        console.error("Error fetching all products for export:", error);
+        return [];
+    }
+}
+
+
+/**
  * Search products by text query with in-memory filtering
  * Optimized for speed by caching products and filtering client-side
  */

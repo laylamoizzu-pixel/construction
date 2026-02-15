@@ -16,10 +16,12 @@ import {
     getCategories,
     getOffers,
     searchProducts,
+    getAllProductsForExport,
     Product,
     Category,
     Offer
 } from "@/app/actions";
+import * as XLSX from "xlsx";
 import {
     Loader2,
     ArrowLeft,
@@ -33,7 +35,6 @@ import {
     Tag,
     X,
     Filter,
-    Film,
     FileSpreadsheet,
     Search,
     Star,
@@ -412,6 +413,58 @@ export default function ProductsManager() {
     const getCategoryName = (id: string) => categories.find(c => c.id === id)?.name || "Unknown";
     const getOfferName = (id: string) => offers.find(o => o.id === id);
 
+    const handleExport = async () => {
+        try {
+            setLoading(true); // Show global loading or specific export state
+            const allProducts = await getAllProductsForExport();
+
+            const exportData = allProducts.map(p => ({
+                "ID": p.id,
+                "Name": p.name,
+                "Description": p.description,
+                "Category": getCategoryName(p.categoryId),
+                "Subcategory": p.subcategoryId ? getCategoryName(p.subcategoryId) : "",
+                "Price": p.price,
+                "Original Price": p.originalPrice || "",
+                "Available": p.available ? "Yes" : "No",
+                "Featured": p.featured ? "Yes" : "No",
+                "Offer": p.offerId ? getOfferName(p.offerId)?.title : "",
+                "Tags": p.tags ? p.tags.join(", ") : "",
+                "Image URL": p.imageUrl || "",
+                "Created At": p.createdAt ? new Date(p.createdAt).toLocaleDateString() : ""
+            }));
+
+            const ws = XLSX.utils.json_to_sheet(exportData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Products");
+
+            // Auto-width columns
+            const colWidths = [
+                { wch: 20 }, // ID
+                { wch: 30 }, // Name
+                { wch: 40 }, // Description
+                { wch: 15 }, // Category
+                { wch: 15 }, // Subcategory
+                { wch: 10 }, // Price
+                { wch: 10 }, // Original Price
+                { wch: 10 }, // Available
+                { wch: 10 }, // Featured
+                { wch: 20 }, // Offer
+                { wch: 20 }, // Tags
+                { wch: 50 }, // Image URL
+                { wch: 15 }, // Created At
+            ];
+            ws['!cols'] = colWidths;
+
+            XLSX.writeFile(wb, `smart_avenue_products_${new Date().toISOString().split('T')[0]}.xlsx`);
+        } catch (error) {
+            console.error("Export failed:", error);
+            alert("Failed to export products. Please try again.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
     if (authLoading || !user) {
         return (
             <div className="min-h-screen flex items-center justify-center">
@@ -439,16 +492,23 @@ export default function ProductsManager() {
                         Manage Categories
                     </Link>
                     <button
-                        onClick={() => setShowImportModal(true)}
-                        className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
+                        onClick={handleExport}
+                        className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 rounded-lg transition-colors shadow-sm font-medium"
                     >
-                        <FileSpreadsheet className="w-5 h-5" />
+                        <FileSpreadsheet className="w-5 h-5 text-green-600" />
+                        Export Excel
+                    </button>
+                    <button
+                        onClick={() => setShowImportModal(true)}
+                        className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 rounded-lg transition-colors shadow-sm font-medium"
+                    >
+                        <FolderInput className="w-5 h-5 text-blue-600" />
                         Import Excel
                     </button>
 
                     <button
                         onClick={() => { resetForm(); setShowForm(!showForm); }}
-                        className="flex items-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg transition-colors"
+                        className="flex items-center gap-2 px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg transition-colors shadow-sm font-medium"
                     >
                         <Plus className="w-5 h-5" />
                         Add Product
@@ -733,157 +793,183 @@ export default function ProductsManager() {
                     </div>
                 )}
 
-                {/* Products list */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-100">
-                    <div className="p-4 border-b border-gray-100 flex items-center gap-3">
-                        <input
-                            type="checkbox"
-                            checked={filteredProducts.length > 0 && selectedIds.size === filteredProducts.length}
-                            onChange={toggleAll}
-                            className="w-4 h-4 text-amber-500 rounded focus:ring-amber-500 cursor-pointer"
-                        />
-                        <h3 className="font-semibold text-gray-800">All Products ({products.length})</h3>
-                        {selectedIds.size > 0 && (
-                            <span className="text-sm text-gray-500 ml-2">
-                                ({selectedIds.size} selected)
-                            </span>
-                        )}
-                    </div>
+                {/* Products Table */}
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left border-collapse">
+                            <thead>
+                                <tr className="bg-gray-50 border-b border-gray-200">
+                                    <th className="p-4 w-10">
+                                        <input
+                                            type="checkbox"
+                                            checked={filteredProducts.length > 0 && selectedIds.size === filteredProducts.length}
+                                            onChange={toggleAll}
+                                            className="w-4 h-4 text-amber-600 rounded border-gray-300 focus:ring-amber-500 cursor-pointer"
+                                        />
+                                    </th>
+                                    <th className="p-4 text-xs font-semibold text-gray-500 uppercase tracking-wider w-16">Image</th>
+                                    <th className="p-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Product Name</th>
+                                    <th className="p-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Category</th>
+                                    <th className="p-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Price</th>
+                                    <th className="p-4 text-xs font-semibold text-gray-500 uppercase tracking-wider text-center">Status</th>
+                                    <th className="p-4 text-xs font-semibold text-gray-500 uppercase tracking-wider text-center">Featured</th>
+                                    <th className="p-4 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-100">
+                                {loading && products.length === 0 ? (
+                                    <tr>
+                                        <td colSpan={8} className="p-8 text-center">
+                                            <Loader2 className="w-8 h-8 animate-spin text-amber-600 mx-auto" />
+                                        </td>
+                                    </tr>
+                                ) : products.length === 0 ? (
+                                    <tr>
+                                        <td colSpan={8} className="p-12 text-center text-gray-500">
+                                            <Package className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                                            <p className="text-lg font-medium text-gray-900">No products found</p>
+                                            <p className="text-sm">Get started by creating a new product.</p>
+                                        </td>
+                                    </tr>
+                                ) : filteredProducts.length === 0 ? (
+                                    <tr>
+                                        <td colSpan={8} className="p-12 text-center text-gray-500">
+                                            <Search className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                                            <p className="text-lg font-medium text-gray-900">No matching products</p>
+                                            <p className="text-sm">Try adjusting your search or filters.</p>
+                                        </td>
+                                    </tr>
+                                ) : (
+                                    filteredProducts.map((product) => {
+                                        const offer = product.offerId ? getOfferName(product.offerId) : null;
+                                        const isSelected = selectedIds.has(product.id);
 
-                    {loading && products.length === 0 ? (
-                        <div className="p-8 text-center">
-                            <Loader2 className="w-8 h-8 animate-spin text-amber-600 mx-auto" />
-                        </div>
-                    ) : products.length === 0 ? (
-                        <div className="p-8 text-center text-gray-500">
-                            <Package className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                            <p>No products yet. Add your first product!</p>
-                        </div>
-                    ) : filteredProducts.length === 0 ? (
-                        <div className="p-8 text-center text-gray-500">
-                            <Filter className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                            <p>No products match your search criteria.</p>
-                        </div>
-                    ) : (
-                        <div>
-                            <div className="divide-y divide-gray-100">
-                                {filteredProducts.map((product) => {
-                                    const offer = product.offerId ? getOfferName(product.offerId) : null;
-                                    return (
-                                        <div key={product.id} className={`p-4 flex items-center gap-4 hover:bg-gray-50 transition-colors ${selectedIds.has(product.id) ? 'bg-amber-50' : ''}`}>
-                                            <input
-                                                type="checkbox"
-                                                checked={selectedIds.has(product.id)}
-                                                onChange={() => toggleSelection(product.id)}
-                                                className="w-4 h-4 text-amber-500 rounded focus:ring-amber-500 cursor-pointer"
-                                            />
-                                            <div className="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0 relative">
-                                                {product.imageUrl ? (
-                                                    <Image
-                                                        src={(() => {
-                                                            // Auto-optimize delivery if it's a Cloudinary URL and doesn't have transformations
-                                                            if (product.imageUrl.includes("cloudinary.com") && !product.imageUrl.includes("f_auto,q_auto")) {
-                                                                // Insert transformation before /v[version]/ or /upload/
-                                                                // Simplest way: use Cloudinary fetch API or just regex insert
-                                                                // Regex to find /upload/ and replace with /upload/f_auto,q_auto/
-                                                                return product.imageUrl.replace("/upload/", "/upload/f_auto,q_auto/");
-                                                            }
-                                                            return product.imageUrl;
-                                                        })()}
-                                                        alt={product.name}
-                                                        fill
-                                                        className="object-cover"
-                                                        unoptimized
-                                                        onError={(e) => {
-                                                            const target = e.target as HTMLImageElement;
-                                                            target.style.display = 'none'; // Simple fallback to hide broken image
-                                                        }}
+                                        return (
+                                            <tr
+                                                key={product.id}
+                                                className={`group hover:bg-gray-50 transition-colors ${isSelected ? 'bg-amber-50/50' : ''}`}
+                                            >
+                                                <td className="p-4">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={isSelected}
+                                                        onChange={() => toggleSelection(product.id)}
+                                                        className="w-4 h-4 text-amber-600 rounded border-gray-300 focus:ring-amber-500 cursor-pointer"
                                                     />
-                                                ) : (
-                                                    <div className="w-full h-full flex items-center justify-center">
-                                                        <Package className="w-6 h-6 text-gray-300" />
+                                                </td>
+                                                <td className="p-4">
+                                                    <div className="w-12 h-12 bg-gray-100 rounded-lg overflow-hidden relative border border-gray-200">
+                                                        {product.imageUrl ? (
+                                                            <Image
+                                                                src={(() => {
+                                                                    if (product.imageUrl.includes("cloudinary.com") && !product.imageUrl.includes("f_auto,q_auto")) {
+                                                                        return product.imageUrl.replace("/upload/", "/upload/f_auto,q_auto/");
+                                                                    }
+                                                                    return product.imageUrl;
+                                                                })()}
+                                                                alt={product.name}
+                                                                fill
+                                                                className="object-cover"
+                                                                unoptimized
+                                                                onError={(e) => {
+                                                                    const target = e.target as HTMLImageElement;
+                                                                    target.style.display = 'none';
+                                                                }}
+                                                            />
+                                                        ) : (
+                                                            <div className="w-full h-full flex items-center justify-center">
+                                                                <Package className="w-5 h-5 text-gray-300" />
+                                                            </div>
+                                                        )}
                                                     </div>
-                                                )}
-                                            </div>
-
-                                            <div className="flex-1 min-w-0">
-                                                <div className="flex items-center gap-2 flex-wrap mb-1">
-                                                    <h4 className="font-semibold text-gray-800 truncate">{product.name}</h4>
-                                                    {!product.available && (
-                                                        <span className="px-2 py-0.5 text-xs bg-red-100 text-red-600 rounded">
-                                                            Unavailable
-                                                        </span>
-                                                    )}
-                                                    {product.featured && (
-                                                        <span className="px-2 py-0.5 text-xs bg-amber-100 text-amber-600 rounded">
-                                                            Featured
-                                                        </span>
-                                                    )}
+                                                </td>
+                                                <td className="p-4 max-w-xs">
+                                                    <div className="font-medium text-gray-900 truncate" title={product.name}>
+                                                        {product.name}
+                                                    </div>
                                                     {offer && (
-                                                        <span className="px-2 py-0.5 text-xs bg-green-100 text-green-600 rounded flex items-center gap-1">
+                                                        <span className="inline-flex items-center gap-1 mt-1 px-1.5 py-0.5 text-[10px] bg-green-100 text-green-700 rounded font-medium">
                                                             <Tag className="w-3 h-3" />
                                                             {offer.discount}
                                                         </span>
                                                     )}
-                                                </div>
-                                                <p className="text-sm text-gray-500">
-                                                    {getCategoryName(product.categoryId)}
-                                                    {product.subcategoryId && ` → ${getCategoryName(product.subcategoryId)}`}
-                                                </p>
-                                                <div className="flex items-center gap-2 mt-1">
-                                                    <span className="font-bold text-amber-600">₹{product.price}</span>
+                                                </td>
+                                                <td className="p-4 text-sm text-gray-500">
+                                                    <div className="flex flex-col">
+                                                        <span>{getCategoryName(product.categoryId)}</span>
+                                                        {product.subcategoryId && (
+                                                            <span className="text-xs text-gray-400">└ {getCategoryName(product.subcategoryId)}</span>
+                                                        )}
+                                                    </div>
+                                                </td>
+                                                <td className="p-4">
+                                                    <div className="font-semibold text-gray-900">₹{product.price}</div>
                                                     {product.originalPrice && (
-                                                        <span className="text-sm text-gray-400 line-through">₹{product.originalPrice}</span>
+                                                        <div className="text-xs text-gray-400 line-through">₹{product.originalPrice}</div>
                                                     )}
-                                                    {product.videoUrl && (
-                                                        <span className="flex items-center gap-1 text-[10px] bg-indigo-100 text-indigo-600 px-1.5 py-0.5 rounded ml-2">
-                                                            <Film className="w-3 h-3" /> Video
-                                                        </span>
+                                                </td>
+                                                <td className="p-4 text-center">
+                                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${product.available ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                                                        }`}>
+                                                        {product.available ? 'Active' : 'Draft'}
+                                                    </span>
+                                                </td>
+                                                <td className="p-4 text-center">
+                                                    {product.featured ? (
+                                                        <Star className="w-4 h-4 text-amber-400 fill-amber-400 mx-auto" />
+                                                    ) : (
+                                                        <StarOff className="w-4 h-4 text-gray-300 mx-auto" />
                                                     )}
-                                                </div>
-                                            </div>
+                                                </td>
+                                                <td className="p-4 text-right">
+                                                    <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                        <button
+                                                            onClick={() => handleEdit(product)}
+                                                            className="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                                                            title="Edit"
+                                                        >
+                                                            <Edit2 className="w-4 h-4" />
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleToggleAvailability(product.id, product.available)}
+                                                            className={`p-1.5 rounded transition-colors ${product.available ? 'text-gray-500 hover:text-red-600 hover:bg-red-50' : 'text-gray-500 hover:text-green-600 hover:bg-green-50'
+                                                                }`}
+                                                            title={product.available ? "Mark Unavailable" : "Mark Available"}
+                                                        >
+                                                            {product.available ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                                        </button>
+                                                        <div className="w-px h-4 bg-gray-200 mx-1" />
+                                                        <button
+                                                            onClick={() => handleDelete(product.id)}
+                                                            className="p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+                                                            title="Delete"
+                                                        >
+                                                            <Trash2 className="w-4 h-4" />
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
 
-                                            <div className="flex items-center gap-2">
-                                                <button
-                                                    onClick={() => handleToggleAvailability(product.id, product.available)}
-                                                    className={`p-2 rounded-lg transition-colors ${product.available ? 'text-green-600 hover:bg-green-50' : 'text-gray-400 hover:bg-gray-100'}`}
-                                                    title={product.available ? "Mark as Out of Stock" : "Mark as In Stock"}
-                                                >
-                                                    {product.available ? <Eye className="w-5 h-5" /> : <EyeOff className="w-5 h-5" />}
-                                                </button>
-                                                <button
-                                                    onClick={() => handleEdit(product)}
-                                                    className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                                                >
-                                                    <Edit2 className="w-5 h-5" />
-                                                </button>
-                                                <button
-                                                    onClick={() => handleDelete(product.id)}
-                                                    className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                                                >
-                                                    <Trash2 className="w-5 h-5" />
-                                                </button>
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                            {hasMore && !searchQuery && (
-                                <div className="p-6 border-t border-gray-100 text-center">
-                                    <button
-                                        onClick={() => loadProducts(true)}
-                                        disabled={loadingMore}
-                                        className="flex items-center gap-2 px-6 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors disabled:opacity-50"
-                                    >
-                                        {loadingMore ? (
-                                            <Loader2 className="w-4 h-4 animate-spin" />
-                                        ) : (
-                                            <Plus className="w-4 h-4" />
-                                        )}
-                                        {loadingMore ? "Loading..." : "Load More Products"}
-                                    </button>
-                                </div>
-                            )}
+                    {hasMore && !searchQuery && (
+                        <div className="p-4 border-t border-gray-100 bg-gray-50 flex justify-center">
+                            <button
+                                onClick={() => loadProducts(true)}
+                                disabled={loadingMore}
+                                className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 rounded-lg text-sm font-medium transition-all shadow-sm disabled:opacity-50"
+                            >
+                                {loadingMore ? (
+                                    <Loader2 className="w-4 h-4 animate-spin text-amber-600" />
+                                ) : (
+                                    <Plus className="w-4 h-4" />
+                                )}
+                                {loadingMore ? "Loading..." : "Load More Products"}
+                            </button>
                         </div>
                     )}
                 </div>
