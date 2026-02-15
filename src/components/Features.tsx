@@ -48,7 +48,7 @@ export default function Features({ content }: { content?: FeaturesContent }) {
                         </h2>
                     </div>
                     <p className="text-slate-500 text-lg max-w-md pt-4">
-                        We bridge the gap between premium international retail and local convenience, delivering excellence in every package.
+                        {content.description || "We bridge the gap between global trends and local requirements, bringing you a curated selection of world-class products right to your doorstep."}
                     </p>
                 </div>
 
