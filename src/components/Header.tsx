@@ -143,51 +143,82 @@ export default function Header() {
 
                 </div>
 
-                {/* Mobile Menu Toggle */}
-                <button
-                    className={`md:hidden p-2 rounded-lg transition-colors ${isScrolled ? "text-slate-800" : "text-white"
-                        }`}
-                    onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                    aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
-                >
-                    {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-                </button>
+                {/* Header Actions (Mobile) */}
+                <div className="flex items-center gap-2 md:hidden">
+                    <button
+                        onClick={() => {
+                            setIsSearchOpen(!isSearchOpen);
+                            setIsMenuOpen(false); // Close menu if search is opened
+                        }}
+                        className={`p-2 rounded-lg transition-colors ${isScrolled ? "text-slate-800" : "text-white"}`}
+                        aria-label={isSearchOpen ? "Close search" : "Open search"}
+                    >
+                        <Search className="w-6 h-6" />
+                    </button>
+                    <button
+                        onClick={() => {
+                            setIsMenuOpen(!isMenuOpen);
+                            setIsSearchOpen(false); // Close search if menu is opened
+                        }}
+                        className={`p-2 rounded-lg transition-colors ${isScrolled ? "text-slate-800" : "text-white"}`}
+                        aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+                    >
+                        {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                    </button>
+                </div>
             </div>
 
-            {/* Mobile Menu Overlay */}
+            {/* Mobile Search Bar */}
             <AnimatePresence>
-                {isMobileMenuOpen && (
+                {isSearchOpen && (
                     <motion.div
-                        initial={{ opacity: 0, y: -20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -20 }}
-                        transition={{ duration: 0.2 }}
-                        className="absolute top-full left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-slate-100 shadow-xl p-4 flex flex-col gap-2 md:hidden"
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        className="md:hidden bg-white border-t border-slate-100 overflow-hidden"
                     >
-                        {NAV_LINKS.map((link) => (
-                            <Link
-                                key={link.href}
-                                href={link.href}
-                                onClick={() => setIsMobileMenuOpen(false)}
-                                className={`px-4 py-3 rounded-xl text-sm font-medium transition-colors ${pathname === link.href
-                                    ? "bg-brand-blue/10 text-brand-blue"
-                                    : "text-slate-600 hover:bg-slate-50"
-                                    }`}
-                            >
-                                {link.label}
-                            </Link>
-                        ))}
-                        <div className="h-px bg-slate-100 my-2" />
-                        <form onSubmit={handleSearch} className="relative">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                            <input
-                                type="text"
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                placeholder="Search collection..."
-                                className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue/50"
-                            />
+                        <form onSubmit={handleSearch} className="container mx-auto px-4 py-4">
+                            <div className="relative">
+                                <input
+                                    type="text"
+                                    placeholder={config.branding.searchPlaceholder || "Search collections..."}
+                                    autoFocus
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    className="w-full pl-4 pr-12 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-base focus:outline-none focus:ring-2 focus:ring-brand-blue/20 focus:border-brand-blue transition-all"
+                                />
+                                <button type="submit" className="absolute right-4 top-1/2 -translate-y-1/2 text-brand-blue font-semibold">
+                                    Search
+                                </button>
+                            </div>
                         </form>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Mobile Menu */}
+            <AnimatePresence>
+                {isMenuOpen && (
+                    <motion.div
+                        initial={{ x: '100%' }}
+                        animate={{ x: 0 }}
+                        exit={{ x: '100%' }}
+                        transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                        className="fixed inset-y-0 right-0 w-[80%] max-w-sm bg-white shadow-2xl z-[60] md:hidden flex flex-col pt-24"
+                    >
+                        <div className="px-6 space-y-2">
+                            {NAV_LINKS.map((link) => (
+                                <Link
+                                    key={link.href}
+                                    href={link.href}
+                                    onClick={() => setIsMenuOpen(false)}
+                                    className={`block py-4 text-xl font-medium border-b border-slate-200 ${pathname === link.href ? "text-brand-blue" : "text-slate-800"
+                                        }`}
+                                >
+                                    {link.label}
+                                </Link>
+                            ))}
+                        </div>
                     </motion.div>
                 )}
             </AnimatePresence>
