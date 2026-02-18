@@ -9,9 +9,7 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 import Image from "next/image";
-import { toast } from "sonner"; // Assuming sonner is used, or I'll fallback to alert/console if not sure. 
-// Checking package.json, sonner is NOT there. I'll use window.alert for now or a simple custom toast if I can find one.
-// actually, I'll just use simple alerts for MVP or check if there's a toast context.
+import { toast } from "sonner";
 
 export default function RequestManagement() {
     const [requests, setRequests] = useState<ProductRequest[]>([]);
@@ -75,14 +73,15 @@ export default function RequestManagement() {
                 setRequests(prev => prev.map(r =>
                     r.id === selectedRequest.id ? { ...r, status: status as any, notes: note } : r
                 ));
+                toast.success("Status updated successfully");
                 setSelectedRequest(null);
                 setNote("");
             } else {
-                alert("Failed to update status");
+                toast.error(result.error || "Failed to update status");
             }
         } catch (error) {
             console.error(error);
-            alert("An error occurred");
+            toast.error("An error occurred while updating status");
         } finally {
             setUpdating(false);
         }
@@ -119,8 +118,8 @@ export default function RequestManagement() {
                             key={status}
                             onClick={() => setStatusFilter(status)}
                             className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors whitespace-nowrap ${statusFilter === status
-                                    ? "bg-brand-dark text-white border-brand-dark"
-                                    : "bg-white text-gray-600 border-gray-200 hover:bg-gray-50"
+                                ? "bg-brand-dark text-white border-brand-dark"
+                                : "bg-white text-gray-600 border-gray-200 hover:bg-gray-50"
                                 }`}
                         >
                             {status === "ALL" ? "All Requests" : status.charAt(0) + status.slice(1).toLowerCase()}

@@ -978,3 +978,70 @@ export async function generateProductComparison(
         recommendation: string;
     }>(prompt, "groq", GROQ_MODEL_REASONING);
 }
+
+/**
+ * Phase 4: Proactive Alerts
+ */
+
+/**
+ * Out of Stock / Low Stock Urgency Generator
+ */
+export async function generateOOSUrgency(
+    productName: string,
+    sku: string,
+    stockLevel: number,
+    viewCount: number
+): Promise<{ headline: string; subtext: string; urgencyLevel: "high" | "medium" | "low" }> {
+    const prompt = `You are a sales psychology expert for Smart Avenue.
+    Context:
+    - Product: ${productName} (SKU: ${sku})
+    - Real-time Stock: ${stockLevel} units remaining
+    - Active Viewers: ${viewCount} people viewing right now
+
+    Task:
+    Generate a short, punchy urgency message to encourage immediate purchase without sounding spammy.
+    
+    Response JSON:
+    {
+      "headline": "Short trigger phrase (e.g. 'Only 2 left!')",
+      "subtext": "Social proof context (e.g. '15 people have this in their cart')",
+      "urgencyLevel": "high" | "medium" | "low"
+    }`;
+
+    // Using Llama 3.1 8B (Light) for fast inference
+    return await callLLMForJSON<{
+        headline: string;
+        subtext: string;
+        urgencyLevel: "high" | "medium" | "low";
+    }>(prompt, "groq", GROQ_MODEL_LIGHT);
+}
+
+/**
+ * Restock Notification Message Generator
+ */
+export async function generateBackInStockMessage(
+    productName: string,
+    customerName: string
+): Promise<{ subject: string; body: string; discountCode?: string }> {
+    const prompt = `You are a customer loyalty bot for Smart Avenue.
+    Context:
+    - Customer: ${customerName}
+    - Item Back in Stock: ${productName}
+    
+    Task:
+    Write a friendly, exciting notification message telling them their item is back.
+    Suggest a small discount code 'WELCOMEBACK5' to nudge them.
+
+    Response JSON:
+    {
+      "subject": "Email/Push subject line (Emojis allowed)",
+      "body": "Warm, short, 2-sentence message.",
+      "discountCode": "WELCOMEBACK5"
+    }`;
+
+    return await callLLMForJSON<{
+        subject: string;
+        body: string;
+        discountCode?: string;
+    }>(prompt, "groq", GROQ_MODEL_LIGHT);
+}
