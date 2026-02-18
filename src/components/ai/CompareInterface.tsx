@@ -37,7 +37,7 @@ export default function CompareInterface({ currentProduct }: CompareInterfacePro
                 .catch(console.error)
                 .finally(() => setLoadingSimilar(false));
         }
-    }, [isOpen, step, currentProduct]);
+    }, [isOpen, step, currentProduct, similarProducts.length]);
 
     const handleCompare = async (product: Product) => {
         setSelectedProduct(product);

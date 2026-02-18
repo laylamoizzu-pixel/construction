@@ -39,7 +39,7 @@ export default function SocialProofClient({ product, className = "" }: SocialPro
         load();
 
         return () => { mounted = false; };
-    }, [product.id, product.name, product.categoryId]); // reduced deps
+    }, [product]); // reduced deps
 
     if (loading) return null; // Don't show anything while loading to keep UI clean
     if (!proof) return null;

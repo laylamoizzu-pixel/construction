@@ -37,29 +37,7 @@ export default function InfiniteProductGrid({
     );
 
     const observer = useRef<IntersectionObserver | null>(null);
-    const lastProductElementRef = useCallback((node: HTMLAnchorElement | null) => {
-        if (loading) return;
-        if (observer.current) observer.current.disconnect();
-        observer.current = new IntersectionObserver(entries => {
-            if (entries[0].isIntersecting && hasMore) {
-                loadMore();
-            }
-        });
-        if (node) observer.current.observe(node);
-    }, [loading, hasMore]);
-
-    // Reset when filters change (since we are doing server-side fetching for batches)
-    // However, if we want to support the current client-side filtering logic, things get tricky.
-    // For now, let's assume filtering happened on the server OR we fetch all.
-    // Given the user request, we want to fetch "slowly in batches".
-
-    useEffect(() => {
-        setProducts(initialProducts);
-        setHasMore(initialProducts.length === 20);
-        setLastId(initialProducts.length > 0 ? initialProducts[initialProducts.length - 1].id : undefined);
-    }, [initialProducts]);
-
-    const loadMore = async () => {
+    const loadMore = useCallback(async () => {
         if (loading || !hasMore) return;
         setLoading(true);
 
@@ -88,7 +66,30 @@ export default function InfiniteProductGrid({
         } finally {
             setLoading(false);
         }
-    };
+    }, [loading, hasMore, lastId, filters.category, filters.subcategory]);
+
+    const lastProductElementRef = useCallback((node: HTMLAnchorElement | null) => {
+        if (loading) return;
+        if (observer.current) observer.current.disconnect();
+        observer.current = new IntersectionObserver(entries => {
+            if (entries[0].isIntersecting && hasMore) {
+                loadMore();
+            }
+        });
+        if (node) observer.current.observe(node);
+    }, [loading, hasMore, loadMore]);
+
+    // Reset when filters change (since we are doing server-side fetching for batches)
+    // However, if we want to support the current client-side filtering logic, things get tricky.
+    // For now, let's assume filtering happened on the server OR we fetch all.
+    // Given the user request, we want to fetch "slowly in batches".
+
+    useEffect(() => {
+        setProducts(initialProducts);
+        setHasMore(initialProducts.length === 20);
+        setLastId(initialProducts.length > 0 ? initialProducts[initialProducts.length - 1].id : undefined);
+    }, [initialProducts]);
+
 
     const getCategoryName = (id: string) => categories.find(c => c.id === id)?.name || "Unknown";
     const getOffer = (id?: string) => id ? offers.find(o => o.id === id) : null;

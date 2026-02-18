@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { ProductRequest, getProductRequests, updateRequestStatus } from "@/app/actions/request-actions";
 import {
     Search, XCircle, ImageIcon, Loader2,
@@ -17,20 +17,11 @@ export default function RequestManagement() {
     const [searchQuery, setSearchQuery] = useState("");
     const [statusFilter, setStatusFilter] = useState("ALL");
 
-    // Modal state
     const [selectedRequest, setSelectedRequest] = useState<ProductRequest | null>(null);
     const [note, setNote] = useState("");
     const [updating, setUpdating] = useState(false);
 
-    useEffect(() => {
-        loadRequests();
-    }, []);
-
-    useEffect(() => {
-        filterRequests();
-    }, [requests, searchQuery, statusFilter]);
-
-    async function loadRequests() {
+    const loadRequests = useCallback(async () => {
         setLoading(true);
         try {
             const data = await getProductRequests();
@@ -40,9 +31,9 @@ export default function RequestManagement() {
         } finally {
             setLoading(false);
         }
-    }
+    }, []);
 
-    function filterRequests() {
+    const filterRequests = useCallback(() => {
         let result = requests;
 
         if (statusFilter !== "ALL") {
@@ -60,7 +51,16 @@ export default function RequestManagement() {
         }
 
         setFilteredRequests(result);
-    }
+    }, [requests, searchQuery, statusFilter]);
+
+    useEffect(() => {
+        loadRequests();
+    }, [loadRequests]);
+
+    useEffect(() => {
+        filterRequests();
+    }, [filterRequests]);
+
 
     async function handleStatusUpdate(status: string) {
         if (!selectedRequest) return;
