@@ -7,6 +7,8 @@ import { Reviews } from "@/components/Reviews";
 import DealExplainer from "@/components/ai/DealExplainer";
 import ReviewSummarizer from "@/components/ai/ReviewSummarizer";
 import CompareInterface from "@/components/ai/CompareInterface";
+import OOSPredictor from "@/components/ai/OOSPredictor";
+import RestockTracker from "@/components/ai/RestockTracker";
 import { Suspense } from "react";
 
 export const dynamic = "force-dynamic";
@@ -143,6 +145,13 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
                                 )}
                             </div>
 
+                            {/* Phase 4: Low Stock Urgency */}
+                            <OOSPredictor
+                                productName={product.name}
+                                sku={product.id}
+                                stockLevel={product.stockLevel || 0}
+                            />
+
                             <Suspense fallback={
                                 <div className="h-24 bg-slate-50 animate-pulse rounded-xl my-6 border border-slate-100" />
                             }>
@@ -177,6 +186,12 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
                             <p className="text-sm text-slate-500">
                                 {content.availabilityBadge} - Visit us to experience it firsthand.
                             </p>
+
+                            {/* Phase 4: Restock Notification */}
+                            <RestockTracker
+                                productName={product.name}
+                                stockLevel={product.stockLevel || 0}
+                            />
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <a

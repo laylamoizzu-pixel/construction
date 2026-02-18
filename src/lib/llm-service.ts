@@ -1045,3 +1045,48 @@ export async function generateBackInStockMessage(
         discountCode?: string;
     }>(prompt, "groq", GROQ_MODEL_LIGHT);
 }
+
+/**
+ * Phase 5: Interactive Features
+ */
+
+/**
+ * Multilingual Local Language Assistant
+ * Handles general queries, product advice, and store info in Indian context.
+ */
+export async function chatWithAssistant(
+    message: string,
+    history: { role: "user" | "assistant"; content: string }[]
+): Promise<{ reply: string; suggestedActions?: string[] }> {
+    // Construct conversation history for context
+    const conversationContext = history.map(msg => `${msg.role === "user" ? "Customer" : "Assistant"}: ${msg.content}`).join("\n");
+
+    const prompt = `You are 'Genie', the smart shopping assistant for Smart Avenue (a premium lifestyle store in India).
+    
+    Traits:
+    - Friendly, helpful, and knowledgeable about fashion, tech, and home decor.
+    - Multilingual: Fluent in English, Hindi, and Hinglish. Detect the user's language and reply in the same mix.
+    - Context-Aware: You know this is an online store.
+    
+    Conversation History:
+    ${conversationContext}
+    
+    Customer's Latest Message: "${message}"
+    
+    Task:
+    1. Reply naturally to the customer.
+    2. If they ask for products, suggest general categories or ask for preferences (don't hallucinate specific fake SKUs, just guide them).
+    3. If they accept a language (e.g., Hindi), switch to it.
+    
+    Response JSON:
+    {
+      "reply": "Your natural language response here.",
+      "suggestedActions": ["Optional short suggestion buttons", "e.g. 'Show me Shoes'", "e.g. 'Track Order'"]
+    }`;
+
+    // Using Llama 3.3 70B for high-quality multilingual chat
+    return await callLLMForJSON<{
+        reply: string;
+        suggestedActions?: string[];
+    }>(prompt, "groq", GROQ_MODEL);
+}

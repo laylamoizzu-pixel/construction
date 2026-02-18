@@ -518,6 +518,7 @@ export interface Product {
     updatedAt?: Date;
     highlights?: string[];
     specifications?: { key: string; value: string }[];
+    stockLevel?: number;
 }
 
 export const getProducts = cache(async function getProducts(
@@ -682,6 +683,8 @@ export const getProduct = cache(async function getProduct(id: string): Promise<P
                 ...data,
                 createdAt: (data?.createdAt as admin.firestore.Timestamp)?.toDate() || new Date(),
                 updatedAt: (data?.updatedAt as admin.firestore.Timestamp)?.toDate() || undefined,
+                // Simulate stock level for Phase 4 Proactive Alerts
+                stockLevel: data?.available ? Math.floor(Math.random() * 15) + 1 : 0,
             } as Product;
         }
         return null;

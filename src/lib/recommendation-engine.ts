@@ -67,21 +67,22 @@ export async function getRecommendations(
 
         // Handle explicit product request (using new structure)
         if (intentResponse.productRequestData) {
-            const { createProductRequest } = await import("@/app/actions/product-requests");
+            const { createProductRequest } = await import("@/app/actions/request-actions");
 
             // Check if we have enough info to submit immediately
             const decision = await handleMissingProduct(query, intentResponse, request.messages);
 
             if (decision.action === "request" && decision.requestData) {
                 console.log("[RecommendationEngine] Auto-submitting explicit product request:", decision.requestData);
-                await createProductRequest(
-                    decision.requestData.name,
-                    "", // description
-                    "", // userContact
-                    decision.requestData.category || "",
-                    decision.requestData.maxBudget || 0,
-                    decision.requestData.specifications || []
-                );
+                await createProductRequest({
+                    productName: decision.requestData.name,
+                    brand: "",
+                    description: `Category: ${decision.requestData.category || "N/A"}. Specs: ${decision.requestData.specifications?.join(", ") || "None"}`,
+                    minPrice: 0,
+                    maxPrice: decision.requestData.maxBudget || 0,
+                    imageUrl: "",
+                    contactInfo: "Auto-generated from recommendation engine"
+                });
 
                 return {
                     success: true,
@@ -111,15 +112,16 @@ export async function getRecommendations(
 
             if (decision.action === "request" && decision.requestData) {
                 console.log("[RecommendationEngine] Auto-submitting product request:", decision.requestData);
-                const { createProductRequest } = await import("@/app/actions/product-requests");
-                await createProductRequest(
-                    decision.requestData.name,
-                    "",
-                    "",
-                    decision.requestData.category || "",
-                    decision.requestData.maxBudget || 0,
-                    decision.requestData.specifications || []
-                );
+                const { createProductRequest } = await import("@/app/actions/request-actions");
+                await createProductRequest({
+                    productName: decision.requestData.name,
+                    brand: "",
+                    description: `Category: ${decision.requestData.category || "N/A"}. Specs: ${decision.requestData.specifications?.join(", ") || "None"}`,
+                    minPrice: 0,
+                    maxPrice: decision.requestData.maxBudget || 0,
+                    imageUrl: "",
+                    contactInfo: "Auto-generated from recommendation engine"
+                });
 
                 return {
                     success: true,
