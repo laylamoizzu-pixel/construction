@@ -1,9 +1,12 @@
 import { getProduct, getReviews, getCategories, getSiteContent, ProductDetailPageContent } from "@/app/actions";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ChevronRight, MapPin, Phone, Clock, ShieldCheck, Check, Star } from "lucide-react";
+import { ChevronRight, MapPin, Phone, Clock, ShieldCheck, Check, Star, Loader2 } from "lucide-react";
 import ImageGallery from "@/components/ImageGallery";
 import { Reviews } from "@/components/Reviews";
+import DealExplainer from "@/components/ai/DealExplainer";
+import ReviewSummarizer from "@/components/ai/ReviewSummarizer";
+import { Suspense } from "react";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -138,6 +141,12 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
                                     </span>
                                 )}
                             </div>
+
+                            <Suspense fallback={
+                                <div className="h-24 bg-slate-50 animate-pulse rounded-xl my-6 border border-slate-100" />
+                            }>
+                                <DealExplainer product={product} />
+                            </Suspense>
                         </div>
 
                         {/* Highlights */}
@@ -250,6 +259,11 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
                                 Customer Reviews
                                 <div className="h-px flex-1 bg-slate-100"></div>
                             </h2>
+                            <Suspense fallback={
+                                <div className="h-48 bg-slate-50 animate-pulse rounded-2xl mb-8 border border-slate-100" />
+                            }>
+                                <ReviewSummarizer productName={product.name} reviews={reviews} />
+                            </Suspense>
                             <Reviews
                                 productId={product.id}
                                 reviews={reviews}

@@ -587,7 +587,7 @@ export const getProducts = cache(async function getProducts(
         if (error instanceof Error && error.message.includes("index")) {
             console.warn("Falling back to unordered query due to missing index.");
             try {
-                let fallbackQuery = getAdminDb().collection("products");
+                let fallbackQuery: admin.firestore.Query = getAdminDb().collection("products");
                 if (subcategoryId) fallbackQuery = fallbackQuery.where("subcategoryId", "==", subcategoryId);
                 else if (categoryId) fallbackQuery = fallbackQuery.where("categoryId", "==", categoryId);
                 if (available !== undefined) fallbackQuery = fallbackQuery.where("available", "==", available);

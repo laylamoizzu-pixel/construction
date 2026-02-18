@@ -27,6 +27,8 @@ const GROQ_API_BASE = "https://api.groq.com/openai/v1/chat/completions";
 const GROQ_MODEL = "llama-3.3-70b-versatile"; // Meta model for better multi-language support (Hindi, Urdu, Hinglish)
 const GROQ_MODEL_LIGHT = "llama-3.1-8b-instant";
 const GROQ_MODEL_VISION = "llama-3.2-90b-vision-preview";
+const GROQ_MODEL_REASONING = "deepseek-r1-distill-llama-70b";
+const GROQ_MODEL_GIFT = "deepseek-r1-distill-qwen-32b";
 
 const GEMINI_API_BASE = "https://generativelanguage.googleapis.com/v1beta/models";
 const GEMINI_MODEL = "gemini-2.0-flash";
@@ -65,7 +67,7 @@ interface GeminiResponse {
 /**
  * Make a request to Groq API
  */
-async function callGroqAPI(prompt: string, retryCount: number = 0): Promise<string> {
+async function callGroqAPI(prompt: string, model: string = GROQ_MODEL, retryCount: number = 0): Promise<string> {
     const keyManager = getAPIKeyManager();
     let apiKey: string;
 
@@ -83,7 +85,7 @@ async function callGroqAPI(prompt: string, retryCount: number = 0): Promise<stri
                 "Authorization": `Bearer ${apiKey}`
             },
             body: JSON.stringify({
-                model: GROQ_MODEL,
+                model: model,
                 messages: [
                     { role: "user", content: prompt }
                 ],
@@ -97,7 +99,7 @@ async function callGroqAPI(prompt: string, retryCount: number = 0): Promise<stri
             keyManager.markKeyRateLimited(apiKey);
             if (retryCount < MAX_RETRIES) {
                 console.log(`[LLMService] Groq Rate limited, retrying (attempt ${retryCount + 1})`);
-                return callGroqAPI(prompt, retryCount + 1);
+                return callGroqAPI(prompt, model, retryCount + 1);
             }
             throw new LLMServiceError("Rate limit exceeded on Groq keys", 429);
         }
@@ -109,7 +111,7 @@ async function callGroqAPI(prompt: string, retryCount: number = 0): Promise<stri
             keyManager.markKeyFailed(apiKey);
             if (retryCount < MAX_RETRIES) {
                 console.log(`[LLMService] Groq Request failed (${response.status}), retrying`);
-                return callGroqAPI(prompt, retryCount + 1);
+                return callGroqAPI(prompt, model, retryCount + 1);
             }
             throw new LLMServiceError(`Groq API request failed: ${response.statusText} - ${errorText}`, response.status);
         }
@@ -132,7 +134,7 @@ async function callGroqAPI(prompt: string, retryCount: number = 0): Promise<stri
         if (error instanceof LLMServiceError || error instanceof APIKeyExhaustedError) throw error;
 
         keyManager.markKeyFailed(apiKey);
-        if (retryCount < MAX_RETRIES) return callGroqAPI(prompt, retryCount + 1);
+        if (retryCount < MAX_RETRIES) return callGroqAPI(prompt, model, retryCount + 1);
 
         throw new LLMServiceError(`Unexpected Groq error: ${error instanceof Error ? error.message : "Unknown"}`);
     }
@@ -202,7 +204,7 @@ async function callGeminiAPI(prompt: string, retryCount: number = 0): Promise<st
  * Main LLM call function that routes to available providers
  * Prioritizes Groq > Gemini
  */
-async function callLLM(prompt: string, _preferredProvider: LLMProvider = "google"): Promise<string> {
+async function callLLM(prompt: string, _preferredProvider: LLMProvider = "google", model?: string): Promise<string> {
     // Prevent eslint unused vars warning for _preferredProvider
     void _preferredProvider;
     const keyManager = getAPIKeyManager();
@@ -214,7 +216,7 @@ async function callLLM(prompt: string, _preferredProvider: LLMProvider = "google
     // Try Groq first if available
     if (keyManager.hasKeys("groq")) {
         try {
-            return await callGroqAPI(prompt);
+            return await callGroqAPI(prompt, model);
         } catch (error) {
             console.warn("[LLMService] Groq failed, falling back to Gemini:", error);
             // Fallthrough to Gemini
@@ -267,10 +269,10 @@ function parseJSONFromResponse<T>(response: string): T {
 /**
  * Call LLM expecting JSON output. Retries once with a stricter prompt on parse failure.
  */
-async function callLLMForJSON<T>(prompt: string, provider: LLMProvider = "google"): Promise<T> {
+async function callLLMForJSON<T>(prompt: string, provider: LLMProvider = "google", model?: string): Promise<T> {
     // First attempt
     try {
-        const response = await callLLM(prompt, provider);
+        const response = await callLLM(prompt, provider, model);
         return parseJSONFromResponse<T>(response);
     } catch (firstError) {
         if (!(firstError instanceof LLMServiceError) || !String(firstError.message).includes("Failed to parse")) {
@@ -281,7 +283,7 @@ async function callLLMForJSON<T>(prompt: string, provider: LLMProvider = "google
 
         // Retry with a much stricter prompt
         const stricterPrompt = `${prompt}\n\nIMPORTANT: You MUST respond with ONLY a valid JSON object. No explanation text before or after. No markdown. Just the raw JSON.`;
-        const retryResponse = await callLLM(stricterPrompt, provider);
+        const retryResponse = await callLLM(stricterPrompt, provider, model);
         return parseJSONFromResponse<T>(retryResponse);
     }
 }
@@ -676,4 +678,117 @@ Keep it under 100 characters. No hashtags.`;
 
     const response = await callGroqAPI(prompt);
     return response.trim().replace(/^["']|["']$/g, "");
+}
+
+/**
+ * AI Personal Stylist: Generates outfit recommendations based on user preferences and occasion
+ */
+export async function generateStylistAdvice(
+    userPreferences: {
+        gender: string;
+        style: string;
+        occasion: string;
+        budget?: string;
+        colors?: string[];
+    },
+    availableProducts: any[] // In a real app, we'd pass a subset of relevant products/categories
+): Promise<{
+    advice: string;
+    suggestedOutfit: {
+        top?: string;
+        bottom?: string;
+        shoes?: string;
+        accessory?: string;
+        reasoning: string
+    }
+}> {
+    const prompt = `You are a world-class fashion stylist for Smart Avenue.
+    
+    User Profile:
+    - Gender: ${userPreferences.gender}
+    - Style Preference: ${userPreferences.style}
+    - Occasion: ${userPreferences.occasion}
+    - Budget: ${userPreferences.budget || "Flexible"}
+    - Preferred Colors: ${userPreferences.colors?.join(", ") || "Any"}
+
+    Available Product Categories/Types (Abstract):
+    - Tops: Shirts, T-Shirts, Blouses, Kurtas
+    - Bottoms: Jeans, Trousers, Skirts, Chinos
+    - Footwear: Sneakers, Loafers, Heels, Boots
+    - Accessories: Watches, Bags, Jewelry
+
+    Task:
+    1. Analyze the user's request and occasion.
+    2. Curate a complete outfit from the available types.
+    3. Provide expert styling advice on *how* to wear it (tucking, layering, color coordination).
+
+    Respond with a JSON object in this exact format:
+    {
+      "advice": "3-4 sentences of expert styling advice specific to this look.",
+      "suggestedOutfit": {
+        "top": "specific item type and color (e.g., 'White Linen Shirt')",
+        "bottom": "specific item type and color",
+        "shoes": "specific item type",
+        "accessory": "specific accessory",
+        "reasoning": "Why this specific combination works for the occasion."
+      }
+    }`;
+
+    // Using DeepSeek-R1 Distill Llama 70B for reasoning
+    return await callLLMForJSON<{
+        advice: string;
+        suggestedOutfit: {
+            top?: string;
+            bottom?: string;
+            shoes?: string;
+            accessory?: string;
+            reasoning: string
+        }
+    }>(prompt, "groq", GROQ_MODEL_REASONING);
+}
+
+/**
+ * Gift Concierge: Recommends gifts based on recipient persona
+ */
+export async function generateGiftRecommendations(
+    recipient: {
+        relation: string;
+        age: string;
+        interests: string[];
+        occasion: string;
+        budget: string;
+    }
+): Promise<{
+    thoughtProcess: string;
+    recommendations: Array<{ item: string; reason: string; category: string }>;
+}> {
+    const prompt = `You are the specific 'Gift Concierge' for Smart Avenue.
+    
+    Recipient Profile:
+    - Relation: ${recipient.relation}
+    - Age Group: ${recipient.age}
+    - Interests: ${recipient.interests.join(", ")}
+    - Occasion: ${recipient.occasion}
+    - Budget: ${recipient.budget}
+
+    Task:
+    1. Think deeply about what this person would actually value based on their psychology and interests.
+    2. Suggest 3 unique gift ideas that are likely to be found in a modern lifestyle store (Fashion, Tech, Accessories, Home Decor).
+    3. Explain the emotional or practical value of each.
+
+    Respond with a JSON object:
+    {
+      "thoughtProcess": "A brief explanation of your gifting strategy for this persona.",
+      "recommendations": [
+        { "item": "Name of the item type", "reason": "Why they will love it", "category": "General category (e.g. Electronics)" },
+        { "item": "Name of the item type", "reason": "Why they will love it", "category": "General category" },
+        { "item": "Name of the item type", "reason": "Why they will love it", "category": "General category" }
+      ]
+    }`;
+
+    // Using DeepSeek-R1 Distill Qwen 32B for creative/empathetic tasks
+    return await callLLMForJSON<{
+        thoughtProcess: string;
+        recommendations: Array<{ item: string; reason: string; category: string }>;
+    }>(prompt, "groq", GROQ_MODEL_GIFT);
 }

@@ -12,6 +12,8 @@ const DEFAULT_NAV_LINKS = [
     { label: "Home", href: "/" },
     { label: "Products", href: "/products" },
     { label: "Offers", href: "/offers" },
+    { label: "Stylist", href: "/stylist" },
+    { label: "Gift Finder", href: "/gift-finder" },
     { label: "Departments", href: "/departments" },
     { label: "About Us", href: "/about" },
 ];
@@ -56,11 +58,14 @@ export default function Header() {
 
     return (
         <header
-            className="fixed top-0 left-0 right-0 z-50 transition-all duration-500 border-b shadow-sm"
+            className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 border-b ${config.theme.navbarOpaque ? 'shadow-md' : 'shadow-sm'}`}
             style={{
-                backgroundColor: config.theme.navbarColor || config.theme.backgroundColor || "#ffffff",
+                backgroundColor: config.theme.navbarOpaque
+                    ? (config.theme.navbarColor || config.theme.backgroundColor || "#ffffff")
+                    : (isScrolled ? (config.theme.navbarColor || config.theme.backgroundColor || "#ffffff") : "transparent"),
                 color: config.theme.navbarTextColor || config.theme.textColor || "#0f172a",
-                borderColor: isScrolled ? "rgba(229, 231, 235, 0.5)" : "transparent"
+                borderColor: isScrolled || config.theme.navbarOpaque ? "rgba(229, 231, 235, 0.5)" : "transparent",
+                backdropFilter: config.theme.navbarOpaque ? "none" : (isScrolled ? "blur(8px)" : "none")
             }}
         >
             <div className="container mx-auto px-4 md:px-6 flex items-center justify-between">

@@ -227,10 +227,68 @@ export default function AppearancePage() {
                                 </div>
                             </div>
                         </div>
+
                     </section>
 
-
-
+                    {/* Navigation Bar Settings */}
+                    <section className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                        <h2 className="text-lg font-serif font-bold text-gray-800 mb-4 pb-2 border-b border-gray-100">
+                            Navigation Bar
+                        </h2>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Background Color</label>
+                                <div className="flex items-center gap-2">
+                                    <input
+                                        type="color"
+                                        value={config.theme.navbarColor || config.theme.backgroundColor || "#ffffff"}
+                                        onChange={(e) => setConfig({ ...config, theme: { ...config.theme, navbarColor: e.target.value } })}
+                                        className="h-10 w-20 rounded cursor-pointer border-0 p-0"
+                                    />
+                                    <input
+                                        type="text"
+                                        value={config.theme.navbarColor || config.theme.backgroundColor || "#ffffff"}
+                                        onChange={(e) => setConfig({ ...config, theme: { ...config.theme, navbarColor: e.target.value } })}
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg uppercase"
+                                    />
+                                </div>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Text Color</label>
+                                <div className="flex items-center gap-2">
+                                    <input
+                                        type="color"
+                                        value={config.theme.navbarTextColor || config.theme.textColor || "#0f172a"}
+                                        onChange={(e) => setConfig({ ...config, theme: { ...config.theme, navbarTextColor: e.target.value } })}
+                                        className="h-10 w-20 rounded cursor-pointer border-0 p-0"
+                                    />
+                                    <input
+                                        type="text"
+                                        value={config.theme.navbarTextColor || config.theme.textColor || "#0f172a"}
+                                        onChange={(e) => setConfig({ ...config, theme: { ...config.theme, navbarTextColor: e.target.value } })}
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg uppercase"
+                                    />
+                                </div>
+                            </div>
+                            <div className="md:col-span-2">
+                                <label className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer text-sm font-medium text-gray-700">
+                                    <span>Opaque Navbar (Solid background from the start)</span>
+                                    <div className={`w-12 h-6 rounded-full p-1 transition-colors ${config.theme.navbarOpaque ? 'bg-green-500' : 'bg-gray-300'}`}>
+                                        <input
+                                            type="checkbox"
+                                            checked={config.theme.navbarOpaque}
+                                            onChange={(e) => setConfig({
+                                                ...config,
+                                                theme: { ...config.theme, navbarOpaque: e.target.checked }
+                                            })}
+                                            className="hidden"
+                                        />
+                                        <div className={`w-4 h-4 rounded-full bg-white shadow-sm transform transition-transform ${config.theme.navbarOpaque ? 'translate-x-6' : 'translate-x-0'}`} />
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                    </section>
                     {/* Features Visibility */}
                     <section className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
                         <h2 className="text-lg font-serif font-bold text-gray-800 mb-4 pb-2 border-b border-gray-100">

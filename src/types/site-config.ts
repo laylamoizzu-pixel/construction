@@ -18,6 +18,7 @@ export interface ThemeConfig {
     textColor: string;
     navbarColor: string;
     navbarTextColor: string;
+    navbarOpaque: boolean;
 }
 
 export interface HeroSlide {
@@ -202,6 +203,7 @@ export const DEFAULT_SITE_CONFIG: SiteConfig = {
         textColor: "#0f172a", // Slate 900
         navbarColor: "#ffffff", // White
         navbarTextColor: "#0f172a", // Slate 900
+        navbarOpaque: true,
     },
     hero: {
         slides: [

@@ -203,7 +203,15 @@ export default function AdminSidebar({ mobileOpen, setMobileOpen }: { mobileOpen
         setExpandedItems(prev => ({ ...prev, [name]: !prev[name] }));
     };
 
-    if (!user) return null;
+    if (!user) {
+        return (
+            <aside className="hidden lg:flex flex-col w-64 h-full bg-brand-green border-r border-white/10 fixed lg:static inset-y-0 left-0 z-50">
+                <div className="p-6 border-b border-white/10">
+                    <div className="h-6 w-32 bg-white/10 rounded animate-pulse" />
+                </div>
+            </aside>
+        );
+    }
 
     return (
         <>

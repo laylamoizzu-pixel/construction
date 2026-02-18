@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Package, ChevronRight, Zap, Tag, Star, Loader2 } from "lucide-react";
 import { Product, getProducts, Offer, Category } from "@/app/actions";
+import SocialProofClient from "@/components/ai/SocialProofClient";
 
 interface InfiniteProductGridProps {
     initialProducts: Product[];
@@ -160,6 +161,9 @@ export default function InfiniteProductGrid({
                                         </span>
                                     )}
                                 </div>
+                                <div className="absolute bottom-3 left-3 right-3 flex justify-end">
+                                    <SocialProofClient product={product} />
+                                </div>
                             </div>
 
                             <div className="p-5 flex flex-col flex-1">
@@ -212,7 +216,7 @@ export default function InfiniteProductGrid({
 
             {!hasMore && products.length > 0 && (
                 <div className="text-center py-8 text-slate-400 text-sm">
-                    You've reached the end of our collection.
+                    You&apos;ve reached the end of our collection.
                 </div>
             )}
         </div>
