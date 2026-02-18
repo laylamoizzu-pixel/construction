@@ -56,10 +56,12 @@ export default function Header() {
 
     return (
         <header
-            className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 border-b ${isScrolled
-                ? "bg-white/90 backdrop-blur-xl border-gray-200/50 py-3 shadow-sm"
-                : "bg-transparent border-transparent py-5"
-                }`}
+            className="fixed top-0 left-0 right-0 z-50 transition-all duration-500 border-b shadow-sm"
+            style={{
+                backgroundColor: config.theme.navbarColor || config.theme.backgroundColor || "#ffffff",
+                color: config.theme.navbarTextColor || config.theme.textColor || "#0f172a",
+                borderColor: isScrolled ? "rgba(229, 231, 235, 0.5)" : "transparent"
+            }}
         >
             <div className="container mx-auto px-4 md:px-6 flex items-center justify-between">
                 {/* Logo */}
@@ -83,10 +85,8 @@ export default function Header() {
                             <Link
                                 key={link.href}
                                 href={link.href}
-                                className={`relative px-5 py-2 text-sm font-medium rounded-full transition-all duration-300 ${isActive
-                                    ? "text-white"
-                                    : isScrolled ? "text-slate-600 hover:text-brand-blue" : "text-white/90 hover:text-white"
-                                    }`}
+                                className={`relative px-5 py-2 text-sm font-medium rounded-full transition-all duration-300 opacity-90 hover:opacity-100`}
+                                style={{ color: isActive ? undefined : (config.theme.navbarTextColor || config.theme.textColor) }}
                             >
                                 {isActive && (
                                     <motion.div
@@ -132,10 +132,11 @@ export default function Header() {
                             aria-label={isSearchOpen ? "Close search" : "Open search"}
                             className={`relative z-10 w-10 h-10 flex items-center justify-center rounded-full transition-colors ${isSearchOpen
                                 ? "bg-slate-100 text-brand-blue"
-                                : isScrolled
-                                    ? "hover:bg-slate-100 text-slate-700"
-                                    : "bg-white/10 hover:bg-white/20 text-white backdrop-blur-md"
+                                : "hover:bg-slate-100"
                                 }`}
+                            style={{
+                                color: isSearchOpen ? undefined : (config.theme.navbarTextColor || config.theme.textColor)
+                            }}
                         >
                             {isSearchOpen ? <X className="w-4 h-4" /> : <Search className="w-4 h-4" />}
                         </button>
@@ -150,7 +151,8 @@ export default function Header() {
                             setIsSearchOpen(!isSearchOpen);
                             setIsMenuOpen(false); // Close menu if search is opened
                         }}
-                        className={`p-2 rounded-lg transition-colors ${isScrolled ? "text-slate-800" : "text-white"}`}
+                        className="p-2 rounded-lg transition-colors"
+                        style={{ color: config.theme.navbarTextColor || config.theme.textColor }}
                         aria-label={isSearchOpen ? "Close search" : "Open search"}
                     >
                         <Search className="w-6 h-6" />
@@ -160,7 +162,8 @@ export default function Header() {
                             setIsMenuOpen(!isMenuOpen);
                             setIsSearchOpen(false); // Close search if menu is opened
                         }}
-                        className={`p-2 rounded-lg transition-colors ${isScrolled ? "text-slate-800" : "text-white"}`}
+                        className="p-2 rounded-lg transition-colors"
+                        style={{ color: config.theme.navbarTextColor || config.theme.textColor }}
                         aria-label={isMenuOpen ? "Close menu" : "Open menu"}
                     >
                         {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}

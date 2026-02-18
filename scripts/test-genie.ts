@@ -1,9 +1,9 @@
 
 import 'dotenv/config';
-import type { Category } from '../src/app/actions.ts';
+import type { Category } from '../src/app/actions';
 
 async function main() {
-    const { analyzeIntent } = await import('../src/lib/llm-service.ts');
+    const { analyzeIntent } = await import('../src/lib/llm-service');
 
     console.log("Starting Genie Persona Verification...");
 

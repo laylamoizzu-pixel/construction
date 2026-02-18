@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight, Sparkles, ChevronLeft, ChevronRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSiteConfig } from "@/context/SiteConfigContext";
@@ -44,10 +45,16 @@ export default function Hero() {
                     className="absolute inset-0"
                 >
                     {/* Background Image */}
-                    <div
-                        className="absolute inset-0 bg-cover bg-center transition-transform duration-[20s] animate-slow-zoom"
-                        style={{ backgroundImage: `url(${slide.backgroundImageUrl})` }}
-                    />
+                    <div className="absolute inset-0 overflow-hidden">
+                        <Image
+                            src={slide.backgroundImageUrl}
+                            alt={slide.title}
+                            fill
+                            className="object-cover object-center transition-transform duration-[20s] animate-slow-zoom"
+                            priority
+                            sizes="100vw"
+                        />
+                    </div>
 
                     {/* Modern Gradient Overlay */}
                     <div className="absolute inset-0 bg-gradient-to-r from-brand-dark via-brand-dark/80 to-transparent" />
