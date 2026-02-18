@@ -45,9 +45,9 @@ async function verifyAllKeys() {
                             "Authorization": `Bearer ${keyConfig.key}`
                         },
                         body: JSON.stringify({
-                            model: "llama-3.3-70b-versatile",
-                            messages: [{ role: "user", content: "Hi" }],
-                            max_tokens: 5
+                            model: "openai/gpt-oss-120b",
+                            messages: [{ role: "user", content: "how are you" }],
+                            max_tokens: 100
                         }),
                     });
                 } else {
