@@ -38,7 +38,8 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 ## Features
 
 ### AI Shopping Assistant
-Smart Avenue includes an intelligent AI assistant that helps users find products and handles requests for out-of-stock items.
+Smart Avenue includes a suite of intelligent assistants under the **Genie** brand (e.g., Genie Stylist, Genie Gift Finder) that help users find products and handle requests.
+-   [AI Naming Guidelines](docs/assistant-guidelines.md)
 -   [AI Product Request System Documentation](docs/ai-product-requests.md)
 
 ### Automated Tracking System

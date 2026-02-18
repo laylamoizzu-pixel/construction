@@ -27,8 +27,9 @@ const GROQ_API_BASE = "https://api.groq.com/openai/v1/chat/completions";
 const GROQ_MODEL = "llama-3.3-70b-versatile"; // Meta model for better multi-language support (Hindi, Urdu, Hinglish)
 const GROQ_MODEL_LIGHT = "llama-3.1-8b-instant";
 const GROQ_MODEL_VISION = "llama-3.2-90b-vision-preview";
-const GROQ_MODEL_REASONING = "deepseek-r1-distill-llama-70b";
-const GROQ_MODEL_GIFT = "deepseek-r1-distill-qwen-32b";
+// DeepSeek models decommissioned, falling back to Llama 3.3 70B
+const GROQ_MODEL_REASONING = "llama-3.3-70b-versatile";
+const GROQ_MODEL_GIFT = "llama-3.3-70b-versatile";
 
 const GEMINI_API_BASE = "https://generativelanguage.googleapis.com/v1beta/models";
 const GEMINI_MODEL = "gemini-2.0-flash";
@@ -89,9 +90,10 @@ async function callGroqAPI(prompt: string, model: string = GROQ_MODEL, retryCoun
                 messages: [
                     { role: "user", content: prompt }
                 ],
-                temperature: 1, // Increased as requested in prompt snippet
+                // DeepSeek R1 models often require lower temperature
+                temperature: model.includes("deepseek") ? 0.6 : 1,
                 max_tokens: 2048,
-                top_p: 1,
+                top_p: model.includes("deepseek") ? 0.95 : 1,
             }),
         });
 
@@ -137,6 +139,76 @@ async function callGroqAPI(prompt: string, model: string = GROQ_MODEL, retryCoun
         if (retryCount < MAX_RETRIES) return callGroqAPI(prompt, model, retryCount + 1);
 
         throw new LLMServiceError(`Unexpected Groq error: ${error instanceof Error ? error.message : "Unknown"}`);
+    }
+}
+
+/**
+ * Make a request to Groq Vision API
+ */
+export async function callGroqVisionAPI(base64Image: string, retryCount: number = 0): Promise<string> {
+    const keyManager = getAPIKeyManager();
+    let apiKey: string;
+
+    try {
+        apiKey = keyManager.getActiveKey("groq");
+    } catch (error) {
+        throw error;
+    }
+
+    try {
+        const response = await fetch(GROQ_API_BASE, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${apiKey}`
+            },
+            body: JSON.stringify({
+                model: GROQ_MODEL_VISION,
+                messages: [
+                    {
+                        role: "user",
+                        content: [
+                            { type: "text", text: "Identify the main product in this image and describe it in 3-5 keywords for a search query. Return ONLY the keywords, no other text." },
+                            {
+                                type: "image_url",
+                                image_url: {
+                                    url: base64Image.startsWith("data:") ? base64Image : `data:image/jpeg;base64,${base64Image}`
+                                }
+                            }
+                        ]
+                    }
+                ],
+                temperature: 0.1,
+                max_tokens: 100,
+            }),
+        });
+
+        if (response.status === 429) {
+            keyManager.markKeyRateLimited(apiKey);
+            if (retryCount < MAX_RETRIES) return callGroqVisionAPI(base64Image, retryCount + 1);
+            throw new LLMServiceError("Rate limit exceeded on Groq keys", 429);
+        }
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error(`[LLMService] Groq Vision Error: ${errorText}`);
+            keyManager.markKeyFailed(apiKey);
+            if (retryCount < MAX_RETRIES) return callGroqVisionAPI(base64Image, retryCount + 1);
+            throw new LLMServiceError(`Groq Vision API failed: ${response.statusText}`, response.status);
+        }
+
+        const data: GroqResponse = await response.json();
+        const text = data.choices?.[0]?.message?.content;
+
+        if (!text) throw new LLMServiceError("No response from Groq Vision");
+
+        keyManager.markKeySuccess(apiKey);
+        return text.trim();
+    } catch (error) {
+        if (error instanceof LLMServiceError || error instanceof APIKeyExhaustedError) throw error;
+        keyManager.markKeyFailed(apiKey);
+        if (retryCount < MAX_RETRIES) return callGroqVisionAPI(base64Image, retryCount + 1);
+        throw new LLMServiceError(`Unexpected Groq Vision error: ${error instanceof Error ? error.message : "Unknown"}`);
     }
 }
 
@@ -204,16 +276,19 @@ async function callGeminiAPI(prompt: string, retryCount: number = 0): Promise<st
  * Main LLM call function that routes to available providers
  * Prioritizes Groq > Gemini
  */
-async function callLLM(prompt: string, _preferredProvider: LLMProvider = "google", model?: string): Promise<string> {
-    // Prevent eslint unused vars warning for _preferredProvider
-    void _preferredProvider;
+async function callLLM(prompt: string, provider: LLMProvider = "google", model?: string): Promise<string> {
     const keyManager = getAPIKeyManager();
 
-    // If preferred is specified and we have keys, try that first?
-    // Actually the logic in the bad file prioritized Groq hardcoded if keys exist.
-    // I will keep that logic as it seems intentional for cost/speed.
+    // Respect specific provider request
+    if (provider === "groq") {
+        return await callGroqAPI(prompt, model);
+    }
 
-    // Try Groq first if available
+    if (provider === "google") {
+        return await callGeminiAPI(prompt);
+    }
+
+    // Default auto-routing logic (start with Groq if available)
     if (keyManager.hasKeys("groq")) {
         try {
             return await callGroqAPI(prompt, model);
@@ -791,4 +866,50 @@ export async function generateGiftRecommendations(
         thoughtProcess: string;
         recommendations: Array<{ item: string; reason: string; category: string }>;
     }>(prompt, "groq", GROQ_MODEL_GIFT);
+}
+
+/**
+ * Compare & Contrast: Analyzes two products side-by-side
+ */
+export async function generateProductComparison(
+    product1: { name: string; price: number; description: string; features: string[] },
+    product2: { name: string; price: number; description: string; features: string[] }
+): Promise<{
+    comparisonPoints: Array<{ feature: string; item1Value: string; item2Value: string; verdict: string }>;
+    summary: string;
+    recommendation: string;
+}> {
+    const prompt = `You are a meticulous product analyst for Smart Avenue.
+    
+    Compare these two products specifically:
+    
+    Product A: ${product1.name} (₹${product1.price})
+    ${product1.description}
+    Features: ${product1.features.join(", ")}
+    
+    Product B: ${product2.name} (₹${product2.price})
+    ${product2.description}
+    Features: ${product2.features.join(", ")}
+    
+    Task:
+    1. Identify the key distinguishing features (e.g. Battery, Material, Use-case).
+    2. Compare them side-by-side.
+    3. Declare a "Verdict" for each feature (e.g. "A is better for X").
+    4. Provide a final recommendation on who should buy which.
+    
+    Respond with a JSON object:
+    {
+      "comparisonPoints": [
+        { "feature": "Feature Name", "item1Value": "Value/Description for A", "item2Value": "Value/Description for B", "verdict": "Which wins and why (brief)" }
+      ],
+      "summary": "A balanced 2-sentence summary of the main trade-off.",
+      "recommendation": "Final advice: Buy A if..., Buy B if..."
+    }`;
+
+    // Using DeepSeek-R1 Distill Llama 70B for reasoning comparison
+    return await callLLMForJSON<{
+        comparisonPoints: Array<{ feature: string; item1Value: string; item2Value: string; verdict: string }>;
+        summary: string;
+        recommendation: string;
+    }>(prompt, "groq", GROQ_MODEL_REASONING);
 }

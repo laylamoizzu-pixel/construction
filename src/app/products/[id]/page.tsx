@@ -6,6 +6,7 @@ import ImageGallery from "@/components/ImageGallery";
 import { Reviews } from "@/components/Reviews";
 import DealExplainer from "@/components/ai/DealExplainer";
 import ReviewSummarizer from "@/components/ai/ReviewSummarizer";
+import CompareInterface from "@/components/ai/CompareInterface";
 import { Suspense } from "react";
 
 export const dynamic = "force-dynamic";
@@ -192,6 +193,15 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
                                     <MapPin className="w-4 h-4" />
                                     Visit Store
                                 </Link>
+                            </div>
+                            <div className="pt-2">
+                                <CompareInterface currentProduct={{
+                                    id: product.id,
+                                    name: product.name,
+                                    price: product.price,
+                                    imageUrl: product.imageUrl,
+                                    categoryId: product.categoryId
+                                }} />
                             </div>
                         </div>
 
