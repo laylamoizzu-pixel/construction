@@ -49,7 +49,7 @@ export default function AssistantChat() {
                 {
                     id: "welcome",
                     role: "assistant",
-                    content: "Hy this is Gene, your Shopping Master! How can I help You? Will you like me to serve you as master to do shopping?",
+                    content: "Hy this is Genie, your Shopping Master! How can I help You? Will you like me to serve you as master to do shopping?",
                     timestamp: new Date(),
                 },
             ]);
@@ -234,7 +234,7 @@ export default function AssistantChat() {
                                     <Sparkles className="w-5 h-5 text-brand-lime" />
                                 </div>
                                 <div>
-                                    <h3 className="font-bold text-sm">Gene</h3>
+                                    <h3 className="font-bold text-sm">Genie</h3>
                                     <p className="text-[10px] text-slate-300 flex items-center gap-1">
                                         <span className="w-1.5 h-1.5 rounded-full bg-brand-lime" />
                                         Shopping Master

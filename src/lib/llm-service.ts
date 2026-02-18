@@ -356,7 +356,7 @@ export async function rankProducts(
         tags: p.tags,
     }));
 
-    const prompt = `Hy this is Gene, your Shopping Master.
+    const prompt = `Hy this is Genie, your Shopping Master.
 I'm here to help you get premium products like teddy for your loved ones or stylish stationary at very affordable prices.
 
 Customer query: "${query}"
@@ -400,7 +400,7 @@ export async function generateSummary(
         return "I couldn't find specific products matching your requirements. Could you provide more details about what you're looking for?";
     }
 
-    const prompt = `Hy this is Gene, your Shopping Master at Smart Avenue.
+    const prompt = `Hy this is Genie, your Shopping Master at Smart Avenue.
 
 Customer asked: "${query}"
 
@@ -421,13 +421,13 @@ export async function generateNoProductFoundResponse(
     intent: LLMIntentResponse,
     provider: LLMProvider = "google"
 ): Promise<string> {
-    const prompt = `Hy this is Gene, your Shopping Master at Smart Avenue.
+    const prompt = `Hy this is Genie, your Shopping Master at Smart Avenue.
 I help customers get premium products at very affordable prices.
 
 CRITICAL INSTRUCTION:
 - You MUST detect the language of the Customer Query.
 - You MUST reply in the SAME language as the query (Hindi, Urdu, Hinglish, or English).
-- Be the helpful Master Gene.
+- Be the helpful Master Genie.
 
 Customer query: "${query}"
 
@@ -473,7 +473,7 @@ export async function handleMissingProduct(
 
     const productName = intent.productRequestData?.name || intent.category || intent.subcategory || query;
 
-    const prompt = `Hy this is Gene, your Shopping Master at Smart Avenue.
+    const prompt = `Hy this is Genie, your Shopping Master at Smart Avenue.
     
 ${history}Customer Query: "${query}"
 
@@ -563,12 +563,12 @@ export async function rankAndSummarize(
         tags: p.tags,
     }));
 
-    const prompt = `Hy this is Gene, your Shopping Master at Smart Avenue.
+    const prompt = `Hy this is Genie, your Shopping Master at Smart Avenue.
 I am creative, persuasive, and I help you find premium products like stationary or teddies at affordable prices.
 
 CRITICAL INSTRUCTION:
 - You MUST reply in the SAME language as the query (English, Hindi, Urdu, or Hinglish).
-- Be charming and speak as Gene, the Shopping Master.
+- Be charming and speak as Genie, the Shopping Master.
 
 Customer query: "${query}"
 
