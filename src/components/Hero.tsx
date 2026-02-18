@@ -65,7 +65,7 @@ export default function Hero() {
                     />
 
                     <div className="container mx-auto px-4 md:px-6 relative z-10 h-full flex items-center">
-                        <div className="max-w-3xl pt-20">
+                        <div className="max-w-3xl pt-16 md:pt-20">
                             <motion.div
                                 initial={{ opacity: 0, y: 30 }}
                                 animate={{ opacity: 1, y: 0 }}
@@ -76,7 +76,7 @@ export default function Hero() {
                                     <span>Smart Avenue 99</span>
                                 </div>
 
-                                <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold text-white mb-6 leading-[1.1] tracking-tight">
+                                <h1 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-bold text-white mb-6 leading-[1.1] tracking-tight">
                                     {slide.title.split(" ").map((word, i) => (
                                         <span key={i} className={i === 1 ? "text-gradient block" : "block"}>
                                             {word}{" "}

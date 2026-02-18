@@ -322,38 +322,29 @@ export default function Header() {
             <AnimatePresence>
                 {isSearchOpen && (
                     <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: 'auto', opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        className="md:hidden bg-white border-t border-slate-100 overflow-hidden"
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        className="absolute inset-0 bg-white z-50 flex items-center px-4 md:hidden"
                     >
-                        <form onSubmit={handleSearch} className="container mx-auto px-4 py-4">
-                            <div className="relative">
-                                <input
-                                    type="text"
-                                    placeholder={isAnalyzing ? "Analyzing..." : (config.labels?.placeholders?.search || config.branding.searchPlaceholder || "Search collections...")}
-                                    autoFocus
-                                    disabled={isAnalyzing}
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="w-full pl-4 pr-12 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-base focus:outline-none focus:ring-2 focus:ring-brand-blue/20 focus:border-brand-blue transition-all disabled:opacity-70"
-                                />
-                                <button type="submit" className="absolute right-4 top-1/2 -translate-y-1/2 text-brand-blue font-semibold">
-                                    Search
-                                </button>
-
-                                {/* Mobile Visual Search Trigger - Maybe overlay or another button? 
-                                        For now keeping it simple on mobile, just text search or let's add camera icon there too 
-                                    */}
-                                <button
-                                    type="button"
-                                    onClick={() => fileInputRef.current?.click()}
-                                    disabled={isAnalyzing}
-                                    className="absolute right-20 top-1/2 -translate-y-1/2 text-slate-400 p-2"
-                                >
-                                    {isAnalyzing ? <Loader2 className="w-5 h-5 animate-spin" /> : <Camera className="w-5 h-5" />}
-                                </button>
-                            </div>
+                        <form onSubmit={handleSearch} className="w-full relative flex items-center gap-2">
+                            <Search className="w-5 h-5 text-slate-400 absolute left-3" />
+                            <input
+                                type="text"
+                                placeholder={isAnalyzing ? "Analyzing..." : (config.labels?.placeholders?.search || config.branding.searchPlaceholder || "Search...")}
+                                autoFocus
+                                disabled={isAnalyzing}
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="w-full pl-10 pr-12 py-2.5 bg-slate-100 border-none rounded-full text-sm focus:ring-2 focus:ring-brand-blue/20"
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setIsSearchOpen(false)}
+                                className="p-2 text-slate-500 hover:text-slate-700"
+                            >
+                                <span className="text-xs font-semibold">Cancel</span>
+                            </button>
                         </form>
                     </motion.div>
                 )}

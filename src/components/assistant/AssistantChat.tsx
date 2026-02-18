@@ -160,7 +160,7 @@ export default function AssistantChat() {
                     initial={{ scale: 0, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
                     exit={{ scale: 0, opacity: 0 }}
-                    className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3"
+                    className="fixed bottom-24 right-4 md:bottom-6 md:right-6 z-50 flex flex-col items-end gap-3"
                 >
                     <AnimatePresence>
                         {showGreetingPopup && (

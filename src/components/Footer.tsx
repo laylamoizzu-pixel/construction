@@ -18,7 +18,7 @@ export default function Footer() {
                 <div className="grid grid-cols-1 lg:grid-cols-12 divide-y lg:divide-y-0 lg:divide-x divide-white/10 border-b border-white/10">
 
                     {/* Brand / Logo Section (Spans 3) */}
-                    <div className="lg:col-span-3 p-8 lg:p-10 flex flex-col items-center md:items-start text-center md:text-left bg-brand-dark/50 backdrop-blur-sm">
+                    <div className="lg:col-span-3 p-6 lg:p-10 flex flex-col items-center md:items-start text-center md:text-left bg-brand-dark/50 backdrop-blur-sm">
                         <Link href="/" className="mb-6 group">
                             <div className="relative w-48 h-12 transition-transform duration-300 group-hover:scale-105">
                                 <Image
@@ -51,7 +51,7 @@ export default function Footer() {
                     </div>
 
                     {/* Navigation: Company (Spans 2) */}
-                    <div className="lg:col-span-2 p-8 lg:p-10">
+                    <div className="lg:col-span-2 p-6 lg:p-10">
                         <h3 className="text-white font-mono uppercase tracking-wider text-sm font-bold mb-6 text-brand-lime">
                             {footer.navigation.company.title}
                         </h3>
@@ -67,7 +67,7 @@ export default function Footer() {
                     </div>
 
                     {/* Newsletter & Updates (Spans 5) */}
-                    <div className="lg:col-span-5 p-8 lg:p-10 bg-white/5">
+                    <div className="lg:col-span-5 p-6 lg:p-10 bg-white/5">
                         <div className="h-full flex flex-col justify-center">
                             <h3 className="text-2xl font-bold mb-2">{footer.newsletter?.title || "Join the Movement"}</h3>
                             <p className="text-slate-400 mb-6 font-light">{footer.newsletter?.description || "Get the latest collections and exclusive offers sent to your inbox."}</p>
