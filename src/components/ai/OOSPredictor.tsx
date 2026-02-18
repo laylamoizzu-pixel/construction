@@ -25,12 +25,9 @@ export default function OOSPredictor({ productName, sku, stockLevel }: OOSPredic
                 } catch (err) {
                     console.error("Failed to fetch urgency data", err);
                 } finally {
-                    setLoading(false);
                 }
             };
             fetchUrgency();
-        } else {
-            setLoading(false);
         }
     }, [productName, sku, stockLevel]);
 

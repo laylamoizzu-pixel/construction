@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react";
 import { ProductRequest, getProductRequests, updateRequestStatus } from "@/app/actions/request-actions";
 import {
-    Search, XCircle, ImageIcon, Loader2
+    Search, XCircle, ImageIcon, Loader2,
+    Mail, Eye, Calendar, ExternalLink
 } from "lucide-react";
 import { format } from "date-fns";
 import Image from "next/image";
