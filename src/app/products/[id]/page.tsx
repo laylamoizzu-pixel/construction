@@ -4,11 +4,13 @@ import Link from "next/link";
 import { ChevronRight, MapPin, Phone, Clock, ShieldCheck, Check, Star } from "lucide-react";
 import ImageGallery from "@/components/ImageGallery";
 import { Reviews } from "@/components/Reviews";
-import DealExplainer from "@/components/ai/DealExplainer";
+
 import ReviewSummarizer from "@/components/ai/ReviewSummarizer";
 import CompareInterface from "@/components/ai/CompareInterface";
 import OOSPredictor from "@/components/ai/OOSPredictor";
 import RestockTracker from "@/components/ai/RestockTracker";
+import DealInsight from "@/components/ai/DealInsight";
+import SocialProofBadge from "@/components/ai/SocialProofBadge";
 import { Suspense } from "react";
 
 export const dynamic = "force-dynamic";
@@ -126,6 +128,10 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
                                 ) : null}
                             </div>
 
+                            <div className="mb-6">
+                                <SocialProofBadge product={product} />
+                            </div>
+
                             {/* Price Section */}
                             <div className="flex items-end gap-4 border-b border-slate-100 pb-8">
                                 <div className="space-y-1">
@@ -155,7 +161,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
                             <Suspense fallback={
                                 <div className="h-24 bg-slate-50 animate-pulse rounded-xl my-6 border border-slate-100" />
                             }>
-                                <DealExplainer product={product} />
+                                <DealInsight product={product} discount={discount} />
                             </Suspense>
                         </div>
 

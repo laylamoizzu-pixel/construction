@@ -10,7 +10,7 @@ export async function getStylistAdvice(data: {
     colors: string[];
 }) {
     try {
-        return await generateStylistAdvice(data, []);
+        return await generateStylistAdvice(data);
     } catch (error) {
         console.error("Stylist error:", error);
         throw new Error("Failed to get stylist advice.");

@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Package, ChevronRight, Zap, Tag, Star, Loader2 } from "lucide-react";
 import { Product, getProducts, Offer, Category } from "@/app/actions";
-import SocialProofClient from "@/components/ai/SocialProofClient";
+import SocialProofBadge from "@/components/ai/SocialProofBadge";
 import GenieRequestTrigger from "@/components/GenieRequestTrigger";
 
 interface InfiniteProductGridProps {
@@ -169,7 +169,7 @@ export default function InfiniteProductGrid({
                                     )}
                                 </div>
                                 <div className="absolute bottom-3 left-3 right-3 flex justify-end">
-                                    <SocialProofClient product={product} />
+                                    <SocialProofBadge product={product} compact={true} />
                                 </div>
                             </div>
 

@@ -821,6 +821,37 @@ Keep it under 100 characters. No hashtags.`;
 }
 
 /**
+ * AI Deal Explainer: Explains *why* a deal is good or the product value
+ */
+export async function generateDealInsight(
+    product: { name: string; price: number; originalPrice?: number; description: string }
+): Promise<string> {
+    const discount = product.originalPrice
+        ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
+        : 0;
+
+    const prompt = `You are a savvy shopping assistant for Smart Avenue.
+    Explain why this deal is great or highlight the key value proposition in one short, punchy sentence.
+    
+    Product: ${product.name}
+    Price: ₹${product.price} ${discount > 0 ? `(was ₹${product.originalPrice}, ${discount}% OFF)` : ""}
+    Desc: ${product.description.substring(0, 100)}...
+    
+    Rules:
+    - If there's a big discount (>30%), focus on the savings value.
+    - If no discount, focus on premium quality or "timeless investment".
+    - Use emojis.
+    - Keep it under 15 words.
+    
+    Example: "🔥 Huge 40% drop! Lowest price we've seen in 30 days."
+    Example: "✨ Premium leather that lasts a lifetime—worth every rupee."`;
+
+    // Using Llama 3.1 8B for fast, snappy copy
+    const response = await callGroqAPI(prompt, GROQ_MODEL_LIGHT);
+    return response.trim().replace(/^["']|["']$/g, "");
+}
+
+/**
  * AI Personal Stylist: Generates outfit recommendations based on user preferences and occasion
  */
 export async function generateStylistAdvice(
