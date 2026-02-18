@@ -1,6 +1,11 @@
 import fs from 'fs';
 import path from 'path';
-import { callVisionAPI } from '../src/lib/llm-service';
+import dotenv from 'dotenv';
+
+// Load environment variables
+dotenv.config({ path: '.env.local' });
+
+import { callVisionAPI } from '../src/lib/llm-service.ts';
 
 async function testGeminiVision() {
     console.log("🚀 Testing Gemini Vision API...");
