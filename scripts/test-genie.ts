@@ -5,7 +5,7 @@ import type { Category } from '../src/app/actions.ts';
 async function main() {
     const { analyzeIntent } = await import('../src/lib/llm-service.ts');
 
-    console.log("Starting Gene Persona Verification...");
+    console.log("Starting Genie Persona Verification...");
 
     const categories: Category[] = [
         { id: "cat_teddies", name: "Teddies", slug: "teddies", parentId: null, order: 0, createdAt: new Date() },
@@ -22,7 +22,7 @@ async function main() {
         console.log(`\nTesting Query: "${query}"`);
         try {
             const result = await analyzeIntent(query, categories);
-            console.log("Gene's Response (Intent):", JSON.stringify(result, null, 2));
+            console.log("Genie's Response (Intent):", JSON.stringify(result, null, 2));
         } catch (error) {
             console.error("Verification Failed:", error);
         }

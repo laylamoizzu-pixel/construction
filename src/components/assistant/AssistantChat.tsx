@@ -181,9 +181,9 @@ export default function AssistantChat() {
                                         <Sparkles className="w-4 h-4 text-brand-blue" />
                                     </div>
                                     <div className="flex-1">
-                                        <p className="text-xs font-bold text-brand-dark mb-1">Gene is here! ✨</p>
+                                        <p className="text-xs font-bold text-brand-dark mb-1">Genie is here! ✨</p>
                                         <p className="text-[11px] text-slate-600 leading-snug">
-                                            Hy this is Gene, your Shopping Master! How can I help You?
+                                            Hy this is Genie, your Shopping Master! How can I help You?
                                         </p>
                                         <button
                                             onClick={() => {
