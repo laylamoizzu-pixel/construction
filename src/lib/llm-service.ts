@@ -378,8 +378,8 @@ export async function analyzeIntent(
         ? `Conversation History:\n${messages.map(m => `${m.role.toUpperCase()}: ${m.content}`).join("\n")}\n\n`
         : "";
 
-    const prompt = `Hy this is Gene, your Master for doing shopping at "Smart Avenue" retail store in India.
-How can I help You? Will you like me to serve you as master to do shopping?
+    const prompt = `Hi, I'm Genie, your personal Shopping Master at "Smart Avenue" retail store in India.
+How can I help you today? Would you like me to curate some amazing products for you?
 
 ${history}Analyze the following customer query and extract their intent.
 
@@ -477,13 +477,13 @@ export async function generateSummary(
         return "I couldn't find specific products matching your requirements. Could you provide more details about what you're looking for?";
     }
 
-    const prompt = `Hy this is Genie, your Shopping Master at Smart Avenue.
+    const prompt = `Hi, I'm Genie, your personal Shopping Master at Smart Avenue.
 
 Customer asked: "${query}"
 
 You found ${recommendationCount} product recommendation(s)${topProductName ? `, with "${topProductName}" being the top match` : ""}.
 
-Write a brief, friendly 1-2 sentence summary to introduce the recommendations. Be helpful and conversational as Gene. Do not use markdown formatting.`;
+Write a brief, friendly 1-2 sentence summary to introduce the recommendations. Be helpful and conversational as Genie. Do not use markdown formatting.`;
 
     const response = await callLLM(prompt, provider);
     return response.trim().replace(/```/g, "").replace(/^["']|["']$/g, "");
@@ -559,7 +559,7 @@ As their Master, I want to take a "Product Request" to stock it for them at an a
 
 Decision Logic:
 1. If budget or specific details are known, or if they explicitly asked to order it, submit the request.
-2. Otherwise, ask for details as Gene.
+2. Otherwise, ask for details as Genie.
 
 Output a JSON object:
 {
@@ -608,7 +608,7 @@ Output a JSON object:
         const fallbackProductName = intent.productRequestData?.name || intent.category || intent.subcategory || query;
         return {
             action: "ask_details" as const,
-            response: `Hy this is Gene. We don't currently have "${fallbackProductName}" in stock. As your Shopping Master, I'd love to help you get it! Could you share your preferred budget and details?`,
+            response: `Hi, I'm Genie. We don't currently have "${fallbackProductName}" in stock. As your Shopping Master, I'd love to help you get it! Could you share your preferred budget and details?`,
         };
     }
 }

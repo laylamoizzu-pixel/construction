@@ -53,7 +53,7 @@ export default function StylistInterface() {
                     >
                         <h2 className="text-2xl font-bold text-slate-900 mb-6 flex items-center gap-2">
                             <User className="w-6 h-6 text-brand-dark" />
-                            Tell us about yourself
+                            I'm Genie, your Stylist. Tell me about yourself.
                         </h2>
 
                         <div className="space-y-6">

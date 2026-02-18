@@ -49,7 +49,7 @@ export default function AssistantChat() {
                 {
                     id: "welcome",
                     role: "assistant",
-                    content: "Hy this is Genie, your Shopping Master! How can I help You? Will you like me to serve you as master to do shopping?",
+                    content: "Hi, I'm Genie, your personal Shopping Master! 🧞‍♂️ How can I help you today? Would you like me to curate some amazing products for you?",
                     timestamp: new Date(),
                 },
             ]);
@@ -183,7 +183,7 @@ export default function AssistantChat() {
                                     <div className="flex-1">
                                         <p className="text-xs font-bold text-brand-dark mb-1">Genie is here! ✨</p>
                                         <p className="text-[11px] text-slate-600 leading-snug">
-                                            Hy this is Genie, your Shopping Master! How can I help You?
+                                            Hi, I'm Genie, your personal Shopping Master! 🧞‍♂️ How can I help you today?
                                         </p>
                                         <button
                                             onClick={() => {

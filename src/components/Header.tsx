@@ -5,8 +5,9 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Search } from "lucide-react";
+import { Menu, X, Search, Camera, Loader2 } from "lucide-react";
 import { useSiteConfig } from "@/context/SiteConfigContext";
+import { analyzeImage } from "@/app/actions/image-search-action";
 
 const DEFAULT_NAV_LINKS = [
     { label: "Home", href: "/" },
@@ -23,7 +24,9 @@ export default function Header() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
+    const [isAnalyzing, setIsAnalyzing] = useState(false);
     const searchInputRef = useRef<HTMLInputElement>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
     const pathname = usePathname();
     const router = useRouter();
     const { config } = useSiteConfig();
@@ -38,6 +41,43 @@ export default function Header() {
             setSearchQuery("");
             setIsSearchOpen(false);
             setIsMenuOpen(false);
+        }
+    };
+
+    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setIsAnalyzing(true);
+        const originalQuery = searchQuery;
+        setSearchQuery("Analyzing image...");
+
+        try {
+            const formData = new FormData();
+            formData.append("image", file);
+
+            const result = await analyzeImage(formData);
+
+            if (result.success && result.query) {
+                router.push(`/products?search=${encodeURIComponent(result.query)}`);
+                setSearchQuery("");
+                setIsSearchOpen(false);
+                setIsMenuOpen(false);
+            } else {
+                console.error(result.error);
+                setSearchQuery(originalQuery);
+                alert("Could not analyze image. Please try again.");
+            }
+        } catch (error) {
+            console.error("Image upload failed:", error);
+            setSearchQuery(originalQuery);
+            alert("Error uploading image.");
+        } finally {
+            setIsAnalyzing(false);
+            // Reset file input
+            if (fileInputRef.current) {
+                fileInputRef.current.value = "";
+            }
         }
     };
 
@@ -110,7 +150,7 @@ export default function Header() {
                 {/* Right Actions */}
                 <div className="hidden md:flex items-center gap-3">
                     {/* Search Bar */}
-                    <div className={`relative flex items-center transition-all duration-300 ${isSearchOpen ? "w-64" : "w-10"}`}>
+                    <div className={`relative flex items-center transition-all duration-300 ${isSearchOpen ? "w-72" : "w-10"}`}>
                         <AnimatePresence>
                             {isSearchOpen && (
                                 <motion.form
@@ -120,15 +160,40 @@ export default function Header() {
                                     onSubmit={handleSearch}
                                     className="absolute right-0 top-1/2 -translate-y-1/2 w-full pr-10"
                                 >
-                                    <input
-                                        ref={searchInputRef}
-                                        type="text"
-                                        value={searchQuery}
-                                        onChange={(e) => setSearchQuery(e.target.value)}
-                                        placeholder={config.labels?.placeholders?.search || config.branding.searchPlaceholder || "Search collection..."}
-                                        className="w-full bg-slate-100/50 border border-slate-200 text-slate-800 text-sm rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-brand-blue/50"
-                                        onBlur={() => !searchQuery && setIsSearchOpen(false)}
-                                    />
+                                    <div className="relative">
+                                        <input
+                                            ref={searchInputRef}
+                                            type="text"
+                                            value={searchQuery}
+                                            onChange={(e) => setSearchQuery(e.target.value)}
+                                            disabled={isAnalyzing}
+                                            placeholder={isAnalyzing ? "Analyzing image..." : (config.labels?.placeholders?.search || config.branding.searchPlaceholder || "Search collection...")}
+                                            className="w-full bg-slate-100/50 border border-slate-200 text-slate-800 text-sm rounded-full pl-4 pr-10 py-2 focus:outline-none focus:ring-2 focus:ring-brand-blue/50 disabled:bg-slate-50 disabled:text-slate-500"
+                                            onBlur={() => !searchQuery && !isAnalyzing && setIsSearchOpen(false)}
+                                        />
+
+                                        {/* Visual Search Button */}
+                                        <button
+                                            type="button"
+                                            onClick={() => fileInputRef.current?.click()}
+                                            disabled={isAnalyzing}
+                                            className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-brand-blue transition-colors disabled:opacity-50"
+                                            title="Search with image"
+                                        >
+                                            {isAnalyzing ? (
+                                                <Loader2 className="w-4 h-4 animate-spin" />
+                                            ) : (
+                                                <Camera className="w-4 h-4" />
+                                            )}
+                                        </button>
+                                        <input
+                                            type="file"
+                                            ref={fileInputRef}
+                                            className="hidden"
+                                            accept="image/*"
+                                            onChange={handleImageUpload}
+                                        />
+                                    </div>
                                 </motion.form>
                             )}
                         </AnimatePresence>
@@ -189,14 +254,27 @@ export default function Header() {
                             <div className="relative">
                                 <input
                                     type="text"
-                                    placeholder={config.labels?.placeholders?.search || config.branding.searchPlaceholder || "Search collections..."}
+                                    placeholder={isAnalyzing ? "Analyzing..." : (config.labels?.placeholders?.search || config.branding.searchPlaceholder || "Search collections...")}
                                     autoFocus
+                                    disabled={isAnalyzing}
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="w-full pl-4 pr-12 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-base focus:outline-none focus:ring-2 focus:ring-brand-blue/20 focus:border-brand-blue transition-all"
+                                    className="w-full pl-4 pr-12 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-base focus:outline-none focus:ring-2 focus:ring-brand-blue/20 focus:border-brand-blue transition-all disabled:opacity-70"
                                 />
                                 <button type="submit" className="absolute right-4 top-1/2 -translate-y-1/2 text-brand-blue font-semibold">
                                     Search
+                                </button>
+
+                                {/* Mobile Visual Search Trigger - Maybe overlay or another button? 
+                                    For now keeping it simple on mobile, just text search or let's add camera icon there too 
+                                */}
+                                <button
+                                    type="button"
+                                    onClick={() => fileInputRef.current?.click()}
+                                    disabled={isAnalyzing}
+                                    className="absolute right-20 top-1/2 -translate-y-1/2 text-slate-400 p-2"
+                                >
+                                    {isAnalyzing ? <Loader2 className="w-5 h-5 animate-spin" /> : <Camera className="w-5 h-5" />}
                                 </button>
                             </div>
                         </form>

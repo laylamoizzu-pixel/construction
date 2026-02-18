@@ -62,7 +62,7 @@ export default function GiftConciergeInterface() {
                     >
                         <h2 className="text-2xl font-bold text-slate-900 mb-6 flex items-center gap-2">
                             <User className="w-6 h-6 text-brand-dark" />
-                            Who are we gifting?
+                            I'm Genie, your Gift Concierge. Who are we gifting?
                         </h2>
 
                         <div className="space-y-6">
