@@ -194,34 +194,52 @@ function mapIntentResponse(response: LLMIntentResponse): IntentAnalysis {
     };
 }
 
-/**
- * Query products based on intent and context
- */
 async function queryProducts(
     intent: IntentAnalysis,
     context: RecommendationRequest["context"]
 ): Promise<Product[]> {
-    // Determine category to filter by
+    // 1. Determine category to filter by
     let categoryId = context?.categoryId || intent.category || undefined;
 
-    // If we have a subcategory, use that instead
+    // If we have a subcategory, use that instead (it's more specific)
     if (intent.subcategory) {
         categoryId = intent.subcategory;
     }
 
-    // Get all products (cached), filter available in-memory
-    let products = (await getProducts()).filter(p => p.available);
+    // 2. Strict Category Filtering
+    // If a category IS specified, we MUST filter by it.
+    // If that category has no products, we return ZERO products.
+    // We do NOT fallback to "all products" as that causes hallucinations.
 
-    // Filter by category if specified
+    let products: Product[] = [];
+
     if (categoryId) {
-        const categoryFiltered = products.filter(p => p.categoryId === categoryId || p.subcategoryId === categoryId);
-        if (categoryFiltered.length > 0) {
-            products = categoryFiltered;
+        // Option A: Use the searchProducts which has robust filtering
+        // We pass empty query string to just get category items, or use the user's query if available?
+        // Let's use getProducts with category filter directly for precision
+        products = await getProducts(categoryId, true); // true = only available
+
+        // If specific subcategory was requested but not found in the main getProducts call (which filters by catId),
+        // we might need to filter in memory if getProducts doesn't support subcategory arg comfortably.
+        // verified: getProducts supports subcategoryId as 5th arg. 
+        // Let's rely on memory filtering for subcategory to be safe as getProducts signature is a bit complex.
+
+        if (intent.subcategory) {
+            products = products.filter(p => p.subcategoryId === intent.subcategory);
         }
-        // If no products in specific category, keep all available products
+
+    } else {
+        // Option B: No category specified (General Search)
+        // We should search by text using the user's requirements/keywords
+        // We do NOT dump all products unless it's a "show me everything" query (which is rare).
+        // Let's use the explicit requirements as search terms if possible, or just available products.
+
+        // If we have no strong intent, we might want to default to "Featured" or "New Arrivals" rather than everything.
+        // But for now, let's just get available products and let the text search (if any) refine it.
+        products = (await getProducts()).filter(p => p.available);
     }
 
-    // Filter by budget if specified
+    // 3. Filter by budget if specified
     const budgetMax = context?.budget || intent.budget.max;
     const budgetMin = intent.budget.min;
 
@@ -232,7 +250,7 @@ async function queryProducts(
         products = products.filter(p => p.price >= budgetMin);
     }
 
-    // Exclude specific products if requested
+    // 4. Exclude specific products if requested
     if (context?.excludeProductIds && context.excludeProductIds.length > 0) {
         const excludeSet = new Set(context.excludeProductIds);
         products = products.filter(p => !excludeSet.has(p.id));

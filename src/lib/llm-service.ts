@@ -456,6 +456,8 @@ Customer query: "${query}"
 If the customer is asking for a product that is clearly NOT in our categories or is explicitly requesting a new item we don't stock, identify it as a "request".
 Otherwise, treat it as a search for existing products.
 
+CRITICAL: Do NOT assign a category if the user's request doesn't reasonably match any of them. Return null for category in that case.
+
 Respond with a JSON object (and nothing else) in this exact format:
 {
   "category": "category ID from the list above, or null if unclear",
@@ -513,6 +515,11 @@ Available products:
 ${JSON.stringify(productList, null, 2)}
 
 Rank the top 3-5 most suitable products for this customer. For each product, explain why it matches their needs.
+
+CRITICAL INSTRUCTIONS:
+1. You must ONLY recommend products from the "Available products" list provided above.
+2. Do NOT mention, suggest, or hallucinate any products that are not in the list.
+3. If the list is empty, return an empty array. Do NOT invent a product.
 
 Respond with a JSON array (and nothing else) in this exact format:
 [
@@ -580,9 +587,10 @@ Intent analysis:
 
 We do NOT have this product in stock right now.
 1. Apologize that we don't have it currently.
-2. Offer to note down their request as their Shopping Master.
-3. Crucially, ask for their TARGET PRICE or BUDGET if they haven't provided it.
-4. Ask for any other specific details (color, size, brand) if relevant.
+2. STRICTLY DO NOT invent, hallucinate, or offer any product that you don't have context for.
+3. Offer to note down their request as their Shopping Master.
+4. Crucially, ask for their TARGET PRICE or BUDGET if they haven't provided it.
+5. Ask for any other specific details (color, size, brand) if relevant.
 
 Keep it concise (2-3 sentences max).`;
 
@@ -735,6 +743,12 @@ Respond with a JSON object (and nothing else) in this exact format:
   ],
   "summary": "A creative, charming, and persuasive summary for the customer, in their language"
 }
+
+CRITICAL:
+1. You must ONLY recommend products from the "Available products" list provided above.
+2. If "Available products" is empty array [], you MUST return empty rankings [].
+3. In the summary, if no products are found, say "I couldn't find exactly that in our current collection, but I can take a request for it!"
+4. Do NOT make up products.
 
 Only include relevant products. If no products match well, return empty rankings.`;
 
