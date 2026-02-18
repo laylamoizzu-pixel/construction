@@ -15,13 +15,11 @@ const VIBES = [
 
 export default function VibeSelector() {
     const router = useRouter();
-    const [selectedVibe, setSelectedVibe] = useState("");
     const [customVibe, setCustomVibe] = useState("");
     const [isLoading, setIsLoading] = useState(false);
 
     const handleVibeCheck = async (vibe: string) => {
         setIsLoading(true);
-        setSelectedVibe(vibe);
 
         const response = await getVibeFilters(vibe);
 

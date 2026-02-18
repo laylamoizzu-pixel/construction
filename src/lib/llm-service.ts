@@ -830,8 +830,7 @@ export async function generateStylistAdvice(
         occasion: string;
         budget?: string;
         colors?: string[];
-    },
-    availableProducts: unknown[] // In a real app, we'd pass a subset of relevant products/categories
+    }
 ): Promise<{
     advice: string;
     suggestedOutfit: {
