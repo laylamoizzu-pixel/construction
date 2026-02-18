@@ -1,6 +1,4 @@
 import { getProducts, getCategories, getOffers, getSiteContent, ProductsPageContent } from "@/app/actions";
-import Link from "next/link";
-import { ChevronRight } from "lucide-react";
 import Image from "next/image";
 import FilterSidebar from "@/components/FilterSidebar";
 import InfiniteProductGrid from "@/components/InfiniteProductGrid";

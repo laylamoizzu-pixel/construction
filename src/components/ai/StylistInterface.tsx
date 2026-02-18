@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { getStylistAdvice } from "@/app/actions/ai-stylist-actions";
-import { Loader2, Shirt, Sparkles, User, Palette, Briefcase } from "lucide-react";
+import { Loader2, Sparkles, User, Briefcase } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface StylistAdviceResult {

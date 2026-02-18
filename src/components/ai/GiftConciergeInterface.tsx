@@ -4,7 +4,6 @@ import { useState } from "react";
 import { getGiftRecommendations } from "@/app/actions/ai-stylist-actions";
 import { Loader2, Gift, Heart, User, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Product } from "@/app/actions";
 
 interface GiftRecommendationResult {
     thoughtProcess: string;
