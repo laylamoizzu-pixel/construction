@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { AlertCircle, Eye, TrendingUp } from "lucide-react";
+import { Eye, TrendingUp } from "lucide-react";
 import { getOOSUrgency, OOSUrgencyResult } from "@/app/actions/proactive-alerts-action";
 
 interface OOSPredictorProps {
@@ -12,7 +12,6 @@ interface OOSPredictorProps {
 
 export default function OOSPredictor({ productName, sku, stockLevel }: OOSPredictorProps) {
     const [urgencyData, setUrgencyData] = useState<OOSUrgencyResult["data"] | null>(null);
-    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         // Only fetch urgency if stock is low (1-5 units)

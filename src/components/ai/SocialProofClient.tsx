@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { fetchSocialProof } from "@/app/actions/ai-actions";
-import { TrendingUp, Loader2 } from "lucide-react";
+import { TrendingUp } from "lucide-react";
 
 interface SocialProofClientProps {
     product: {

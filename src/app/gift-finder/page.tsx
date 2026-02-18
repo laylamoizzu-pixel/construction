@@ -18,7 +18,7 @@ export default function GiftFinderPage() {
                         Genie: Find the Perfect Gift
                     </h1>
                     <p className="text-xl text-rose-200/80 max-w-2xl mx-auto leading-relaxed">
-                        Struggling to find the right gift? Let our AI Concierge analyze your recipient's persona and suggest thoughtful ideas.
+                        Struggling to find the right gift? Let our AI Concierge analyze your recipient&apos;s persona and suggest thoughtful ideas.
                     </p>
                 </div>
             </div>

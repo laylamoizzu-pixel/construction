@@ -2,13 +2,19 @@
 
 import { useState } from "react";
 import { getGiftRecommendations } from "@/app/actions/ai-stylist-actions";
-import { Loader2, Gift, Heart, User, Calendar, Sparkles } from "lucide-react";
+import { Loader2, Gift, Heart, User, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Product } from "@/app/actions";
+
+interface GiftRecommendationResult {
+    thoughtProcess: string;
+    recommendations: Array<{ item: string; reason: string; category: string }>;
+}
 
 export default function GiftConciergeInterface() {
     const [step, setStep] = useState(1);
     const [loading, setLoading] = useState(false);
-    const [result, setResult] = useState<any>(null);
+    const [result, setResult] = useState<GiftRecommendationResult | null>(null);
 
     const [recipient, setRecipient] = useState({
         relation: "",
@@ -62,7 +68,7 @@ export default function GiftConciergeInterface() {
                     >
                         <h2 className="text-2xl font-bold text-slate-900 mb-6 flex items-center gap-2">
                             <User className="w-6 h-6 text-brand-dark" />
-                            I'm Genie, your Gift Concierge. Who are we gifting?
+                            I&apos;m Genie, your Gift Concierge. Who are we gifting?
                         </h2>
 
                         <div className="space-y-6">
@@ -221,15 +227,15 @@ export default function GiftConciergeInterface() {
                         <div className="p-8">
                             <div className="bg-rose-50 p-6 rounded-2xl border border-rose-100 mb-8">
                                 <h3 className="text-sm font-bold text-rose-800 uppercase tracking-wide mb-2 flex items-center gap-2">
-                                    <Sparkles className="w-4 h-4" /> Genie's Thought Process
+                                    <Sparkles className="w-4 h-4" /> Genie&apos;s Thought Process
                                 </h3>
                                 <p className="text-slate-700 leading-relaxed italic">
-                                    "{result.thoughtProcess}"
+                                    &quot;{result.thoughtProcess}&quot;
                                 </p>
                             </div>
 
                             <div className="space-y-4">
-                                {result.recommendations.map((rec: any, i: number) => (
+                                {result.recommendations.map((rec, i: number) => (
                                     <div key={i} className="p-5 bg-white rounded-xl border border-slate-200 hover:border-rose-200 transition-colors shadow-sm group">
                                         <div className="flex justify-between items-start mb-2">
                                             <h4 className="font-bold text-lg text-slate-900 group-hover:text-rose-600 transition-colors">{rec.item}</h4>

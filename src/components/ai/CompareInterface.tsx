@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { getComparison, getSimilarProducts } from "@/app/actions/ai-compare-actions";
-import { Loader2, Scale, ArrowRightLeft, Check, X, Sparkles } from "lucide-react";
+import { Loader2, Scale, ArrowRightLeft, X, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
+import { Product } from "@/app/actions";
 
 interface CompareInterfaceProps {
     currentProduct: {
@@ -19,9 +20,13 @@ interface CompareInterfaceProps {
 export default function CompareInterface({ currentProduct }: CompareInterfaceProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [step, setStep] = useState(1); // 1: Select, 2: Analyze, 3: Result
-    const [similarProducts, setSimilarProducts] = useState<any[]>([]);
-    const [selectedProduct, setSelectedProduct] = useState<any>(null);
-    const [comparison, setComparison] = useState<any>(null);
+    const [similarProducts, setSimilarProducts] = useState<Product[]>([]);
+    const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+    const [comparison, setComparison] = useState<{
+        comparisonPoints: Array<{ feature: string; item1Value: string; item2Value: string; verdict: string }>;
+        summary: string;
+        recommendation: string;
+    } | null>(null);
     const [loadingSimilar, setLoadingSimilar] = useState(false);
 
     useEffect(() => {
@@ -34,7 +39,7 @@ export default function CompareInterface({ currentProduct }: CompareInterfacePro
         }
     }, [isOpen, step, currentProduct]);
 
-    const handleCompare = async (product: any) => {
+    const handleCompare = async (product: Product) => {
         setSelectedProduct(product);
         setStep(2);
         try {
@@ -138,11 +143,11 @@ export default function CompareInterface({ currentProduct }: CompareInterfacePro
                                 <div className="grid grid-cols-3 gap-4 mb-8 bg-slate-50 p-4 rounded-xl">
                                     <div className="col-span-1"></div>
                                     <div className="col-span-1 text-center font-bold text-brand-dark">{currentProduct.name}</div>
-                                    <div className="col-span-1 text-center font-bold text-slate-600">{selectedProduct.name}</div>
+                                    <div className="col-span-1 text-center font-bold text-slate-600">{selectedProduct?.name}</div>
                                 </div>
 
                                 <div className="space-y-4 mb-8">
-                                    {comparison.comparisonPoints.map((point: any, i: number) => (
+                                    {comparison.comparisonPoints.map((point, i: number) => (
                                         <div key={i} className="grid grid-cols-1 md:grid-cols-3 gap-4 border-b border-slate-100 pb-4 last:border-0">
                                             <div className="font-semibold text-slate-700 flex items-center gap-2">
                                                 <Scale className="w-4 h-4 text-brand-blue/50" />
@@ -151,7 +156,7 @@ export default function CompareInterface({ currentProduct }: CompareInterfacePro
                                             <div className={`p-3 rounded-lg text-sm ${point.verdict.includes("A is better") || point.verdict.includes(currentProduct.name) ? "bg-green-50 text-green-800 border border-green-100" : "bg-slate-50 text-slate-600"}`}>
                                                 {point.item1Value}
                                             </div>
-                                            <div className={`p-3 rounded-lg text-sm ${point.verdict.includes("B is better") || point.verdict.includes(selectedProduct.name) ? "bg-green-50 text-green-800 border border-green-100" : "bg-slate-50 text-slate-600"}`}>
+                                            <div className={`p-3 rounded-lg text-sm ${point.verdict.includes("B is better") || (selectedProduct && point.verdict.includes(selectedProduct.name)) ? "bg-green-50 text-green-800 border border-green-100" : "bg-slate-50 text-slate-600"}`}>
                                                 {point.item2Value}
                                             </div>
                                         </div>

@@ -2,6 +2,7 @@
 
 import { generateProductComparison } from "@/lib/llm-service";
 import { getProduct, getProducts } from "@/lib/data";
+import { Product } from "@/app/actions";
 
 export async function getComparison(product1Id: string, product2Id: string) {
     try {
@@ -15,7 +16,7 @@ export async function getComparison(product1Id: string, product2Id: string) {
         }
 
         // Extract simplified data for LLM
-        const formatForLLM = (p: any) => ({
+        const formatForLLM = (p: Product) => ({
             name: p.name,
             price: p.price,
             description: p.description,

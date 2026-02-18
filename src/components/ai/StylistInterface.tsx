@@ -5,10 +5,23 @@ import { getStylistAdvice } from "@/app/actions/ai-stylist-actions";
 import { Loader2, Shirt, Sparkles, User, Palette, Briefcase } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
+interface StylistAdviceResult {
+    advice: string;
+    suggestedOutfit: {
+        top?: string;
+        bottom?: string;
+        shoes?: string;
+        accessory?: string;
+        reasoning: string;
+        [key: string]: string | undefined;
+    };
+}
+
+
 export default function StylistInterface() {
     const [step, setStep] = useState(1);
     const [loading, setLoading] = useState(false);
-    const [result, setResult] = useState<any>(null);
+    const [result, setResult] = useState<StylistAdviceResult | null>(null);
 
     const [preferences, setPreferences] = useState({
         gender: "",
@@ -53,7 +66,7 @@ export default function StylistInterface() {
                     >
                         <h2 className="text-2xl font-bold text-slate-900 mb-6 flex items-center gap-2">
                             <User className="w-6 h-6 text-brand-dark" />
-                            I'm Genie, your Stylist. Tell me about yourself.
+                            I&apos;m Genie, your Stylist. Tell me about yourself.
                         </h2>
 
                         <div className="space-y-6">
@@ -185,10 +198,10 @@ export default function StylistInterface() {
                         <div className="p-8">
                             <div className="bg-amber-50 p-6 rounded-2xl border border-amber-100 mb-8">
                                 <h3 className="text-sm font-bold text-amber-800 uppercase tracking-wide mb-2 flex items-center gap-2">
-                                    <Sparkles className="w-4 h-4" /> Genie's Stylist Notes
+                                    <Sparkles className="w-4 h-4" /> Genie&apos;s Stylist Notes
                                 </h3>
                                 <p className="text-slate-700 leading-relaxed italic">
-                                    "{result.advice}"
+                                    &quot;{result.advice}&quot;
                                 </p>
                             </div>
 

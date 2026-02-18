@@ -43,8 +43,8 @@ export default function RestockTracker({ productName, stockLevel }: RestockTrack
                         <Check className="w-5 h-5" />
                     </div>
                     <div>
-                        <h4 className="font-semibold text-green-900">You're on the list!</h4>
-                        <p className="text-sm text-green-700">We'll alert you efficiently.</p>
+                        <h4 className="font-semibold text-green-900">You&apos;re on the list!</h4>
+                        <p className="text-sm text-green-700">We&apos;ll alert you efficiently.</p>
                     </div>
                 </div>
 
@@ -53,7 +53,7 @@ export default function RestockTracker({ productName, stockLevel }: RestockTrack
                         <p className="text-xs text-slate-400 mb-1 uppercase tracking-wider font-semibold">AI Generated Preview</p>
                         <div className="text-sm text-slate-800">
                             <p className="font-medium mb-1">Subject: {demoNotification.subject}</p>
-                            <p className="text-slate-600 leading-relaxed">"{demoNotification.body}"</p>
+                            <p className="text-slate-600 leading-relaxed">&quot;{demoNotification.body}&quot;</p>
                             {demoNotification.discountCode && (
                                 <div className="mt-2 inline-block px-2 py-1 bg-green-100 text-green-700 text-xs font-mono rounded border border-green-200 border-dashed">
                                     Code: {demoNotification.discountCode}
@@ -75,7 +75,7 @@ export default function RestockTracker({ productName, stockLevel }: RestockTrack
                 <div className="flex-1">
                     <h3 className="font-semibold text-slate-900">Out of Stock</h3>
                     <p className="text-sm text-slate-500 mb-4">
-                        Demand is high. Get notified strictly when it's back.
+                        Demand is high. Get notified strictly when it&apos;s back.
                     </p>
 
                     <form onSubmit={handleSubscribe} className="flex gap-2">

@@ -1,7 +1,7 @@
 import { getProduct, getReviews, getCategories, getSiteContent, ProductDetailPageContent } from "@/app/actions";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ChevronRight, MapPin, Phone, Clock, ShieldCheck, Check, Star, Loader2 } from "lucide-react";
+import { ChevronRight, MapPin, Phone, Clock, ShieldCheck, Check, Star } from "lucide-react";
 import ImageGallery from "@/components/ImageGallery";
 import { Reviews } from "@/components/Reviews";
 import DealExplainer from "@/components/ai/DealExplainer";

@@ -3,9 +3,7 @@
 import { useState, useEffect } from "react";
 import { ProductRequest, getProductRequests, updateRequestStatus } from "@/app/actions/request-actions";
 import {
-    Search, Filter, CheckCircle, Clock, XCircle,
-    MoreHorizontal, Eye, ExternalLink, Image as ImageIcon,
-    Loader2, Mail, Phone, Calendar
+    Search, XCircle, ImageIcon, Loader2
 } from "lucide-react";
 import { format } from "date-fns";
 import Image from "next/image";
@@ -71,7 +69,7 @@ export default function RequestManagement() {
             if (result.success) {
                 // Update local state
                 setRequests(prev => prev.map(r =>
-                    r.id === selectedRequest.id ? { ...r, status: status as any, notes: note } : r
+                    r.id === selectedRequest.id ? { ...r, status: status as ProductRequest["status"], notes: note } : r
                 ));
                 toast.success("Status updated successfully");
                 setSelectedRequest(null);

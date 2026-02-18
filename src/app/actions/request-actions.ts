@@ -76,7 +76,11 @@ export async function getProductRequests(status?: string) {
 
 export async function updateRequestStatus(id: string, status: string, notes?: string) {
     try {
-        const updateData: any = {
+        const updateData: {
+            status: string;
+            updatedAt: admin.firestore.FieldValue;
+            notes?: string;
+        } = {
             status,
             updatedAt: admin.firestore.FieldValue.serverTimestamp(),
         };

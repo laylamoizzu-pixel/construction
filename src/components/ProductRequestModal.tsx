@@ -58,7 +58,7 @@ export default function ProductRequestModal({
             } else {
                 setError(result.error as string);
             }
-        } catch (err) {
+        } catch (_err) {
             setError("Something went wrong. Please try again.");
         } finally {
             setIsSubmitting(false);
@@ -107,7 +107,7 @@ export default function ProductRequestModal({
                                     </motion.div>
                                     <h3 className="text-2xl font-bold text-gray-800 mb-2">Request Sent!</h3>
                                     <p className="text-gray-600">
-                                        Your Genie has received the request.<br />We'll notify you once we find this product.
+                                        Your Genie has received the request.<br />We&apos;ll notify you once we find this product.
                                     </p>
                                 </div>
                             ) : (
@@ -190,7 +190,7 @@ export default function ProductRequestModal({
                                             className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-brand-blue/20 focus:border-brand-blue transition-all"
                                             placeholder="Email or Phone Number"
                                         />
-                                        <p className="text-xs text-gray-500 mt-1">We'll contact you when we find it.</p>
+                                        <p className="text-xs text-gray-500 mt-1">We&apos;ll contact you when we find it.</p>
                                     </div>
 
                                     {/* Todo: Add Image Upload here. Will assume CloudinaryUpload exists and we can use it. 

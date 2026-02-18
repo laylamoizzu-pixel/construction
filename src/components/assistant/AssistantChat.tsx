@@ -183,7 +183,7 @@ export default function AssistantChat() {
                                     <div className="flex-1">
                                         <p className="text-xs font-bold text-brand-dark mb-1">Genie is here! ✨</p>
                                         <p className="text-[11px] text-slate-600 leading-snug">
-                                            Hi, I'm Genie, your personal Shopping Master! 🧞‍♂️ How can I help you today?
+                                            Hi, I&apos;m Genie, your personal Shopping Master! 🧞‍♂️ How can I help you today?
                                         </p>
                                         <button
                                             onClick={() => {

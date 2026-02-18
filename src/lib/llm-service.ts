@@ -36,7 +36,7 @@ const GROQ_MODEL_WHISPER = "whisper-large-v3-turbo";
 
 const GEMINI_API_BASE = "https://generativelanguage.googleapis.com/v1beta/models";
 const GROQ_AUDIO_BASE = "https://api.groq.com/openai/v1/audio/transcriptions";
-const GEMINI_MODEL = "gemini-2.0-flash";
+const GEMINI_MODEL = "gemini-flash-latest";
 
 interface GroqResponse {
     choices?: Array<{
@@ -260,7 +260,7 @@ export async function callGroqWhisperAPI(audioFormData: FormData, retryCount: nu
             throw new LLMServiceError(`Groq Whisper API failed: ${response.statusText}`, response.status);
         }
 
-        const data: any = await response.json();
+        const data: { text?: string } = await response.json();
 
         if (!data.text) {
             throw new LLMServiceError("No text in Whisper response");
@@ -831,7 +831,7 @@ export async function generateStylistAdvice(
         budget?: string;
         colors?: string[];
     },
-    availableProducts: any[] // In a real app, we'd pass a subset of relevant products/categories
+    availableProducts: unknown[] // In a real app, we'd pass a subset of relevant products/categories
 ): Promise<{
     advice: string;
     suggestedOutfit: {

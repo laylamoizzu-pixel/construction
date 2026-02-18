@@ -54,7 +54,7 @@ export default function VibeSelector() {
                     </span>
                     <h2 className="text-3xl font-bold text-slate-900 mb-4">Shop by Vibe</h2>
                     <p className="text-slate-600 max-w-2xl mx-auto">
-                        Don't know what to search for? Tell our AI your mood or occasion, and we'll curate the perfect collection.
+                        Don&apos;t know what to search for? Tell our AI your mood or occasion, and we&apos;ll curate the perfect collection.
                     </p>
                 </div>
 

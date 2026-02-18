@@ -31,11 +31,11 @@ export default function GenieRequestTrigger({ searchQuery }: GenieRequestTrigger
                         </div>
 
                         <h3 className="text-2xl font-bold font-serif text-gray-900 mb-3">
-                            Couldn't find what you're looking for?
+                            Couldn&apos;t find what you&apos;re looking for?
                         </h3>
 
                         <p className="text-gray-600 mb-8 max-w-md mx-auto leading-relaxed">
-                            Don't worry! Our <span className="font-semibold text-brand-blue">Genie Service</span> can find it for you. Just tell us what you need, and we'll hunt it down.
+                            Don&apos;t worry! Our <span className="font-semibold text-brand-blue">Genie Service</span> can find it for you. Just tell us what you need, and we&apos;ll hunt it down.
                         </p>
 
                         <button
