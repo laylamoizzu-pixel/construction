@@ -58,7 +58,7 @@ export default function ProductRequestModal({
             } else {
                 setError(result.error as string);
             }
-        } catch (_err) {
+        } catch {
             setError("Something went wrong. Please try again.");
         } finally {
             setIsSubmitting(false);
