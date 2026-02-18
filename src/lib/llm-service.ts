@@ -215,65 +215,7 @@ export async function callVisionAPI(base64Image: string, retryCount: number = 0)
         throw new LLMServiceError(`Unexpected Vision error: ${error instanceof Error ? error.message : "Unknown"}`);
     }
 }
-/* OLD IMPLEMENTATION REMOVED */
 
-try {
-    const response = await fetch(GROQ_API_BASE, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${apiKey}`
-        },
-        body: JSON.stringify({
-            model: GROQ_MODEL_VISION,
-            messages: [
-                {
-                    role: "user",
-                    content: [
-                        { type: "text", text: "Identify the main product in this image. Return ONLY the product name and 2-3 key visual attributes (color, style) for a search query. No preamble." },
-                        {
-                            type: "image_url",
-                            image_url: {
-                                url: base64Image.startsWith("data:") ? base64Image : `data:image/jpeg;base64,${base64Image}`
-                            }
-                        }
-                    ]
-                }
-            ],
-            temperature: 0.1,
-            max_tokens: 100,
-        }),
-    });
-
-    // ... error handling ...
-    if (response.status === 429) {
-        keyManager.markKeyRateLimited(apiKey);
-        if (retryCount < MAX_RETRIES) return callGroqVisionAPI(base64Image, retryCount + 1);
-        throw new LLMServiceError("Rate limit exceeded on Groq keys", 429);
-    }
-
-    if (!response.ok) {
-        const errorText = await response.text();
-        console.error(`[LLMService] Groq Vision Error: ${errorText}`);
-        keyManager.markKeyFailed(apiKey);
-        if (retryCount < MAX_RETRIES) return callGroqVisionAPI(base64Image, retryCount + 1);
-        throw new LLMServiceError(`Groq Vision API failed: ${response.statusText}`, response.status);
-    }
-
-    const data: GroqResponse = await response.json();
-    const text = data.choices?.[0]?.message?.content;
-
-    if (!text) throw new LLMServiceError("No response from Groq Vision");
-
-    keyManager.markKeySuccess(apiKey);
-    return text.trim();
-} catch (error) {
-    if (error instanceof LLMServiceError || error instanceof APIKeyExhaustedError) throw error;
-    keyManager.markKeyFailed(apiKey);
-    if (retryCount < MAX_RETRIES) return callGroqVisionAPI(base64Image, retryCount + 1);
-    throw new LLMServiceError(`Unexpected Groq Vision error: ${error instanceof Error ? error.message : "Unknown"}`);
-}
-}
 
 /**
  * Make a request to Groq Whisper API

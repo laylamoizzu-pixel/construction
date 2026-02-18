@@ -1,6 +1,6 @@
 "use server";
 
-import { callGroqVisionAPI } from "@/lib/llm-service";
+import { callVisionAPI } from "@/lib/llm-service";
 
 export async function analyzeImage(formData: FormData) {
     const file = formData.get("image") as File;
@@ -21,7 +21,7 @@ export async function analyzeImage(formData: FormData) {
         const mimeType = file.type;
         const dataUrl = `data:${mimeType};base64,${base64Image}`;
 
-        const searchKeywords = await callGroqVisionAPI(dataUrl);
+        const searchKeywords = await callVisionAPI(dataUrl);
 
         return { success: true, query: searchKeywords };
     } catch (error) {

@@ -14,7 +14,7 @@ dotenv.config({ path: envPath });
 
 async function testVision() {
     // Dynamic import
-    const { callGroqVisionAPI } = await import("../src/lib/llm-service");
+    const { callVisionAPI } = await import("../src/lib/llm-service");
 
     console.log("----------------------------------------------------------------");
     console.log("👁️ STARTING VISUAL SEARCH TEST");
@@ -36,7 +36,7 @@ async function testVision() {
         // 3. Call Vision API
         const start = Date.now();
         console.log("Calling Groq Vision API...");
-        const keywords = await callGroqVisionAPI(dataUrl);
+        const keywords = await callVisionAPI(dataUrl);
         const duration = Date.now() - start;
 
         console.log(`⏱️ Duration: ${duration}ms`);
