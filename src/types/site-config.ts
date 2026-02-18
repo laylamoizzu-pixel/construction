@@ -16,6 +16,8 @@ export interface ThemeConfig {
     accentColor: string;
     backgroundColor: string;
     textColor: string;
+    navbarColor: string;
+    navbarTextColor: string;
 }
 
 export interface HeroSlide {
@@ -198,6 +200,8 @@ export const DEFAULT_SITE_CONFIG: SiteConfig = {
         accentColor: "#10b981", // Emerald 500
         backgroundColor: "#f8fafc", // Slate 50
         textColor: "#0f172a", // Slate 900
+        navbarColor: "#ffffff", // White
+        navbarTextColor: "#0f172a", // Slate 900
     },
     hero: {
         slides: [

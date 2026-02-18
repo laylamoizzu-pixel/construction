@@ -523,9 +523,9 @@ export interface Product {
 export const getProducts = cache(async function getProducts(
     categoryId?: string,
     available?: boolean,
-    limitCount: number = 200, // Increased default for better initial visibility
+    limitCount: number = 20, // Reduced default for efficiency, callers can override
     startAfterId?: string,
-    subcategoryId?: string // New parameter
+    subcategoryId?: string
 ): Promise<Product[]> {
     const cache = getSearchCache();
 
@@ -553,33 +553,20 @@ export const getProducts = cache(async function getProducts(
             query = query.where("available", "==", available);
         }
 
-        // --- Critical Fix for "Requires Index" Error ---
-        // If we have ANY inequality filter (range, etc) or multiple equality filters, 
-        // Firestore requires a composite index to sort by a different field (createdAt).
-        // Since we don't want to force creating 10+ indexes for every combination,
-        // we will SKIP database sorting if we are filtering, and sort in memory.
+        // Apply ordering - Default to createdAt desc for consistency
+        // Note: This may require composite indexes in Firestore for combined filters.
+        // If an index error occurs, Firestore provides a link in the console to create it.
+        let orderedQuery = query.orderBy("createdAt", "desc");
 
-        const isFiltering = !!(categoryId || subcategoryId || available !== undefined);
-        let snapshot;
-
-        if (isFiltering) {
-            // specific optimization: no orderBy to avoid index requirement
-            // We fetch slightly more if needed to ensure we get enough recent items, 
-            // but ideally limitCount applies to the filtered set.
-            snapshot = await query.limit(limitCount).get();
-        } else {
-            // default behavior: sort by createdAt when NO filters are active
-            let orderedQuery = query.orderBy("createdAt", "desc");
-
-            if (startAfterId) {
-                const startAfterDoc = await getAdminDb().collection("products").doc(startAfterId).get();
-                if (startAfterDoc.exists) {
-                    orderedQuery = orderedQuery.startAfter(startAfterDoc);
-                }
+        // Apply pagination
+        if (startAfterId) {
+            const startAfterDoc = await getAdminDb().collection("products").doc(startAfterId).get();
+            if (startAfterDoc.exists) {
+                orderedQuery = orderedQuery.startAfter(startAfterDoc);
             }
-
-            snapshot = await orderedQuery.limit(limitCount).get();
         }
+
+        const snapshot = await orderedQuery.limit(limitCount).get();
 
         const products = snapshot.docs.map((doc: admin.firestore.QueryDocumentSnapshot) => ({
             id: doc.id,
@@ -587,12 +574,6 @@ export const getProducts = cache(async function getProducts(
             createdAt: (doc.data().createdAt as admin.firestore.Timestamp)?.toDate() || new Date(),
             updatedAt: (doc.data().updatedAt as admin.firestore.Timestamp)?.toDate() || undefined,
         })) as Product[];
-
-        // In-memory sort always if we didn't sort in DB (or even if we did, to be safe for combined results)
-        // But mainly if isFiltering is true.
-        if (isFiltering) {
-            products.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
-        }
 
         // Cache if this was a cacheable query
         if (canUseCache) {
@@ -602,6 +583,26 @@ export const getProducts = cache(async function getProducts(
         return products;
     } catch (error) {
         console.error("Error fetching products:", error);
+        // Fallback: If index is missing, retry without orderBy for basic functionality
+        if (error instanceof Error && error.message.includes("index")) {
+            console.warn("Falling back to unordered query due to missing index.");
+            try {
+                let fallbackQuery = getAdminDb().collection("products");
+                if (subcategoryId) fallbackQuery = fallbackQuery.where("subcategoryId", "==", subcategoryId);
+                else if (categoryId) fallbackQuery = fallbackQuery.where("categoryId", "==", categoryId);
+                if (available !== undefined) fallbackQuery = fallbackQuery.where("available", "==", available);
+
+                const snapshot = await fallbackQuery.limit(limitCount).get();
+                return snapshot.docs.map((doc: admin.firestore.QueryDocumentSnapshot) => ({
+                    id: doc.id,
+                    ...doc.data(),
+                    createdAt: (doc.data().createdAt as admin.firestore.Timestamp)?.toDate() || new Date(),
+                    updatedAt: (doc.data().updatedAt as admin.firestore.Timestamp)?.toDate() || undefined,
+                })) as Product[];
+            } catch (fallbackError) {
+                console.error("Fallback query also failed:", fallbackError);
+            }
+        }
         return [];
     }
 });
