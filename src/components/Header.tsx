@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Search, Camera, Loader2 } from "lucide-react";
+import { Menu, X, Search, Camera, Loader2, Mic, Square } from "lucide-react";
 import { useSiteConfig } from "@/context/SiteConfigContext";
 import { analyzeImage } from "@/app/actions/image-search-action";
 
@@ -59,25 +59,91 @@ export default function Header() {
             const result = await analyzeImage(formData);
 
             if (result.success && result.query) {
+                setSearchQuery(result.query);
+                // Auto-submit search after analysis
                 router.push(`/products?search=${encodeURIComponent(result.query)}`);
-                setSearchQuery("");
                 setIsSearchOpen(false);
-                setIsMenuOpen(false);
-            } else {
-                console.error(result.error);
-                setSearchQuery(originalQuery);
-                alert("Could not analyze image. Please try again.");
             }
         } catch (error) {
-            console.error("Image upload failed:", error);
-            setSearchQuery(originalQuery);
-            alert("Error uploading image.");
+            console.error("Image search failed:", error);
+            setSearchQuery(originalQuery); // Revert on failure
+            alert("Failed to analyze image. Please try again.");
         } finally {
             setIsAnalyzing(false);
-            // Reset file input
-            if (fileInputRef.current) {
-                fileInputRef.current.value = "";
-            }
+        }
+    };
+
+    // Voice Search Logic
+    const [isRecording, setIsRecording] = useState(false);
+    const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+    const chunksRef = useRef<Blob[]>([]);
+
+    const startRecording = async () => {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            mediaRecorderRef.current = new MediaRecorder(stream);
+            chunksRef.current = [];
+
+            mediaRecorderRef.current.ondataavailable = (e) => {
+                if (e.data.size > 0) {
+                    chunksRef.current.push(e.data);
+                }
+            };
+
+            mediaRecorderRef.current.onstop = async () => {
+                const audioBlob = new Blob(chunksRef.current, { type: 'audio/webm' });
+                const formData = new FormData();
+                formData.append('audio', audioBlob, 'recording.webm');
+
+                // Show loading state
+                const originalQuery = searchQuery;
+                setSearchQuery("Listening...");
+                setIsAnalyzing(true);
+
+                try {
+                    // Dynamic import to avoid server-side issues
+                    const { processVoiceSearch } = await import("@/app/actions/voice-search-action");
+                    const result = await processVoiceSearch(formData);
+
+                    if (result.success && result.text) {
+                        setSearchQuery(result.text);
+                        // Auto-submit
+                        router.push(`/products?search=${encodeURIComponent(result.text)}`);
+                        setIsSearchOpen(false);
+                    } else {
+                        console.error("Voice search failed:", result.error);
+                        setSearchQuery(originalQuery);
+                    }
+                } catch (err) {
+                    console.error("Voice search error:", err);
+                    setSearchQuery(originalQuery);
+                } finally {
+                    setIsAnalyzing(false);
+                    // Stop all tracks
+                    stream.getTracks().forEach(track => track.stop());
+                }
+            };
+
+            mediaRecorderRef.current.start();
+            setIsRecording(true);
+        } catch (err) {
+            console.error("Error accessing microphone:", err);
+            alert("Could not access microphone. Please check permissions.");
+        }
+    };
+
+    const stopRecording = () => {
+        if (mediaRecorderRef.current && isRecording) {
+            mediaRecorderRef.current.stop();
+            setIsRecording(false);
+        }
+    };
+
+    const handleVoiceClick = () => {
+        if (isRecording) {
+            stopRecording();
+        } else {
+            startRecording();
         }
     };
 
@@ -168,24 +234,35 @@ export default function Header() {
                                             onChange={(e) => setSearchQuery(e.target.value)}
                                             disabled={isAnalyzing}
                                             placeholder={isAnalyzing ? "Analyzing image..." : (config.labels?.placeholders?.search || config.branding.searchPlaceholder || "Search collection...")}
-                                            className="w-full bg-slate-100/50 border border-slate-200 text-slate-800 text-sm rounded-full pl-4 pr-10 py-2 focus:outline-none focus:ring-2 focus:ring-brand-blue/50 disabled:bg-slate-50 disabled:text-slate-500"
+                                            className="w-full bg-slate-100/50 border border-slate-200 text-slate-800 text-sm rounded-full pl-4 pr-20 py-2 focus:outline-none focus:ring-2 focus:ring-brand-blue/50 disabled:bg-slate-50 disabled:text-slate-500"
                                             onBlur={() => !searchQuery && !isAnalyzing && setIsSearchOpen(false)}
                                         />
 
-                                        {/* Visual Search Button */}
-                                        <button
-                                            type="button"
-                                            onClick={() => fileInputRef.current?.click()}
-                                            disabled={isAnalyzing}
-                                            className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-brand-blue transition-colors disabled:opacity-50"
-                                            title="Search with image"
-                                        >
-                                            {isAnalyzing ? (
-                                                <Loader2 className="w-4 h-4 animate-spin" />
-                                            ) : (
-                                                <Camera className="w-4 h-4" />
-                                            )}
-                                        </button>
+                                        {/* Visual & Voice Search Buttons */}
+                                        <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                                            <button
+                                                type="button"
+                                                onClick={() => fileInputRef.current?.click()}
+                                                disabled={isAnalyzing}
+                                                className="text-slate-400 hover:text-brand-blue transition-colors disabled:opacity-50 p-1"
+                                                title="Search with image"
+                                            >
+                                                {isAnalyzing ? (
+                                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                                ) : (
+                                                    <Camera className="w-4 h-4" />
+                                                )}
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={handleVoiceClick}
+                                                disabled={isAnalyzing}
+                                                className={`transition-colors disabled:opacity-50 p-1 ${isRecording ? 'text-red-500 animate-pulse' : 'text-slate-400 hover:text-brand-blue'}`}
+                                                title="Voice Search"
+                                            >
+                                                {isRecording ? <Square className="w-4 h-4 fill-current" /> : <Mic className="w-4 h-4" />}
+                                            </button>
+                                        </div>
                                         <input
                                             type="file"
                                             ref={fileInputRef}
@@ -266,8 +343,8 @@ export default function Header() {
                                 </button>
 
                                 {/* Mobile Visual Search Trigger - Maybe overlay or another button? 
-                                    For now keeping it simple on mobile, just text search or let's add camera icon there too 
-                                */}
+                                        For now keeping it simple on mobile, just text search or let's add camera icon there too 
+                                    */}
                                 <button
                                     type="button"
                                     onClick={() => fileInputRef.current?.click()}
