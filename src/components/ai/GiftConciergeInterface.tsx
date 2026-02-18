@@ -221,7 +221,7 @@ export default function GiftConciergeInterface() {
                         <div className="p-8">
                             <div className="bg-rose-50 p-6 rounded-2xl border border-rose-100 mb-8">
                                 <h3 className="text-sm font-bold text-rose-800 uppercase tracking-wide mb-2 flex items-center gap-2">
-                                    <Sparkles className="w-4 h-4" /> Concierge Thought Process
+                                    <Sparkles className="w-4 h-4" /> Genie's Thought Process
                                 </h3>
                                 <p className="text-slate-700 leading-relaxed italic">
                                     "{result.thoughtProcess}"

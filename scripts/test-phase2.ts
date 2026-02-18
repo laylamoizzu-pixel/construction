@@ -20,6 +20,7 @@ if (result.error) {
 
 // Check if GROQ key is present
 console.log("Checking GROQ_API_KEY:", process.env.GROQ_API_KEY ? "Present" : "Missing");
+console.log("Checking GROQ_API_KEY_1:", process.env.GROQ_API_KEY_1 ? "Present" : "Missing");
 
 async function testPhase2() {
     // Dynamic import to ensure env vars are loaded first

@@ -12,8 +12,8 @@ const DEFAULT_NAV_LINKS = [
     { label: "Home", href: "/" },
     { label: "Products", href: "/products" },
     { label: "Offers", href: "/offers" },
-    { label: "Stylist", href: "/stylist" },
-    { label: "Gift Finder", href: "/gift-finder" },
+    { label: "Genie Stylist", href: "/stylist" },
+    { label: "Genie Gift Finder", href: "/gift-finder" },
     { label: "Departments", href: "/departments" },
     { label: "About Us", href: "/about" },
 ];

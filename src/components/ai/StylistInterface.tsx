@@ -185,7 +185,7 @@ export default function StylistInterface() {
                         <div className="p-8">
                             <div className="bg-amber-50 p-6 rounded-2xl border border-amber-100 mb-8">
                                 <h3 className="text-sm font-bold text-amber-800 uppercase tracking-wide mb-2 flex items-center gap-2">
-                                    <Sparkles className="w-4 h-4" /> Stylist's Notes
+                                    <Sparkles className="w-4 h-4" /> Genie's Stylist Notes
                                 </h3>
                                 <p className="text-slate-700 leading-relaxed italic">
                                     "{result.advice}"

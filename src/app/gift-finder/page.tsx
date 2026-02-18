@@ -12,10 +12,10 @@ export default function GiftFinderPage() {
 
                 <div className="container mx-auto max-w-4xl text-center relative z-10">
                     <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-md rounded-full text-rose-300 text-sm font-bold mb-6 border border-white/10">
-                        <Gift className="w-4 h-4" /> AI Gift Concierge
+                        <Gift className="w-4 h-4" /> Genie AI Gift Concierge
                     </div>
                     <h1 className="text-4xl md:text-6xl font-black tracking-tight mb-6">
-                        Find the Perfect Gift
+                        Genie: Find the Perfect Gift
                     </h1>
                     <p className="text-xl text-rose-200/80 max-w-2xl mx-auto leading-relaxed">
                         Struggling to find the right gift? Let our AI Concierge analyze your recipient's persona and suggest thoughtful ideas.

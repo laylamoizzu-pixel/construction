@@ -15,7 +15,7 @@ export default function StylistPage() {
                         <Sparkles className="w-4 h-4" /> AI-Powered
                     </div>
                     <h1 className="text-4xl md:text-6xl font-black tracking-tight mb-6">
-                        Your Personal AI Stylist
+                        Your Genie Personal AI Stylist
                     </h1>
                     <p className="text-xl text-slate-300 max-w-2xl mx-auto leading-relaxed">
                         Get personalized outfit recommendations tailored to your vibe, occasion, and budget. Powered by advanced fashion reasoning.
