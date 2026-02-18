@@ -7,6 +7,7 @@ import { getSiteConfig } from "@/app/actions/site-config";
 import { DEFAULT_SITE_CONFIG } from "@/types/site-config";
 import { Suspense } from "react";
 import Script from "next/script";
+import LanguageAssistant from "@/components/ai/LanguageAssistant";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -109,6 +110,7 @@ export default async function RootLayout({
         )}
 
         <SpeedInsights />
+        <LanguageAssistant />
       </body>
     </html>
   );

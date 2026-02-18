@@ -1090,3 +1090,45 @@ export async function chatWithAssistant(
         suggestedActions?: string[];
     }>(prompt, "groq", GROQ_MODEL);
 }
+
+/**
+ * Translates a "Vibe" (abstract mood) into concrete product filters.
+ */
+export async function translateVibeToFilters(vibe: string): Promise<{
+    searchQuery?: string;
+    category?: string;
+    colors?: string[];
+    priceRange?: { min?: number; max?: number };
+    sort?: "price_asc" | "price_desc" | "newest" | "rating";
+    reasoning: string;
+}> {
+    const prompt = `You are a fashion and lifestyle curator.
+    The user wants to shop for a specific "Vibe": "${vibe}".
+    
+    Translate this vibe into search filters for an e-commerce store holding Electronics, Fashion, Home Decor, and Beauty.
+    
+    Rules:
+    - Map the abstract vibe to concrete categories and search terms.
+    - Suggest colors that match the mood.
+    - Suggest a price range if the vibe implies luxury or budget (e.g., "Boujee" -> High Price).
+    
+    Response JSON:
+    {
+      "searchQuery": "Best keyword to search (e.g., 'Party Dress', 'Gaming Setup')",
+      "category": "Main Category ID if clear (e.g., 'fashion', 'electronics')",
+      "colors": ["List of 2-3 dominant colors"],
+      "priceRange": { "min": 0, "max": 10000 },
+      "sort": "One of: 'price_asc', 'price_desc', 'newest', 'rating'",
+      "reasoning": "Short explanation of why these filters match the vibe."
+    }`;
+
+    // Using Llama 3.3 70B for nuanced semantic understanding
+    return await callLLMForJSON<{
+        searchQuery?: string;
+        category?: string;
+        colors?: string[];
+        priceRange?: { min?: number; max?: number };
+        sort?: "price_asc" | "price_desc" | "newest" | "rating";
+        reasoning: string;
+    }>(prompt, "groq", GROQ_MODEL);
+}
