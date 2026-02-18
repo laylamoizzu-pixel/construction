@@ -1,0 +1,80 @@
+# Multi-Feature AI Implementation Plan (Groq-Exclusive)
+
+This plan details the implementation strategy and model selection for the 12 selected AI features for Smart Avenue, using **exclusively** top-tier open-source models available on **Groq**.
+
+## Model Selection (Groq Only)
+
+We will leverage Groq's high-speed inference for all features, prioritizing reasoning and creative performance using leading open-source LLMs.
+
+| Feature | Primary Groq Model | Alternative/Fallback | Purpose |
+|:---|:---|:---|:---|
+| 1. Smart Snap & Shop | **Llama 3.2 90B Vision** | Llama 3.2 11B Vision | Image understanding and product identifying. |
+| 2. AI Personal Stylist | **DeepSeek-R1 Distill Llama 70B** | Llama 3.3 70B | Logical matching and complex fashion reasoning. |
+| 3. Gift Concierge | **DeepSeek-R1 Distill Qwen 32B** | Llama 3.3 70B | Thinking through personalized gift logic. |
+| 4. Voice Shopping | **Whisper-large-v3-turbo** | Whisper-large-v3 | Near-instant speech-to-text. |
+| 5. Smart Deal Explainer | **Llama 3.1 8B** | Gemma 2 9B | Fast reasoning for sales triggers. |
+| 7. AI Sentiment Summarizer| **Llama 3.3 70B** | Mixtral 8x7B | Processing large context reviews. |
+| 8. Vibe Check | **Llama 3.3 70B** | DeepSeek-R1 Distill Llama 70B | Abstract semantic mood mapping. |
+| 9. Local Language Assistant| **Llama 3.3 70B** | Llama 3.1 8B | Superior multilingual chat performance. |
+| 10. Restock Tracker | **Llama 3.1 8B** | Llama 3.2 1B | Lightweight alert generation. |
+| 12. Compare & Contrast | **DeepSeek-R1 Distill Llama 70B** | Llama 3.3 70B | Nuanced difference detection. |
+| 16. Out of Stock Predictor | **Llama 3.1 8B** | Gemma 2 9B | Rapid notification logic. |
+| 20. Social Proof Gen | **Llama 3.1 8B** | Llama 3.2 3B | Creative snippet generation. |
+
+
+---
+
+## Feature Placement & UI/UX Integration
+
+Each feature will be integrated into specific areas of the app to maximize visibility and utility.
+
+### Phase 1: Core Conversion Boosters
+| Feature | UI Location | Trigger/Interaction |
+|:---|:---|:---|
+| **Social Proof Gen** | Homepage & Product Pages | "Trending now" badges and "Purchased recently" labels. |
+| **Smart Deal Explainer**| Product Detail Page | A "Smart Insight" box directly below the discount price. |
+| **Sentiment Summarizer**| Reviews Section | An "AI Review Summary" tab appearing above the list of reviews. |
+
+### Phase 2: Personalized Guidance
+| Feature | UI Location | Trigger/Interaction |
+|:---|:---|:---|
+| **AI Personal Stylist** | "Stylist" Navigation Tab | A dedicated full-page experience for outfit matching. |
+| **Gift Concierge** | "Gift Finder" Page | An interactive multi-step questionnaire to find the perfect gift. |
+| **Compare & Contrast** | Product Detail / Comparison Dialog | A "Compare with similar" button that opens an AI analysis side-by-side. |
+
+### Phase 3: Interactive Search
+| Feature | UI Location | Trigger/Interaction |
+|:---|:---|:---|
+| **Smart Snap & Shop** | Main Search Bar | A "Camera" icon that opens the camera/upload UI. |
+| **Voice Shopping** | Main Search Bar | A "Microphone" icon for hands-free searching. |
+| **Local Language Asst.** | Global Chat Widget | Language selector in the chat settings or via auto-detect. |
+| **Vibe Check** | Homepage Banners | "Shop the Mood" sliders (e.g., Casual, Party, Professional). |
+
+### Phase 4: Proactive Notifications
+| Feature | UI Location | Trigger/Interaction |
+|:---|:---|:---|
+| **Restock Tracker** | Product Page / Notifications | "Notify Me" button on OOS items; WhatsApp/Push notification. |
+| **OOS Predictor** | Product Page | "Buy soon! Likely to sell out by [Date]" banner on low-stock items. |
+
+---
+
+## Technical Appendix: Groq Model Mapping
+
+| Feature | Primary Groq Model | Logic Mode |
+|:---|:---|:---|
+| Visual Search | **Llama 3.2 90B Vision** | Multimodal (Vision API) |
+| Reasoning Tasks | **DeepSeek-R1 Distill Llama 70B** | Chain of Thought (Thinking) |
+| Conversational | **Llama 3.3 70B** | Chat Completion |
+| Voice | **Whisper-large-v3-turbo** | Audio Transcription |
+| Logic/Alerts | **Llama 3.1 8B** | Fast Inference |
+
+## Verification Plan
+
+### Automated Tests
+- Extend [verify-rotation.ts](file:///c:/Users/user/.gemini/antigravity/scratch/smart_avenue%20real/scripts/verify-rotation.ts) to test Groq response latency across all selected models.
+- Validate JSON output consistency for Summarizer and Stylist prompts.
+
+### Manual Verification
+- Test "Vibe Check" sliders to ensure valid product filtering.
+- Upload outfit photos to "Stylist Mode" to verify fashion reasoning.
+

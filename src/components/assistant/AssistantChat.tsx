@@ -21,6 +21,7 @@ export default function AssistantChat() {
     const [inputValue, setInputValue] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [messages, setMessages] = useState<Message[]>([]);
+    const [showGreetingPopup, setShowGreetingPopup] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
 
@@ -48,10 +49,16 @@ export default function AssistantChat() {
                 {
                     id: "welcome",
                     role: "assistant",
-                    content: "Hi! I'm your Smart Shopping Assistant. I can help you find products or take requests for items we don't have yet. Try saying 'I need running shoes' or 'Request a new product'.",
+                    content: "Hy this is Gene, your Shopping Master! How can I help You? Will you like me to serve you as master to do shopping?",
                     timestamp: new Date(),
                 },
             ]);
+
+            // Show the popup after a short delay
+            const timer = setTimeout(() => {
+                setShowGreetingPopup(true);
+            }, 3000);
+            return () => clearTimeout(timer);
         }
     }, []);
 
@@ -149,20 +156,64 @@ export default function AssistantChat() {
         <>
             {/* Floating Action Button */}
             <AnimatePresence>
-                {!isOpen && (
+                <motion.div
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0, opacity: 0 }}
+                    className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3"
+                >
+                    <AnimatePresence>
+                        {showGreetingPopup && (
+                            <motion.div
+                                initial={{ opacity: 0, y: 10, scale: 0.8 }}
+                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.8 }}
+                                className="mb-2 mr-2 bg-white p-4 rounded-2xl shadow-xl border border-slate-100 max-w-[280px] relative"
+                            >
+                                <button
+                                    onClick={() => setShowGreetingPopup(false)}
+                                    className="absolute -top-2 -right-2 w-6 h-6 bg-slate-100 rounded-full flex items-center justify-center text-slate-500 hover:bg-slate-200 transition-colors"
+                                >
+                                    <X className="w-3 h-3" />
+                                </button>
+                                <div className="flex gap-3">
+                                    <div className="w-8 h-8 rounded-full bg-brand-blue/10 flex items-center justify-center flex-shrink-0">
+                                        <Sparkles className="w-4 h-4 text-brand-blue" />
+                                    </div>
+                                    <div className="flex-1">
+                                        <p className="text-xs font-bold text-brand-dark mb-1">Gene is here! ✨</p>
+                                        <p className="text-[11px] text-slate-600 leading-snug">
+                                            Hy this is Gene, your Shopping Master! How can I help You?
+                                        </p>
+                                        <button
+                                            onClick={() => {
+                                                setIsOpen(true);
+                                                setShowGreetingPopup(false);
+                                            }}
+                                            className="mt-2 text-[10px] font-bold text-brand-blue hover:underline"
+                                        >
+                                            Start Shopping
+                                        </button>
+                                    </div>
+                                </div>
+                                <div className="absolute bottom-[-6px] right-6 w-3 h-3 bg-white border-r border-b border-slate-100 rotate-45" />
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+
                     <motion.button
-                        initial={{ scale: 0, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        exit={{ scale: 0, opacity: 0 }}
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.9 }}
-                        onClick={() => setIsOpen(true)}
-                        className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-brand-blue text-white rounded-full shadow-lg shadow-brand-blue/30 flex items-center justify-center border-2 border-white/20 backdrop-blur-md"
+                        onClick={() => {
+                            setIsOpen(true);
+                            setShowGreetingPopup(false);
+                        }}
+                        className="w-14 h-14 bg-brand-blue text-white rounded-full shadow-lg shadow-brand-blue/30 flex items-center justify-center border-2 border-white/20 backdrop-blur-md"
                     >
                         <Sparkles className="w-6 h-6 fill-current" />
                         <span className="absolute -top-1 -right-1 w-3 h-3 bg-brand-lime rounded-full border border-white animate-pulse" />
                     </motion.button>
-                )}
+                </motion.div>
             </AnimatePresence>
 
             {/* Chat Window */}
@@ -183,10 +234,10 @@ export default function AssistantChat() {
                                     <Sparkles className="w-5 h-5 text-brand-lime" />
                                 </div>
                                 <div>
-                                    <h3 className="font-bold text-sm">Smart Assistant</h3>
+                                    <h3 className="font-bold text-sm">Gene</h3>
                                     <p className="text-[10px] text-slate-300 flex items-center gap-1">
                                         <span className="w-1.5 h-1.5 rounded-full bg-brand-lime" />
-                                        Powered by Groq AI
+                                        Shopping Master
                                     </p>
                                 </div>
                             </div>

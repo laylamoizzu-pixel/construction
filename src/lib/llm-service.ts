@@ -24,23 +24,12 @@ interface GenericIntentResponse extends LLMIntentResponse {
 const MAX_RETRIES = 3;
 
 const GROQ_API_BASE = "https://api.groq.com/openai/v1/chat/completions";
-const GROQ_MODEL = "llama-3.3-70b-versatile"; // Using Llama 3.3 70B for high quality
+const GROQ_MODEL = "llama-3.3-70b-versatile"; // Meta model for better multi-language support (Hindi, Urdu, Hinglish)
+const GROQ_MODEL_LIGHT = "llama-3.1-8b-instant";
+const GROQ_MODEL_VISION = "llama-3.2-90b-vision-preview";
+
 const GEMINI_API_BASE = "https://generativelanguage.googleapis.com/v1beta/models";
 const GEMINI_MODEL = "gemini-2.0-flash";
-
-interface GeminiResponse {
-    candidates?: Array<{
-        content?: {
-            parts?: Array<{
-                text?: string;
-            }>;
-        };
-    }>;
-    error?: {
-        code: number;
-        message: string;
-    };
-}
 
 interface GroqResponse {
     choices?: Array<{
@@ -50,6 +39,25 @@ interface GroqResponse {
     }>;
     error?: {
         code: string | number;
+        message: string;
+    };
+}
+
+interface GeminiResponse {
+    candidates?: Array<{
+        content?: {
+            parts?: Array<{
+                text?: string;
+            }>;
+        };
+    }>;
+    choices?: Array<{
+        message?: {
+            content?: string;
+        };
+    }>;
+    error?: {
+        code: number;
         message: string;
     };
 }
@@ -79,8 +87,9 @@ async function callGroqAPI(prompt: string, retryCount: number = 0): Promise<stri
                 messages: [
                     { role: "user", content: prompt }
                 ],
-                temperature: 0.7,
+                temperature: 1, // Increased as requested in prompt snippet
                 max_tokens: 2048,
+                top_p: 1,
             }),
         });
 
@@ -173,8 +182,11 @@ async function callGeminiAPI(prompt: string, retryCount: number = 0): Promise<st
             throw new LLMServiceError(data.error.message, data.error.code);
         }
 
-        const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-        if (!text) throw new LLMServiceError("No response text from Gemini");
+        // Handle both Gemini native and Groq/OpenAI style responses
+        const text = data.candidates?.[0]?.content?.parts?.[0]?.text ||
+            data.choices?.[0]?.message?.content;
+
+        if (!text) throw new LLMServiceError("No response text from LLM");
 
         keyManager.markKeySuccess(apiKey);
         return text;
@@ -289,7 +301,8 @@ export async function analyzeIntent(
         ? `Conversation History:\n${messages.map(m => `${m.role.toUpperCase()}: ${m.content}`).join("\n")}\n\n`
         : "";
 
-    const prompt = `You are a product recommendation assistant for a retail store called "Smart Avenue" in India.
+    const prompt = `Hy this is Gene, your Master for doing shopping at "Smart Avenue" retail store in India.
+How can I help You? Will you like me to serve you as master to do shopping?
 
 ${history}Analyze the following customer query and extract their intent.
 
@@ -343,7 +356,8 @@ export async function rankProducts(
         tags: p.tags,
     }));
 
-    const prompt = `You are a product recommendation assistant for Smart Avenue retail store.
+    const prompt = `Hy this is Gene, your Shopping Master.
+I'm here to help you get premium products like teddy for your loved ones or stylish stationary at very affordable prices.
 
 Customer query: "${query}"
 
@@ -386,13 +400,13 @@ export async function generateSummary(
         return "I couldn't find specific products matching your requirements. Could you provide more details about what you're looking for?";
     }
 
-    const prompt = `You are a friendly product recommendation assistant for Smart Avenue retail store in India.
+    const prompt = `Hy this is Gene, your Shopping Master at Smart Avenue.
 
 Customer asked: "${query}"
 
 You found ${recommendationCount} product recommendation(s)${topProductName ? `, with "${topProductName}" being the top match` : ""}.
 
-Write a brief, friendly 1-2 sentence summary to introduce the recommendations. Be helpful and conversational. Do not use markdown formatting.`;
+Write a brief, friendly 1-2 sentence summary to introduce the recommendations. Be helpful and conversational as Gene. Do not use markdown formatting.`;
 
     const response = await callLLM(prompt, provider);
     return response.trim().replace(/```/g, "").replace(/^["']|["']$/g, "");
@@ -407,15 +421,13 @@ export async function generateNoProductFoundResponse(
     intent: LLMIntentResponse,
     provider: LLMProvider = "google"
 ): Promise<string> {
-    const prompt = `You are an expert sales associate for Smart Avenue, known for being helpful and proactive.
+    const prompt = `Hy this is Gene, your Shopping Master at Smart Avenue.
+I help customers get premium products at very affordable prices.
 
 CRITICAL INSTRUCTION:
 - You MUST detect the language of the Customer Query.
-- You MUST reply in the SAME language as the query.
-- If the user asks in Hindi, reply in Hindi.
-- If the user asks in Urdu, reply in Urdu.
-- If the user asks in Hinglish, reply in Hinglish.
-- If the user asks in English, reply in English.
+- You MUST reply in the SAME language as the query (Hindi, Urdu, Hinglish, or English).
+- Be the helpful Master Gene.
 
 Customer query: "${query}"
 
@@ -425,13 +437,12 @@ Intent analysis:
 - Requirements: ${intent.requirements.join(", ") || "none specified"}
 
 We do NOT have this product in stock right now.
-Your goal is to offer to take a "Product Request" for them.
 1. Apologize that we don't have it currently.
-2. Offer to note down their request so we can stock it.
-3. Crucially, ask for their TARGET PRICE or BUDGET for this item if they haven't provided it.
+2. Offer to note down their request as their Shopping Master.
+3. Crucially, ask for their TARGET PRICE or BUDGET if they haven't provided it.
 4. Ask for any other specific details (color, size, brand) if relevant.
 
-Keep the tone professional, helpful, and encouraging. Keep it concise (2-3 sentences max).`;
+Keep it concise (2-3 sentences max).`;
 
     const response = await callLLM(prompt, provider);
     return response.trim().replace(/```/g, "").replace(/^["']|["']$/g, "");
@@ -462,28 +473,16 @@ export async function handleMissingProduct(
 
     const productName = intent.productRequestData?.name || intent.category || intent.subcategory || query;
 
-    const prompt = `You are a helpful sales assistant for Smart Avenue.
+    const prompt = `Hy this is Gene, your Shopping Master at Smart Avenue.
     
 ${history}Customer Query: "${query}"
 
 Context: The customer is interested in "${productName}", but we DO NOT have this product in stock.
-We want to take a "Product Request" to stock it for them.
-
-To submit a request, we IDEALLY want:
-1. Product Name (We have this: "${productName}")
-2. Specifics (Color, size, brand, etc.)
-3. Target Price / Budget
-
-Current Knowledge:
-- Budget: ${intent.budgetMax || intent.productRequestData?.maxBudget ? "Known" : "Unknown"}
-- Specs: ${intent.requirements.length > 0 || intent.productRequestData?.specifications?.length ? "Known" : "Unknown"}
+As their Master, I want to take a "Product Request" to stock it for them at an affordable price.
 
 Decision Logic:
-1. A request implies we need to KNOW what they want.
-2. If the user has ALREADY provided a budget OR specific details in the history/query, we have enough to submit.
-3. If the user has explicitly said "requests it", "order it", "buy it", or "get it", submit (even if budget is implied or will be discussed later).
-4. If this is the FIRST time they mentioned it and gave NO details (just "do you have gucci bags?"), we should ASK for details first.
-5. If they just answered a question about details (e.g. "My budget is 5k"), submit.
+1. If budget or specific details are known, or if they explicitly asked to order it, submit the request.
+2. Otherwise, ask for details as Gene.
 
 Output a JSON object:
 {
@@ -532,7 +531,7 @@ Output a JSON object:
         const fallbackProductName = intent.productRequestData?.name || intent.category || intent.subcategory || query;
         return {
             action: "ask_details" as const,
-            response: `We don't currently have "${fallbackProductName}" in stock, but I'd love to help you get it! Could you share your preferred budget and any specific details (like brand, color, or size) so I can note down a product request for you?`,
+            response: `Hy this is Gene. We don't currently have "${fallbackProductName}" in stock. As your Shopping Master, I'd love to help you get it! Could you share your preferred budget and details?`,
         };
     }
 }
@@ -564,17 +563,12 @@ export async function rankAndSummarize(
         tags: p.tags,
     }));
 
-    const prompt = `You are an expert sales associate for Smart Avenue, known for being the world's best salesperson.
-You are creative, persuasive, and charming.
+    const prompt = `Hy this is Gene, your Shopping Master at Smart Avenue.
+I am creative, persuasive, and I help you find premium products like stationary or teddies at affordable prices.
 
 CRITICAL INSTRUCTION:
-- You MUST detect the language of the Customer Query.
-- You MUST reply in the SAME language as the query.
-- If the user asks in Hindi, reply in Hindi.
-- If the user asks in Urdu, reply in Urdu.
-- If the user asks in Hinglish, reply in Hinglish.
-- If the user asks in English, reply in English.
-- Be culturally relevant to Indian shoppers.
+- You MUST reply in the SAME language as the query (English, Hindi, Urdu, or Hinglish).
+- Be charming and speak as Gene, the Shopping Master.
 
 Customer query: "${query}"
 
@@ -586,10 +580,6 @@ Intent analysis:
 
 Available products:
 ${JSON.stringify(productList, null, 2)}
-
-Do two things:
-1. Rank the top 3-5 most suitable products for this customer
-3. Write a creative, persuasive, and personalized summary to introduce the recommendations. Speak directly to the customer.
 
 Respond with a JSON object (and nothing else) in this exact format:
 {
@@ -610,4 +600,80 @@ Only include relevant products. If no products match well, return empty rankings
         rankings: Array<{ productId: string; matchScore: number; highlights: string[]; whyRecommended: string }>;
         summary: string;
     }>(prompt);
+}
+
+/**
+ * AI Sentiment Summarizer: Generates a Pros & Cons summary from customer reviews
+ */
+export async function summarizeReviews(
+    productName: string,
+    reviews: { rating: number; comment: string }[]
+): Promise<{ pros: string[]; cons: string[]; summary: string }> {
+    if (reviews.length === 0) {
+        return { pros: [], cons: [], summary: "No reviews available yet for this product." };
+    }
+
+    const reviewText = reviews.map(r => `Rating: ${r.rating}/5, Comment: ${r.comment}`).join("\n---\n");
+
+    const prompt = `You are an expert product analyst for Smart Avenue.
+Analyze the following customer reviews for "${productName}" and generate a concise "Pros & Cons" summary.
+
+Reviews:
+${reviewText}
+
+Respond with a JSON object in this exact format:
+{
+  "pros": ["3-5 clear bullet points of what customers liked"],
+  "cons": ["1-3 clear bullet points of what customers disliked or found lacking"],
+  "summary": "A 2-sentence executive summary of overall sentiment."
+}`;
+
+    return await callLLMForJSON<{ pros: string[]; cons: string[]; summary: string }>(prompt);
+}
+
+/**
+ * Smart Deal Explainer: Explains why a specific deal/price is a "catch" for the user
+ */
+export async function generateDealExplanation(
+    product: { name: string; price: number; originalPrice?: number; description: string },
+    userIntent?: string
+): Promise<string> {
+    const savings = product.originalPrice ? product.originalPrice - product.price : 0;
+    const savingsPercent = product.originalPrice ? Math.round((savings / product.originalPrice) * 100) : 0;
+
+    const prompt = `You are a charismatic sales associate at Smart Avenue.
+Explain why the current deal on "${product.name}" is amazing for the customer.
+
+Product Info:
+- Current Price: ₹${product.price}
+- Original Price: ${product.originalPrice ? `₹${product.originalPrice}` : "N/A"}
+- Savings: ${savings > 0 ? `₹${savings} (${savingsPercent}% off)` : "Best value in category"}
+${userIntent ? `- User's Goal: ${userIntent}` : ""}
+
+Provide a persuasive, 1-2 sentence "pitch" that makes the user feel they are getting a great deal. Be friendly and culturally relevant to India.`;
+
+    // Use light model for simple creative text
+    const response = await callGroqAPI(prompt);
+    return response.trim().replace(/^["']|["']$/g, "");
+}
+
+/**
+ * AI Social Proof Generator: Generates trending snippets for products
+ */
+export async function generateSocialProof(
+    product: { name: string; categoryId: string; tags: string[] },
+    salesStats?: { salesInLastMonth: number; popularInCity?: string }
+): Promise<string> {
+    const prompt = `You are a social media trend expert for Smart Avenue.
+Create a short, catchy "social proof" snippet for "${product.name}".
+
+Context:
+- Category: ${product.categoryId}
+- Stats: ${salesStats ? `${salesStats.salesInLastMonth} people bought this recently${salesStats.popularInCity ? ` in ${salesStats.popularInCity}` : ""}` : "Currently trending"}
+
+Example output: "#1 top-pick for office wear in Mumbai this week!" or "Trending: 50+ people in Delhi just bought this!"
+Keep it under 100 characters. No hashtags.`;
+
+    const response = await callGroqAPI(prompt);
+    return response.trim().replace(/^["']|["']$/g, "");
 }
