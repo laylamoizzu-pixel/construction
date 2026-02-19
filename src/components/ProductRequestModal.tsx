@@ -96,7 +96,7 @@ export default function ProductRequestModal({
                                     Genie Request
                                 </h2>
                                 <p className="text-slate-500 text-sm mt-1 font-medium">
-                                    Tell us what you need, and we'll handle the rest.
+                                    Tell us what you need, and we&apos;ll handle the rest.
                                 </p>
                             </div>
                             <button
@@ -123,7 +123,7 @@ export default function ProductRequestModal({
                                         </div>
                                         <h3 className="text-2xl font-bold text-gray-900 mb-2">Request Sent!</h3>
                                         <p className="text-gray-500 max-w-xs mx-auto text-base">
-                                            Your wish is our command. We'll notify you as soon as we find your item.
+                                            Your wish is our command. We&apos;ll notify you as soon as we find your item.
                                         </p>
                                     </motion.div>
                                 ) : (

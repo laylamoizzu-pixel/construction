@@ -45,7 +45,7 @@ export default function GenieRequestTrigger({ searchQuery }: GenieRequestTrigger
                             </motion.div>
 
                             <h3 className="text-3xl font-semibold tracking-tight text-brand-dark mb-4">
-                                Can't find what you need?
+                                Can&apos;t find what you need?
                             </h3>
 
                             <p className="text-slate-600 mb-10 max-w-md mx-auto leading-relaxed text-lg font-light">

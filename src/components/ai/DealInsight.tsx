@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Sparkles, TrendingUp, Info } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import { getDealInsight } from "@/app/actions/conversion-boosters-action";
 
 interface DealInsightProps {
@@ -12,10 +12,9 @@ interface DealInsightProps {
         originalPrice?: number;
         description: string;
     };
-    discount: number;
 }
 
-export default function DealInsight({ product, discount }: DealInsightProps) {
+export default function DealInsight({ product }: DealInsightProps) {
     const [insight, setInsight] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
 

@@ -161,7 +161,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
                             <Suspense fallback={
                                 <div className="h-24 bg-slate-50 animate-pulse rounded-xl my-6 border border-slate-100" />
                             }>
-                                <DealInsight product={product} discount={discount} />
+                                <DealInsight product={product} />
                             </Suspense>
                         </div>
 

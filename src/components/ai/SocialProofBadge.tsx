@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Users, TrendingUp, MapPin } from "lucide-react";
+import { Users, TrendingUp } from "lucide-react";
 import { getSocialProof } from "@/app/actions/conversion-boosters-action";
 
 interface SocialProofBadgeProps {

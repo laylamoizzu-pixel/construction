@@ -1,16 +1,17 @@
 
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { getRecommendations } from "@/lib/recommendation-engine";
 import { RecommendationRequest } from "@/types/assistant-types";
 
 // Force dynamic needed to prevent static generation errors if any
 export const dynamic = 'force-dynamic';
 
-export async function GET(request: NextRequest) {
-    const results: any[] = [];
+export async function GET() {
+    const results: unknown[] = [];
     let passed = 0;
     let failed = 0;
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async function testCase(name: string, query: string, expectedCondition: (result: any) => boolean) {
         const startTime = Date.now();
         try {
