@@ -129,7 +129,16 @@ const navGroups: NavGroup[] = [
         items: [
             { name: "Staff", href: "/admin/staff", icon: Users, permission: "staff" },
             { name: "Settings", href: "/admin/settings", icon: Settings },
-            { name: "Genie Assistant", href: "/admin/api-keys", icon: Bot, permission: "api-keys" },
+            {
+                name: "Genie Assistant",
+                href: "/admin/api-keys",
+                icon: Bot,
+                permission: "api-keys",
+                subItems: [
+                    { name: "API Keys", href: "/admin/api-keys", permission: "api-keys" },
+                    { name: "AI Settings", href: "/admin/ai-settings", permission: "api-keys" },
+                ]
+            },
         ]
     },
     {

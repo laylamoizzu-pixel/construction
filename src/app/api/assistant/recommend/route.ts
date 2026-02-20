@@ -11,9 +11,21 @@ import { NextRequest, NextResponse } from "next/server";
 import { getRecommendations } from "@/lib/recommendation-engine";
 import { RecommendationRequest } from "@/types/assistant-types";
 import { syncAPIKeysToManager } from "@/app/api-key-actions";
+import { getAISettings } from "@/app/actions/ai-settings-actions";
 
 export async function POST(request: NextRequest) {
     try {
+        // Check if AI is enabled by admin
+        const aiSettings = await getAISettings();
+        if (!aiSettings.enabled) {
+            return NextResponse.json({
+                success: true,
+                recommendations: [],
+                summary: "I'm currently unavailable. Please check back later!",
+                processingTime: 0,
+            });
+        }
+
         // Sync API keys from Firestore
         await syncAPIKeysToManager();
 

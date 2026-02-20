@@ -143,11 +143,28 @@ export async function getRecommendations(
         }
 
         // Step 4: Rank products AND generate summary in single LLM call (2nd LLM call)
-        const { rankings, summary } = await rankAndSummarize(
-            query,
-            products.slice(0, MAX_PRODUCTS_TO_ANALYZE),
-            intentResponse
-        );
+        let rankings: Array<{ productId: string; matchScore: number; highlights: string[]; whyRecommended: string }> = [];
+        let summary = "";
+
+        try {
+            const result = await rankAndSummarize(
+                query,
+                products.slice(0, MAX_PRODUCTS_TO_ANALYZE),
+                intentResponse
+            );
+            rankings = result.rankings;
+            summary = result.summary;
+        } catch (rankError) {
+            console.warn("[RecommendationEngine] rankAndSummarize failed, using fallback:", rankError);
+            // Graceful fallback: return top products without AI ranking
+            rankings = products.slice(0, maxResults).map(p => ({
+                productId: p.id,
+                matchScore: 70,
+                highlights: [p.description?.substring(0, 60) || p.name],
+                whyRecommended: `This ${p.name} might be what you're looking for.`,
+            }));
+            summary = `I found ${products.length} products that might interest you. Here are my top picks:`;
+        }
 
         // Step 5: Build recommendations
         const recommendations = buildRecommendations(rankings, products, maxResults);
