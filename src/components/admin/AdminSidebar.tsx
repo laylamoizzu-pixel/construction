@@ -137,6 +137,7 @@ const navGroups: NavGroup[] = [
                 subItems: [
                     { name: "API Keys", href: "/admin/api-keys", permission: "api-keys" },
                     { name: "AI Settings", href: "/admin/ai-settings", permission: "api-keys" },
+                    { name: "Prompt Registry", href: "/admin/ai-prompts", permission: "api-keys" },
                 ]
             },
         ]
