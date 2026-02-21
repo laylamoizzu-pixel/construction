@@ -15,6 +15,7 @@ import {
 import { Product, Category } from "@/app/actions";
 import { getAIConfig } from "./ai-config";
 import { validateCategoryId, validateRankings } from "./llm-validators";
+import { getPrompt } from "./prompt-registry";
 
 // Extended intent response to include product requests
 interface GenericIntentResponse extends LLMIntentResponse {
@@ -498,37 +499,10 @@ export async function analyzeIntent(
         ? `Conversation History:\n${messages.map(m => `${m.role.toUpperCase()}: ${m.content}`).join("\n")}\n\n`
         : "";
 
-    const prompt = `${config.systemPrompt}
-
-${history}Analyze the following customer query and extract their intent.
-
-Available product categories:
-${categoryList}
-
-Customer query: "${query}"
-
-If the customer is asking for a product that is clearly NOT in our categories or is explicitly requesting a new item we don't stock, identify it as a "request".
-Otherwise, treat it as a search for existing products.
-
-CRITICAL: Do NOT assign a category if the user's request doesn't reasonably match any of them. Return null for category in that case.
-
-Respond with a JSON object (and nothing else) in this exact format:
-{
-  "category": "category ID from the list above, or null if unclear",
-  "subcategory": "subcategory ID if applicable, or null",
-  "requirements": ["list of specific requirements extracted from the query"],
-  "budgetMin": null or number in INR,
-  "budgetMax": null or number in INR (e.g., if they say "under 500", set this to 500),
-  "preferences": ["any stated preferences like 'premium', 'simple', 'colorful', etc."],
-  "useCase": "brief description of what they want to use the product for",
-  "confidence": 0.0 to 1.0 indicating how confident you are in understanding their intent,
-  "productRequestData": null or {
-      "name": "product name",
-      "category": "probable category",
-      "maxBudget": number or null,
-      "specifications": ["list of specs"]
-  } if they are requesting a new item. Only populate this if the intent is clearly to request something you don't have.
-}`;
+    const prompt = await getPrompt("intent-analyze", {
+        categoryList,
+        query
+    });
 
     const result = await callLLMForJSON<GenericIntentResponse>(prompt, provider);
 
@@ -852,18 +826,10 @@ export async function summarizeReviews(
 
     const reviewText = reviews.map(r => `Rating: ${r.rating}/5, Comment: ${r.comment}`).join("\n---\n");
 
-    const prompt = `You are an expert product analyst for Smart Avenue.
-Analyze the following customer reviews for "${productName}" and generate a concise "Pros & Cons" summary.
-
-Reviews:
-${reviewText}
-
-Respond with a JSON object in this exact format:
-{
-  "pros": ["3-5 clear bullet points of what customers liked"],
-  "cons": ["1-3 clear bullet points of what customers disliked or found lacking"],
-  "summary": "A 2-sentence executive summary of overall sentiment."
-}`;
+    const prompt = await getPrompt("review-summarizer", {
+        productName,
+        reviewText
+    });
 
     return await callLLMForJSON<{ pros: string[]; cons: string[]; summary: string }>(prompt);
 }
