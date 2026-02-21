@@ -491,7 +491,6 @@ export async function analyzeIntent(
     messages: Array<{ role: string; content: string }> = [],
     provider: LLMProvider = "google"
 ): Promise<LLMIntentResponse> {
-    const config = await getAIConfig();
     const categoryList = categories.map(c => `- ${c.name} (ID: ${c.id})`).join("\n");
     const validCategoryIds = new Set(categories.map(c => c.id));
 
@@ -1155,8 +1154,6 @@ export async function chatWithAssistant(
     message: string,
     history: { role: "user" | "assistant"; content: string }[]
 ): Promise<{ reply: string; suggestedActions?: string[] }> {
-    const config = await getAIConfig();
-
     // Construct conversation history for context
     const conversationContext = history.map(msg => `${msg.role === "user" ? "Customer" : "Assistant"}: ${msg.content}`).join("\n");
 

@@ -16,14 +16,13 @@ import {
     MessageSquare,
     Sparkles,
     Sliders,
-    Power,
-    CheckCircle2,
     AlertTriangle,
     Zap,
-    Globe,
     Mic,
     ShoppingBag,
     RotateCcw,
+    Power,
+    CheckCircle2
 } from "lucide-react";
 import Link from "next/link";
 

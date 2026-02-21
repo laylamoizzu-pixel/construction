@@ -12,14 +12,13 @@ import { AIPrompt, DEFAULT_PROMPTS } from "@/lib/prompt-defaults";
 import {
     Loader2,
     ArrowLeft,
-    Save,
     MessageSquare,
     AlertTriangle,
     CheckCircle2,
-    Power,
     RefreshCw,
     Search,
-    Edit3
+    Edit3,
+    Save
 } from "lucide-react";
 import Link from "next/link";
 
@@ -144,7 +143,7 @@ export default function AIPromptsPage() {
             } else {
                 setToast({ message: result.error || "Failed to seed database", type: "error" });
             }
-        } catch (error) {
+        } catch {
             setToast({ message: "An unexpected error occurred", type: "error" });
         } finally {
             setSeeding(false);
@@ -253,8 +252,8 @@ export default function AIPromptsPage() {
                                     key={prompt.id}
                                     onClick={() => handleSelectPrompt(prompt)}
                                     className={`w-full text-left p-4 rounded-xl transition-all flex items-start justify-between gap-3 ${selectedPromptId === prompt.id
-                                            ? "bg-indigo-50 border border-indigo-100 ring-1 ring-indigo-500/20"
-                                            : "hover:bg-gray-50 border border-transparent"
+                                        ? "bg-indigo-50 border border-indigo-100 ring-1 ring-indigo-500/20"
+                                        : "hover:bg-gray-50 border border-transparent"
                                         }`}
                                 >
                                     <div>

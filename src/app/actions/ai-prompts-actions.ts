@@ -15,7 +15,7 @@ export async function getAIPrompts(): Promise<AIPrompt[]> {
         const snapshot = await admin.firestore().collection(COLLECTION_NAME).get();
         const prompts: AIPrompt[] = [];
 
-        snapshot.forEach((doc: any) => {
+        snapshot.forEach((doc) => {
             const data = doc.data() as AIPrompt;
             prompts.push({
                 ...data,

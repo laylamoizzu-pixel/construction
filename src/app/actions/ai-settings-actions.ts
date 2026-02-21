@@ -72,7 +72,8 @@ export async function updateAISettings(data: Partial<AISettings>): Promise<{ suc
         }
 
         // Remove updatedAt from data if present (we'll set it server-side)
-        const { updatedAt: _updatedAt, ...cleanData } = data;
+        const { updatedAt, ...cleanData } = data as Partial<AISettings> & { updatedAt?: any };
+        if (updatedAt) { /* ignore */ }
 
         await getAdminDb().collection("settings").doc("aiConfig").set(
             {
