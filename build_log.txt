@@ -13,3 +13,100 @@
  ⚠ See instructions if you need to configure Turbopack:
   https://nextjs.org/docs/app/api-reference/next-config-js/turbopack
 
+ ✓ Finished writing to disk in 828ms
+ ✓ Compiled successfully in 74s
+   Linting and checking validity of types ...
+
+./src/app/actions/ai-settings-actions.ts
+75:28  Warning: '_updatedAt' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/admin/ai-settings/page.tsx
+23:5  Warning: 'Globe' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/lib/data.ts
+280:5  Warning: 'subcategoryId' is defined but never used.  @typescript-eslint/no-unused-vars
+
+info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/app/api-reference/config/eslint#disabling-rules
+   Collecting page data ...
+   Generating static pages (0/50) ...
+   Generating static pages (12/50) 
+   Generating static pages (24/50) 
+   Generating static pages (37/50) 
+ ✓ Generating static pages (50/50)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                                  Size  First Load JS  Revalidate  Expire
+┌ ƒ /                                     4.91 kB         352 kB
+├ ○ /_not-found                               0 B         347 kB          5m      1y
+├ ƒ /about                                4.39 kB         352 kB
+├ ○ /admin                                1.58 kB         354 kB          5m      1y
+├ ○ /admin/ai-settings                    4.33 kB         356 kB          5m      1y
+├ ○ /admin/api-keys                       4.85 kB         357 kB          5m      1y
+├ ○ /admin/appearance                     2.88 kB         355 kB          5m      1y
+├ ○ /admin/branding                       4.16 kB         356 kB          5m      1y
+├ ○ /admin/content/about                  4.74 kB         357 kB          5m      1y
+├ ○ /admin/content/branding               4.63 kB         357 kB          5m      1y
+├ ○ /admin/content/categories             2.32 kB         354 kB          5m      1y
+├ ○ /admin/content/contact                 2.2 kB         354 kB          5m      1y
+├ ○ /admin/content/cta                    3.42 kB         355 kB          5m      1y
+├ ○ /admin/content/departments            4.71 kB         357 kB          5m      1y
+├ ○ /admin/content/features                156 kB         508 kB          5m      1y
+├ ○ /admin/content/footer                 4.86 kB         357 kB          5m      1y
+├ ○ /admin/content/hero                   4.95 kB         357 kB          5m      1y
+├ ○ /admin/content/highlights             5.88 kB         358 kB          5m      1y
+├ ○ /admin/content/navigation             2.47 kB         354 kB          5m      1y
+├ ○ /admin/content/offers                 2.15 kB         354 kB          5m      1y
+├ ○ /admin/content/offers-page            3.33 kB         355 kB          5m      1y
+├ ○ /admin/content/privacy                2.25 kB         354 kB          5m      1y
+├ ○ /admin/content/products                106 kB         458 kB          5m      1y
+├ ○ /admin/content/products-page          4.59 kB         357 kB          5m      1y
+├ ○ /admin/content/promotions             4.32 kB         356 kB          5m      1y
+├ ○ /admin/content/reviews                2.15 kB         354 kB          5m      1y
+├ ○ /admin/content/seo                     2.7 kB         355 kB          5m      1y
+├ ○ /admin/content/specific-product-page  2.67 kB         355 kB          5m      1y
+├ ○ /admin/content/terms                  2.25 kB         354 kB          5m      1y
+├ ○ /admin/login                          1.46 kB         353 kB          5m      1y
+├ ○ /admin/others/configuration           2.88 kB         355 kB          5m      1y
+├ ○ /admin/others/labels                  2.35 kB         354 kB          5m      1y
+├ ○ /admin/others/manifest                2.37 kB         354 kB          5m      1y
+├ ○ /admin/others/newsletter                 2 kB         354 kB          5m      1y
+├ ○ /admin/requests                       13.4 kB         365 kB          5m      1y
+├ ○ /admin/settings                       4.97 kB         357 kB          5m      1y
+├ ○ /admin/staff                          3.55 kB         356 kB          5m      1y
+├ ○ /admin/storefront                     2.78 kB         355 kB          5m      1y
+├ ƒ /api/assistant/health                     0 B            0 B
+├ ƒ /api/assistant/recommend                  0 B            0 B
+├ ƒ /api/assistant/settings                   0 B            0 B
+├ ƒ /api/debug/verify-genie                   0 B            0 B
+├ ○ /apple-icon.png                           0 B            0 B
+├ ƒ /debug                                    0 B         347 kB
+├ ƒ /debug-simple                             0 B         347 kB
+├ ƒ /departments                          2.71 kB         350 kB
+├ ƒ /gift-finder                          2.73 kB         350 kB
+├ ○ /icon.png                                 0 B            0 B
+├ ○ /manifest.webmanifest                     0 B            0 B          5m      1y
+├ ƒ /offers                               3.79 kB         351 kB
+├ ○ /privacy                                  0 B         347 kB          5m      1y
+├ ƒ /products                              9.6 kB         357 kB
+├ ƒ /products/[id]                        7.09 kB         355 kB
+├ ○ /robots.txt                               0 B            0 B          5m      1y
+├ ○ /site-map                                 0 B         347 kB          5m      1y
+├ ○ /sitemap.xml                              0 B            0 B
+├ ƒ /stylist                               2.4 kB         350 kB
+├ ○ /terms                                    0 B         347 kB          5m      1y
+└ ○ /test-firebase                        1.22 kB         349 kB          5m      1y
++ First Load JS shared by all              371 kB
+  ├ chunks/252d259f0c6ef4eb.js            39.6 kB
+  ├ chunks/503339eadd9bc5da.js             163 kB
+  ├ chunks/82cd4cf44d65faca.js              59 kB
+  ├ chunks/8a64e8e5321de3a1.js            17.3 kB
+  ├ chunks/8e1cd981814380c6.js            13.5 kB
+  ├ chunks/eb6bec780eb9fd15.js            12.7 kB
+  ├ chunks/d464a5d17d27c024.css           22.2 kB
+  └ other shared chunks (total)           43.6 kB
+
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
