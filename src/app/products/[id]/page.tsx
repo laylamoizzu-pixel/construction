@@ -14,7 +14,6 @@ import SocialProofBadge from "@/components/ai/SocialProofBadge";
 import { Suspense } from "react";
 
 export const dynamic = "force-dynamic";
-export const revalidate = 0;
 
 export default async function ProductPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;

@@ -2,6 +2,7 @@
 
 import { getAdminDb, admin } from "@/lib/firebase-admin";
 import { revalidatePath } from "next/cache";
+import { invalidateAIConfig } from "@/lib/ai-config";
 
 // ==================== AI SETTINGS TYPES ====================
 
@@ -82,6 +83,9 @@ export async function updateAISettings(data: Partial<AISettings>): Promise<{ suc
         );
 
         revalidatePath("/admin/ai-settings");
+
+        // Invalidate cached AI config so next LLM call picks up new settings
+        invalidateAIConfig();
 
         return { success: true };
     } catch (error: unknown) {

@@ -11,6 +11,7 @@
 import { getProducts, getCategories, Product } from "@/app/actions";
 import { analyzeIntent, rankAndSummarize, handleMissingProduct } from "./llm-service";
 import { getSearchCache, hashQuery } from "./search-cache";
+import { getAIConfig } from "./ai-config";
 import {
     RecommendationRequest,
     RecommendationResponse,
@@ -19,7 +20,7 @@ import {
     LLMIntentResponse,
 } from "@/types/assistant-types";
 
-const DEFAULT_MAX_RESULTS = 5;
+const DEFAULT_MAX_RESULTS = 5; // Fallback, overridden by admin config
 const MAX_PRODUCTS_TO_ANALYZE = 20;
 
 /**
@@ -43,7 +44,8 @@ export async function getRecommendations(
         }
 
         const query = request.query.trim();
-        const maxResults = request.maxResults || DEFAULT_MAX_RESULTS;
+        const config = await getAIConfig();
+        const maxResults = request.maxResults || config.maxRecommendations || DEFAULT_MAX_RESULTS;
 
         // Check cache for similar queries
         const cache = getSearchCache();

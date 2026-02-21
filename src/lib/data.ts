@@ -1,6 +1,6 @@
 import "server-only";
 import { getAdminDb, admin } from "@/lib/firebase-admin";
-import { getSearchCache, CacheKeys } from "@/lib/search-cache";
+import { unstable_cache } from "next/cache";
 
 // ==================== OFFERS ====================
 
@@ -12,7 +12,7 @@ export interface Offer {
     createdAt: Date;
 }
 
-export async function getOffers(): Promise<Offer[]> {
+async function _fetchOffers(): Promise<Offer[]> {
     try {
         const snapshot = await getAdminDb().collection("offers").orderBy("createdAt", "desc").get();
         return snapshot.docs.map((doc: admin.firestore.QueryDocumentSnapshot) => ({
@@ -25,6 +25,11 @@ export async function getOffers(): Promise<Offer[]> {
         return [];
     }
 }
+
+export const getOffers = unstable_cache(_fetchOffers, ["offers"], {
+    revalidate: 300, // 5 minutes
+    tags: ["offers"],
+});
 
 // ==================== TEST CONNECTION ====================
 
@@ -101,17 +106,16 @@ export interface HighlightsContent {
     description: string;
 }
 
-// Get site content by section
-export async function getSiteContent<T>(section: string): Promise<T | null> {
+// Get site content by section - cached per section
+async function _fetchSiteContent<T>(section: string): Promise<T | null> {
     try {
         const doc = await getAdminDb().collection("siteContent").doc(section).get();
         if (doc.exists) {
             const data = doc.data();
-            // detailed generic serialization for common timestamp fields
             return {
                 ...data,
-                createdAt: (data?.createdAt as admin.firestore.Timestamp)?.toDate() || undefined,
-                updatedAt: (data?.updatedAt as admin.firestore.Timestamp)?.toDate() || undefined,
+                createdAt: (data?.createdAt as admin.firestore.Timestamp)?.toDate()?.toISOString() || undefined,
+                updatedAt: (data?.updatedAt as admin.firestore.Timestamp)?.toDate()?.toISOString() || undefined,
             } as T;
         }
         return null;
@@ -121,8 +125,17 @@ export async function getSiteContent<T>(section: string): Promise<T | null> {
     }
 }
 
+export async function getSiteContent<T>(section: string): Promise<T | null> {
+    const cachedFetch = unstable_cache(
+        () => _fetchSiteContent<T>(section),
+        [`site-content-${section}`],
+        { revalidate: 300, tags: ["site-content", `site-content-${section}`] }
+    );
+    return cachedFetch();
+}
+
 // Get all departments
-export async function getDepartments(): Promise<DepartmentContent[]> {
+async function _fetchDepartments(): Promise<DepartmentContent[]> {
     try {
         const doc = await getAdminDb().collection("siteContent").doc("departments").get();
         if (doc.exists) {
@@ -135,6 +148,11 @@ export async function getDepartments(): Promise<DepartmentContent[]> {
     }
 }
 
+export const getDepartments = unstable_cache(_fetchDepartments, ["departments"], {
+    revalidate: 300,
+    tags: ["departments", "site-content"],
+});
+
 // ==================== STAFF MANAGEMENT ====================
 
 export interface StaffMember {
@@ -146,7 +164,7 @@ export interface StaffMember {
     createdAt: Date;
 }
 
-export async function getStaffMembers(): Promise<StaffMember[]> {
+async function _fetchStaffMembers(): Promise<StaffMember[]> {
     try {
         const snapshot = await getAdminDb().collection("staff").orderBy("createdAt", "desc").get();
         return snapshot.docs.map((doc: admin.firestore.QueryDocumentSnapshot) => ({
@@ -160,7 +178,12 @@ export async function getStaffMembers(): Promise<StaffMember[]> {
     }
 }
 
-// Get staff role by email
+export const getStaffMembers = unstable_cache(_fetchStaffMembers, ["staff-members"], {
+    revalidate: 300,
+    tags: ["staff"],
+});
+
+// Get staff role by email - not cached (auth-sensitive, fast single lookup)
 export async function getStaffRole(email: string): Promise<string | null> {
     try {
         // Hardcoded super admin
@@ -190,32 +213,24 @@ export interface Category {
     createdAt: Date;
 }
 
-export async function getCategories(): Promise<Category[]> {
-    const cache = getSearchCache();
-    const cacheKey = CacheKeys.categories();
-
-    // Check cache first
-    const cached = cache.get<Category[]>(cacheKey);
-    if (cached) {
-        return cached;
-    }
-
+async function _fetchCategories(): Promise<Category[]> {
     try {
         const snapshot = await getAdminDb().collection("categories").orderBy("order", "asc").get();
-        const categories = snapshot.docs.map((doc: admin.firestore.QueryDocumentSnapshot) => ({
+        return snapshot.docs.map((doc: admin.firestore.QueryDocumentSnapshot) => ({
             id: doc.id,
             ...doc.data(),
             createdAt: (doc.data().createdAt as admin.firestore.Timestamp)?.toDate() || new Date(),
         })) as Category[];
-
-        // Cache for 5 minutes
-        cache.set(cacheKey, categories);
-        return categories;
     } catch (error) {
         console.error("Error fetching categories:", error);
         return [];
     }
 }
+
+export const getCategories = unstable_cache(_fetchCategories, ["categories"], {
+    revalidate: 300,
+    tags: ["categories"],
+});
 
 // ==================== PRODUCTS ====================
 
@@ -237,26 +252,17 @@ export interface Product {
     reviewCount?: number;
     createdAt: Date;
     updatedAt?: Date;
+    // Allow extra fields from Firestore
+    [key: string]: unknown;
 }
 
-export async function getProducts(
+async function _fetchProducts(
     categoryId?: string,
     available?: boolean,
     limitCount: number = 50,
-    startAfterId?: string
+    startAfterId?: string,
+    subcategoryId?: string
 ): Promise<Product[]> {
-    const cache = getSearchCache();
-
-    // For simple queries (all products, no filters, no pagination), use cache
-    const canUseCache = !startAfterId && !categoryId && available === undefined && limitCount >= 50;
-    if (canUseCache) {
-        const cacheKey = CacheKeys.allProducts();
-        const cached = cache.get<Product[]>(cacheKey);
-        if (cached) {
-            return cached;
-        }
-    }
-
     try {
         let query: admin.firestore.Query = getAdminDb().collection("products");
 
@@ -278,23 +284,40 @@ export async function getProducts(
         }
 
         const snapshot = await query.limit(limitCount).get();
-        const products = snapshot.docs.map((doc: admin.firestore.QueryDocumentSnapshot) => ({
+        return snapshot.docs.map((doc: admin.firestore.QueryDocumentSnapshot) => ({
             id: doc.id,
             ...doc.data(),
             createdAt: (doc.data().createdAt as admin.firestore.Timestamp)?.toDate() || new Date(),
             updatedAt: (doc.data().updatedAt as admin.firestore.Timestamp)?.toDate() || undefined,
         })) as Product[];
-
-        // Cache if this was a cacheable query
-        if (canUseCache) {
-            cache.set(CacheKeys.allProducts(), products);
-        }
-
-        return products;
     } catch (error) {
         console.error("Error fetching products:", error);
         return [];
     }
+}
+
+export async function getProducts(
+    categoryId?: string,
+    available?: boolean,
+    limitCount: number = 50,
+    startAfterId?: string,
+    subcategoryId?: string
+): Promise<Product[]> {
+    // Paginated queries (startAfterId) cannot be cached because the cursor is dynamic
+    if (startAfterId) {
+        return _fetchProducts(categoryId, available, limitCount, startAfterId, subcategoryId);
+    }
+
+    // Build a stable cache key from the arguments
+    const cacheKey = `products-${categoryId || "all"}-${available ?? "any"}-${limitCount}-${subcategoryId || "none"}`;
+
+    const cachedFetch = unstable_cache(
+        () => _fetchProducts(categoryId, available, limitCount, undefined, subcategoryId),
+        [cacheKey],
+        { revalidate: 300, tags: ["products"] }
+    );
+
+    return cachedFetch();
 }
 
 export async function searchProducts(
@@ -334,7 +357,7 @@ export async function searchProducts(
     return filtered;
 }
 
-export async function getProduct(id: string): Promise<Product | null> {
+async function _fetchProduct(id: string): Promise<Product | null> {
     try {
         const doc = await getAdminDb().collection("products").doc(id).get();
         if (doc.exists) {
@@ -353,6 +376,15 @@ export async function getProduct(id: string): Promise<Product | null> {
     }
 }
 
+export async function getProduct(id: string): Promise<Product | null> {
+    const cachedFetch = unstable_cache(
+        () => _fetchProduct(id),
+        [`product-${id}`],
+        { revalidate: 300, tags: ["products", `product-${id}`] }
+    );
+    return cachedFetch();
+}
+
 // ==================== REVIEWS ====================
 
 export interface Review {
@@ -365,7 +397,7 @@ export interface Review {
     createdAt: Date;
 }
 
-export async function getReviews(productId: string): Promise<Review[]> {
+async function _fetchReviews(productId: string): Promise<Review[]> {
     try {
         const snapshot = await getAdminDb()
             .collection("reviews")
@@ -384,7 +416,16 @@ export async function getReviews(productId: string): Promise<Review[]> {
     }
 }
 
-export async function getAllReviews(): Promise<(Review & { productName?: string })[]> {
+export async function getReviews(productId: string): Promise<Review[]> {
+    const cachedFetch = unstable_cache(
+        () => _fetchReviews(productId),
+        [`reviews-${productId}`],
+        { revalidate: 300, tags: ["reviews", `reviews-${productId}`] }
+    );
+    return cachedFetch();
+}
+
+async function _fetchAllReviews(): Promise<(Review & { productName?: string })[]> {
     try {
         const snapshot = await getAdminDb().collection("reviews").orderBy("createdAt", "desc").limit(50).get();
 
@@ -398,3 +439,8 @@ export async function getAllReviews(): Promise<(Review & { productName?: string 
         return [];
     }
 }
+
+export const getAllReviews = unstable_cache(_fetchAllReviews, ["all-reviews"], {
+    revalidate: 300,
+    tags: ["reviews"],
+});

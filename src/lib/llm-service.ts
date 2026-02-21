@@ -2,6 +2,7 @@
  * LLM Service
  * 
  * Wrapper for LLM providers (Google, OpenAI, Anthropic) with automatic key rotation and error handling.
+ * Settings (temperature, maxTokens, provider, persona) are loaded from admin config via Firestore.
  */
 
 import { getAPIKeyManager } from "./api-key-manager";
@@ -12,6 +13,8 @@ import {
     LLMProvider
 } from "@/types/assistant-types";
 import { Product, Category } from "@/app/actions";
+import { getAIConfig } from "./ai-config";
+import { validateCategoryId, validateRankings } from "./llm-validators";
 
 // Extended intent response to include product requests
 interface GenericIntentResponse extends LLMIntentResponse {
@@ -22,6 +25,10 @@ interface GenericIntentResponse extends LLMIntentResponse {
 }
 
 const MAX_RETRIES = 3;
+
+// Default fallback values (overridden by admin config from Firestore)
+const DEFAULT_TEMPERATURE = 0.7;
+const DEFAULT_MAX_TOKENS = 2048;
 
 const GROQ_API_BASE = "https://api.groq.com/openai/v1/chat/completions";
 const GROQ_MODEL = "llama-3.3-70b-versatile"; // Meta model for better multi-language support (Hindi, Urdu, Hinglish)
@@ -37,6 +44,17 @@ const GROQ_MODEL_WHISPER = "whisper-large-v3-turbo";
 const GEMINI_API_BASE = "https://generativelanguage.googleapis.com/v1beta/models";
 const GROQ_AUDIO_BASE = "https://api.groq.com/openai/v1/audio/transcriptions";
 const GEMINI_MODEL = "gemini-flash-latest";
+
+/**
+ * Options for LLM calls — allows overriding default temperature and maxTokens.
+ * When not provided, values are loaded from admin config.
+ */
+export interface LLMCallOptions {
+    temperature?: number;
+    maxTokens?: number;
+    provider?: LLMProvider;
+    model?: string;
+}
 
 interface GroqResponse {
     choices?: Array<{
@@ -72,7 +90,7 @@ interface GeminiResponse {
 /**
  * Make a request to Groq API
  */
-async function callGroqAPI(prompt: string, model: string = GROQ_MODEL, retryCount: number = 0): Promise<string> {
+async function callGroqAPI(prompt: string, model: string = GROQ_MODEL, retryCount: number = 0, options?: LLMCallOptions): Promise<string> {
     const keyManager = getAPIKeyManager();
     let apiKey: string;
 
@@ -81,6 +99,10 @@ async function callGroqAPI(prompt: string, model: string = GROQ_MODEL, retryCoun
     } catch (error) {
         throw error;
     }
+
+    // Use provided options, fallback to defaults
+    const temperature = options?.temperature ?? (model.includes("deepseek") ? 0.6 : DEFAULT_TEMPERATURE);
+    const maxTokens = options?.maxTokens ?? DEFAULT_MAX_TOKENS;
 
     try {
         const response = await fetch(GROQ_API_BASE, {
@@ -94,9 +116,8 @@ async function callGroqAPI(prompt: string, model: string = GROQ_MODEL, retryCoun
                 messages: [
                     { role: "user", content: prompt }
                 ],
-                // DeepSeek R1 models often require lower temperature
-                temperature: model.includes("deepseek") ? 0.6 : 1,
-                max_tokens: 2048,
+                temperature,
+                max_tokens: maxTokens,
                 top_p: model.includes("deepseek") ? 0.95 : 1,
             }),
         });
@@ -280,7 +301,7 @@ export async function callGroqWhisperAPI(audioFormData: FormData, retryCount: nu
 /**
  * Make a request to Gemini API
  */
-async function callGeminiAPI(prompt: string, retryCount: number = 0): Promise<string> {
+async function callGeminiAPI(prompt: string, retryCount: number = 0, options?: LLMCallOptions): Promise<string> {
     const keyManager = getAPIKeyManager();
     let apiKey: string;
 
@@ -290,6 +311,10 @@ async function callGeminiAPI(prompt: string, retryCount: number = 0): Promise<st
         throw error;
     }
 
+    // Use provided options, fallback to defaults
+    const temperature = options?.temperature ?? DEFAULT_TEMPERATURE;
+    const maxTokens = options?.maxTokens ?? DEFAULT_MAX_TOKENS;
+
     const url = `${GEMINI_API_BASE}/${GEMINI_MODEL}:generateContent?key=${apiKey}`;
 
     try {
@@ -298,7 +323,7 @@ async function callGeminiAPI(prompt: string, retryCount: number = 0): Promise<st
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 contents: [{ parts: [{ text: prompt }] }],
-                generationConfig: { temperature: 0.7, maxOutputTokens: 2048 },
+                generationConfig: { temperature, maxOutputTokens: maxTokens },
             }),
         });
 
@@ -341,22 +366,22 @@ async function callGeminiAPI(prompt: string, retryCount: number = 0): Promise<st
  * Main LLM call function that routes to available providers
  * Prioritizes Groq > Gemini
  */
-async function callLLM(prompt: string, provider: LLMProvider = "google", model?: string): Promise<string> {
+async function callLLM(prompt: string, provider: LLMProvider = "google", model?: string, options?: LLMCallOptions): Promise<string> {
     const keyManager = getAPIKeyManager();
 
     // Respect specific provider request
     if (provider === "groq") {
-        return await callGroqAPI(prompt, model);
+        return await callGroqAPI(prompt, model, 0, options);
     }
 
     if (provider === "google") {
-        return await callGeminiAPI(prompt);
+        return await callGeminiAPI(prompt, 0, options);
     }
 
     // Default auto-routing logic (start with Groq if available)
     if (keyManager.hasKeys("groq")) {
         try {
-            return await callGroqAPI(prompt, model);
+            return await callGroqAPI(prompt, model, 0, options);
         } catch (error) {
             console.warn("[LLMService] Groq failed, falling back to Gemini:", error);
             // Fallthrough to Gemini
@@ -364,7 +389,35 @@ async function callLLM(prompt: string, provider: LLMProvider = "google", model?:
     }
 
     // Fallback to Gemini
-    return await callGeminiAPI(prompt);
+    return await callGeminiAPI(prompt, 0, options);
+}
+
+/**
+ * LLM call with dynamic config from admin settings.
+ * Loads temperature, maxTokens, and provider priority from Firestore.
+ */
+async function callLLMWithConfig(prompt: string, overrideProvider?: LLMProvider, overrideModel?: string): Promise<string> {
+    const config = await getAIConfig();
+
+    const options: LLMCallOptions = {
+        temperature: config.temperature,
+        maxTokens: config.maxTokens,
+    };
+
+    // Determine provider: override > admin config > default
+    let provider: LLMProvider;
+    if (overrideProvider) {
+        provider = overrideProvider;
+    } else if (config.providerPriority === "groq") {
+        provider = "groq";
+    } else if (config.providerPriority === "google") {
+        provider = "google";
+    } else {
+        // "auto" mode — use the existing auto-routing
+        return await callLLM(prompt, "google", overrideModel, options);
+    }
+
+    return await callLLM(prompt, provider, overrideModel, options);
 }
 
 /**
@@ -409,10 +462,10 @@ function parseJSONFromResponse<T>(response: string): T {
 /**
  * Call LLM expecting JSON output. Retries once with a stricter prompt on parse failure.
  */
-async function callLLMForJSON<T>(prompt: string, provider: LLMProvider = "google", model?: string): Promise<T> {
+async function callLLMForJSON<T>(prompt: string, provider?: LLMProvider, model?: string): Promise<T> {
     // First attempt
     try {
-        const response = await callLLM(prompt, provider, model);
+        const response = await callLLMWithConfig(prompt, provider, model);
         return parseJSONFromResponse<T>(response);
     } catch (firstError) {
         if (!(firstError instanceof LLMServiceError) || !String(firstError.message).includes("Failed to parse")) {
@@ -423,7 +476,7 @@ async function callLLMForJSON<T>(prompt: string, provider: LLMProvider = "google
 
         // Retry with a much stricter prompt
         const stricterPrompt = `${prompt}\n\nIMPORTANT: You MUST respond with ONLY a valid JSON object. No explanation text before or after. No markdown. Just the raw JSON.`;
-        const retryResponse = await callLLM(stricterPrompt, provider, model);
+        const retryResponse = await callLLMWithConfig(stricterPrompt, provider, model);
         return parseJSONFromResponse<T>(retryResponse);
     }
 }
@@ -437,14 +490,15 @@ export async function analyzeIntent(
     messages: Array<{ role: string; content: string }> = [],
     provider: LLMProvider = "google"
 ): Promise<LLMIntentResponse> {
+    const config = await getAIConfig();
     const categoryList = categories.map(c => `- ${c.name} (ID: ${c.id})`).join("\n");
+    const validCategoryIds = new Set(categories.map(c => c.id));
 
     const history = messages.length > 0
         ? `Conversation History:\n${messages.map(m => `${m.role.toUpperCase()}: ${m.content}`).join("\n")}\n\n`
         : "";
 
-    const prompt = `Hi, I'm Genie, your personal Shopping Master at "Smart Avenue" retail store in India.
-How can I help you today? Would you like me to curate some amazing products for you?
+    const prompt = `${config.systemPrompt}
 
 ${history}Analyze the following customer query and extract their intent.
 
@@ -476,7 +530,13 @@ Respond with a JSON object (and nothing else) in this exact format:
   } if they are requesting a new item. Only populate this if the intent is clearly to request something you don't have.
 }`;
 
-    return await callLLMForJSON<GenericIntentResponse>(prompt, provider);
+    const result = await callLLMForJSON<GenericIntentResponse>(prompt, provider);
+
+    // Validate category ID against real categories to prevent hallucination
+    result.category = validateCategoryId(result.category, validCategoryIds);
+    result.subcategory = validateCategoryId(result.subcategory, validCategoryIds);
+
+    return result;
 }
 
 /**
@@ -492,6 +552,10 @@ export async function rankProducts(
         return [];
     }
 
+    const config = await getAIConfig();
+    const persona = config.personaName;
+    const validProductIds = new Set(products.map(p => p.id));
+
     const productList = products.map(p => ({
         id: p.id,
         name: p.name,
@@ -500,8 +564,7 @@ export async function rankProducts(
         tags: p.tags,
     }));
 
-    const prompt = `Hy this is Genie, your Shopping Master.
-I'm here to help you get premium products like teddy for your loved ones or stylish stationary at very affordable prices.
+    const prompt = `Hi, I'm ${persona}, your personal Shopping Master at Smart Avenue.
 
 Customer query: "${query}"
 
@@ -533,7 +596,10 @@ Respond with a JSON array (and nothing else) in this exact format:
 
 Only include products that are relevant. If no products match well, return an empty array.`;
 
-    return await callLLMForJSON<Array<{ productId: string; matchScore: number; highlights: string[]; whyRecommended: string }>>(prompt, provider);
+    const rankings = await callLLMForJSON<Array<{ productId: string; matchScore: number; highlights: string[]; whyRecommended: string }>>(prompt, provider);
+
+    // Validate product IDs to prevent hallucination
+    return validateRankings(rankings, validProductIds);
 }
 
 /**
@@ -549,15 +615,18 @@ export async function generateSummary(
         return "I couldn't find specific products matching your requirements. Could you provide more details about what you're looking for?";
     }
 
-    const prompt = `Hi, I'm Genie, your personal Shopping Master at Smart Avenue.
+    const config = await getAIConfig();
+    const persona = config.personaName;
+
+    const prompt = `Hi, I'm ${persona}, your personal Shopping Master at Smart Avenue.
 
 Customer asked: "${query}"
 
 You found ${recommendationCount} product recommendation(s)${topProductName ? `, with "${topProductName}" being the top match` : ""}.
 
-Write a brief, friendly 1-2 sentence summary to introduce the recommendations. Be helpful and conversational as Genie. Do not use markdown formatting.`;
+Write a brief, friendly 1-2 sentence summary to introduce the recommendations. Be helpful and conversational as ${persona}. Do not use markdown formatting.`;
 
-    const response = await callLLM(prompt, provider);
+    const response = await callLLMWithConfig(prompt, provider);
     return response.trim().replace(/```/g, "").replace(/^["']|["']$/g, "");
 }
 
@@ -570,13 +639,15 @@ export async function generateNoProductFoundResponse(
     intent: LLMIntentResponse,
     provider: LLMProvider = "google"
 ): Promise<string> {
-    const prompt = `Hy this is Genie, your Shopping Master at Smart Avenue.
-I help customers get premium products at very affordable prices.
+    const config = await getAIConfig();
+    const persona = config.personaName;
+
+    const prompt = `${config.systemPrompt}
 
 CRITICAL INSTRUCTION:
 - You MUST detect the language of the Customer Query.
 - You MUST reply in the SAME language as the query (Hindi, Urdu, Hinglish, or English).
-- Be the helpful Master Genie.
+- Be the helpful Master ${persona}.
 
 Customer query: "${query}"
 
@@ -594,7 +665,7 @@ We do NOT have this product in stock right now.
 
 Keep it concise (2-3 sentences max).`;
 
-    const response = await callLLM(prompt, provider);
+    const response = await callLLMWithConfig(prompt, provider);
     return response.trim().replace(/```/g, "").replace(/^["']|["']$/g, "");
 }
 
@@ -617,13 +688,15 @@ export async function handleMissingProduct(
         specifications?: string[];
     };
 }> {
+    const config = await getAIConfig();
+    const persona = config.personaName;
     const history = messages.length > 0
         ? `Conversation History:\n${messages.map(m => `${m.role.toUpperCase()}: ${m.content}`).join("\n")}\n\n`
         : "";
 
     const productName = intent.productRequestData?.name || intent.category || intent.subcategory || query;
 
-    const prompt = `Hy this is Genie, your Shopping Master at Smart Avenue.
+    const prompt = `${config.systemPrompt}
     
 ${history}Customer Query: "${query}"
 
@@ -632,7 +705,7 @@ As their Master, I want to take a "Product Request" to stock it for them at an a
 
 Decision Logic:
 1. If budget or specific details are known, or if they explicitly asked to order it, submit the request.
-2. Otherwise, ask for details as Genie.
+2. Otherwise, ask for details as ${persona}.
 
 Output a JSON object:
 {
@@ -681,7 +754,7 @@ Output a JSON object:
         const fallbackProductName = intent.productRequestData?.name || intent.category || intent.subcategory || query;
         return {
             action: "ask_details" as const,
-            response: `Hi, I'm Genie. We don't currently have "${fallbackProductName}" in stock. As your Shopping Master, I'd love to help you get it! Could you share your preferred budget and details?`,
+            response: `Hi, I'm ${persona}. We don't currently have "${fallbackProductName}" in stock. As your Shopping Master, I'd love to help you get it! Could you share your preferred budget and details?`,
         };
     }
 }
@@ -705,6 +778,10 @@ export async function rankAndSummarize(
         };
     }
 
+    const config = await getAIConfig();
+    const persona = config.personaName;
+    const validProductIds = new Set(products.map(p => p.id));
+
     const productList = products.map(p => ({
         id: p.id,
         name: p.name,
@@ -713,12 +790,11 @@ export async function rankAndSummarize(
         tags: p.tags,
     }));
 
-    const prompt = `Hy this is Genie, your Shopping Master at Smart Avenue.
-I am creative, persuasive, and I help you find premium products like stationary or teddies at affordable prices.
+    const prompt = `${config.systemPrompt}
 
 CRITICAL INSTRUCTION:
 - You MUST reply in the SAME language as the query (English, Hindi, Urdu, or Hinglish).
-- Be charming and speak as Genie, the Shopping Master.
+- Be charming and speak as ${persona}, the Shopping Master.
 
 Customer query: "${query}"
 
@@ -752,10 +828,15 @@ CRITICAL:
 
 Only include relevant products. If no products match well, return empty rankings.`;
 
-    return await callLLMForJSON<{
+    const result = await callLLMForJSON<{
         rankings: Array<{ productId: string; matchScore: number; highlights: string[]; whyRecommended: string }>;
         summary: string;
     }>(prompt);
+
+    // Validate product IDs to prevent hallucination
+    result.rankings = validateRankings(result.rankings, validProductIds);
+
+    return result;
 }
 
 /**
@@ -1102,10 +1183,12 @@ export async function chatWithAssistant(
     message: string,
     history: { role: "user" | "assistant"; content: string }[]
 ): Promise<{ reply: string; suggestedActions?: string[] }> {
+    const config = await getAIConfig();
+
     // Construct conversation history for context
     const conversationContext = history.map(msg => `${msg.role === "user" ? "Customer" : "Assistant"}: ${msg.content}`).join("\n");
 
-    const prompt = `You are 'Genie', the smart shopping assistant for Smart Avenue (a premium lifestyle store in India).
+    const prompt = `${config.systemPrompt}
     
     Traits:
     - Friendly, helpful, and knowledgeable about fashion, tech, and home decor.

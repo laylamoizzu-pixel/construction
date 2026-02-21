@@ -3,8 +3,7 @@
 
 import { getAdminDb } from "@/lib/firebase-admin";
 import { SiteConfig, DEFAULT_SITE_CONFIG } from "@/types/site-config";
-import { revalidatePath } from "next/cache";
-import { cache } from "react";
+import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 
 const CONFIG_COLLECTION = "site_config";
 const CONFIG_DOC_ID = "main";
@@ -39,24 +38,20 @@ function deepMerge(target: any, source: any): any {
  * Fetches the site configuration from Firestore.
  * Returns the default config if the document doesn't exist.
  */
-export const getSiteConfig = cache(async function getSiteConfig(): Promise<SiteConfig> {
+async function _fetchSiteConfig(): Promise<SiteConfig> {
     try {
         const adminDb = getAdminDb();
         const docRef = adminDb.collection(CONFIG_COLLECTION).doc(CONFIG_DOC_ID);
         const docSnap = await docRef.get();
 
         if (!docSnap.exists) {
-            // If no config exists, create the default one
             await docRef.set(DEFAULT_SITE_CONFIG);
             return DEFAULT_SITE_CONFIG;
         }
 
         const data = docSnap.data() as Partial<SiteConfig>;
-
-        // Perform a deep merge to ensure all fields are present while respecting DB values
         const mergedConfig = deepMerge(DEFAULT_SITE_CONFIG, data) as SiteConfig;
 
-        // Server-side migration: ensure slides exists if older hero config is present
         if (!mergedConfig.hero.slides && (mergedConfig.hero as any).title) {
             const legacyHero = mergedConfig.hero as any;
             mergedConfig.hero.slides = [{
@@ -76,6 +71,11 @@ export const getSiteConfig = cache(async function getSiteConfig(): Promise<SiteC
         console.error("Error fetching site config:", error);
         return DEFAULT_SITE_CONFIG;
     }
+}
+
+export const getSiteConfig = unstable_cache(_fetchSiteConfig, ["site-config"], {
+    revalidate: 300,
+    tags: ["site-config"],
 });
 
 /**
@@ -98,6 +98,7 @@ export async function updateSiteConfig(newConfig: SiteConfig): Promise<{ success
 
         // Revalidate all pages since this affects global layout/theme
         revalidatePath("/", "layout");
+        revalidateTag("site-config");
 
         return { success: true };
     } catch (error) {
