@@ -1019,34 +1019,15 @@ export async function generateGiftRecommendations(
         description: p.description.substring(0, 100) + "..."
     }));
 
-    const prompt = `You are ${persona}, the specific 'Gift Concierge' for Smart Avenue.
-    
-    Recipient Profile:
-    - Relation: ${recipient.relation}
-    - Age Group: ${recipient.age}
-    - Interests: ${recipient.interests.join(", ")}
-    - Occasion: ${recipient.occasion}
-    - Budget: ${recipient.budget}
-
-    Available Products Catalog:
-    ${JSON.stringify(productList, null, 2)}
-
-    Task:
-    1. Think deeply about what this person would actually value based on their psychology and interests.
-    2. Suggest 3 unique gift ideas STRICTLY from the "Available Products Catalog" provided. Do NOT invent items.
-    3. Explain the emotional or practical value of each.
-
-    CRITICAL: For the "productId" field, you MUST return the exact "id" from the catalog.
-
-    Respond with a JSON object:
-    {
-      "thoughtProcess": "A brief explanation of your gifting strategy for this persona.",
-      "recommendations": [
-        { "productId": "ID of the item from catalog", "reason": "Why they will love it", "category": "General category (e.g. Fashion)" },
-        { "productId": "ID of the item from catalog", "reason": "Why they will love it", "category": "General category" },
-        { "productId": "ID of the item from catalog", "reason": "Why they will love it", "category": "General category" }
-      ]
-    }`;
+    const prompt = await getPrompt("gift-concierge", {
+        persona,
+        relation: recipient.relation,
+        age: recipient.age,
+        interests: recipient.interests.join(", "),
+        occasion: recipient.occasion,
+        budget: recipient.budget,
+        productList: JSON.stringify(productList, null, 2)
+    });
 
     // Using DeepSeek-R1 Distill Qwen 32B for creative/empathetic tasks
     const result = await callLLMForJSON<{
@@ -1085,32 +1066,16 @@ export async function generateProductComparison(
     summary: string;
     recommendation: string;
 }> {
-    const prompt = `You are a meticulous product analyst for Smart Avenue.
-    
-    Compare these two products specifically:
-    
-    Product A: ${product1.name} (₹${product1.price})
-    ${product1.description}
-    Features: ${product1.features.join(", ")}
-    
-    Product B: ${product2.name} (₹${product2.price})
-    ${product2.description}
-    Features: ${product2.features.join(", ")}
-    
-    Task:
-    1. Identify the key distinguishing features (e.g. Battery, Material, Use-case).
-    2. Compare them side-by-side.
-    3. Declare a "Verdict" for each feature (e.g. "A is better for X").
-    4. Provide a final recommendation on who should buy which.
-    
-    Respond with a JSON object:
-    {
-      "comparisonPoints": [
-        { "feature": "Feature Name", "item1Value": "Value/Description for A", "item2Value": "Value/Description for B", "verdict": "Which wins and why (brief)" }
-      ],
-      "summary": "A balanced 2-sentence summary of the main trade-off.",
-      "recommendation": "Final advice: Buy A if..., Buy B if..."
-    }`;
+    const prompt = await getPrompt("product-compare", {
+        "product1.name": product1.name,
+        "product1.price": product1.price.toString(),
+        "product1.description": product1.description,
+        "product1.features": product1.features.join(", "),
+        "product2.name": product2.name,
+        "product2.price": product2.price.toString(),
+        "product2.description": product2.description,
+        "product2.features": product2.features.join(", ")
+    });
 
     // Using DeepSeek-R1 Distill Llama 70B for reasoning comparison
     return await callLLMForJSON<{
@@ -1133,21 +1098,12 @@ export async function generateOOSUrgency(
     stockLevel: number,
     viewCount: number
 ): Promise<{ headline: string; subtext: string; urgencyLevel: "high" | "medium" | "low" }> {
-    const prompt = `You are a sales psychology expert for Smart Avenue.
-    Context:
-    - Product: ${productName} (SKU: ${sku})
-    - Real-time Stock: ${stockLevel} units remaining
-    - Active Viewers: ${viewCount} people viewing right now
-
-    Task:
-    Generate a short, punchy urgency message to encourage immediate purchase without sounding spammy.
-    
-    Response JSON:
-    {
-      "headline": "Short trigger phrase (e.g. 'Only 2 left!')",
-      "subtext": "Social proof context (e.g. '15 people have this in their cart')",
-      "urgencyLevel": "high" | "medium" | "low"
-    }`;
+    const prompt = await getPrompt("stock-urgency", {
+        productName,
+        sku,
+        stockLevel: stockLevel.toString(),
+        viewCount: viewCount.toString()
+    });
 
     // Using Llama 3.1 8B (Light) for fast inference
     return await callLLMForJSON<{
@@ -1204,28 +1160,10 @@ export async function chatWithAssistant(
     // Construct conversation history for context
     const conversationContext = history.map(msg => `${msg.role === "user" ? "Customer" : "Assistant"}: ${msg.content}`).join("\n");
 
-    const prompt = `${config.systemPrompt}
-    
-    Traits:
-    - Friendly, helpful, and knowledgeable about fashion, tech, and home decor.
-    - Multilingual: Fluent in English, Hindi, and Hinglish. Detect the user's language and reply in the same mix.
-    - Context-Aware: You know this is an online store.
-    
-    Conversation History:
-    ${conversationContext}
-    
-    Customer's Latest Message: "${message}"
-    
-    Task:
-    1. Reply naturally to the customer.
-    2. If they ask for products, suggest general categories or ask for preferences (don't hallucinate specific fake SKUs, just guide them).
-    3. If they accept a language (e.g., Hindi), switch to it.
-    
-    Response JSON:
-    {
-      "reply": "Your natural language response here.",
-      "suggestedActions": ["Optional short suggestion buttons", "e.g. 'Show me Shoes'", "e.g. 'Track Order'"]
-    }`;
+    const prompt = await getPrompt("general-chat", {
+        conversationContext,
+        message
+    });
 
     // Using Llama 3.3 70B for high-quality multilingual chat
     return await callLLMForJSON<{
@@ -1245,25 +1183,9 @@ export async function translateVibeToFilters(vibe: string): Promise<{
     sort?: "price_asc" | "price_desc" | "newest" | "rating";
     reasoning: string;
 }> {
-    const prompt = `You are a fashion and lifestyle curator.
-    The user wants to shop for a specific "Vibe": "${vibe}".
-    
-    Translate this vibe into search filters for an e-commerce store holding Electronics, Fashion, Home Decor, and Beauty.
-    
-    Rules:
-    - Map the abstract vibe to concrete categories and search terms.
-    - Suggest colors that match the mood.
-    - Suggest a price range if the vibe implies luxury or budget (e.g., "Boujee" -> High Price).
-    
-    Response JSON:
-    {
-      "searchQuery": "Best keyword to search (e.g., 'Party Dress', 'Gaming Setup')",
-      "category": "Main Category ID if clear (e.g., 'fashion', 'electronics')",
-      "colors": ["List of 2-3 dominant colors"],
-      "priceRange": { "min": 0, "max": 10000 },
-      "sort": "One of: 'price_asc', 'price_desc', 'newest', 'rating'",
-      "reasoning": "Short explanation of why these filters match the vibe."
-    }`;
+    const prompt = await getPrompt("vibe-translator", {
+        vibe
+    });
 
     // Using Llama 3.3 70B for nuanced semantic understanding
     return await callLLMForJSON<{
