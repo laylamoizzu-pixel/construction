@@ -867,15 +867,13 @@ export async function generateSocialProof(
     product: { name: string; categoryId: string; tags: string[] },
     salesStats?: { salesInLastMonth: number; popularInCity?: string }
 ): Promise<string> {
-    const prompt = `You are a social media trend expert for Smart Avenue.
-Create a short, catchy "social proof" snippet for "${product.name}".
+    const stats = salesStats ? `${salesStats.salesInLastMonth} people bought this recently${salesStats.popularInCity ? ` in ${salesStats.popularInCity}` : ""}` : "Currently trending";
 
-Context:
-- Category: ${product.categoryId}
-- Stats: ${salesStats ? `${salesStats.salesInLastMonth} people bought this recently${salesStats.popularInCity ? ` in ${salesStats.popularInCity}` : ""}` : "Currently trending"}
-
-Example output: "#1 top-pick for office wear in Mumbai this week!" or "Trending: 50+ people in Delhi just bought this!"
-Keep it under 100 characters. No hashtags.`;
+    const prompt = await getPrompt("social-proof", {
+        productName: product.name,
+        categoryId: product.categoryId,
+        stats
+    });
 
     const response = await callGroqAPI(prompt);
     return response.trim().replace(/^["']|["']$/g, "");
@@ -891,21 +889,12 @@ export async function generateDealInsight(
         ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
         : 0;
 
-    const prompt = `You are a savvy shopping assistant for Smart Avenue.
-    Explain why this deal is great or highlight the key value proposition in one short, punchy sentence.
-    
-    Product: ${product.name}
-    Price: ₹${product.price} ${discount > 0 ? `(was ₹${product.originalPrice}, ${discount}% OFF)` : ""}
-    Desc: ${product.description.substring(0, 100)}...
-    
-    Rules:
-    - If there's a big discount (>30%), focus on the savings value.
-    - If no discount, focus on premium quality or "timeless investment".
-    - Use emojis.
-    - Keep it under 15 words.
-    
-    Example: "🔥 Huge 40% drop! Lowest price we've seen in 30 days."
-    Example: "✨ Premium leather that lasts a lifetime—worth every rupee."`;
+    const prompt = await getPrompt("deal-insight", {
+        productName: product.name,
+        price: product.price,
+        discount: discount > 0 ? `(was ₹${product.originalPrice}, ${discount}% OFF)` : "",
+        description: product.description.substring(0, 100) + "..."
+    });
 
     // Using Llama 3.1 8B for fast, snappy copy
     const response = await callGroqAPI(prompt, GROQ_MODEL_LIGHT);
@@ -948,36 +937,15 @@ export async function generateStylistAdvice(
         colors: p.tags
     }));
 
-    const prompt = `You are ${persona}, a world-class fashion stylist for Smart Avenue.
-    
-    User Profile:
-    - Gender: ${userPreferences.gender}
-    - Style Preference: ${userPreferences.style}
-    - Occasion: ${userPreferences.occasion}
-    - Budget: ${userPreferences.budget || "Flexible"}
-    - Preferred Colors: ${userPreferences.colors?.join(", ") || "Any"}
-
-    Available Products Catalog:
-    ${JSON.stringify(productList, null, 2)}
-
-    Task:
-    1. Analyze the user's request and occasion.
-    2. Curate a complete outfit STRICTLY from the "Available Products Catalog" provided.
-    3. Provide expert styling advice on *how* to wear it.
-    
-    CRITICAL: For the suggestedOutfit fields, you MUST return the exact "id" of the chosen product from the catalog. Do NOT return product names or invent items. If you cannot find a suitable item for a category, return null for that field.
-
-    Respond with a JSON object in this exact format:
-    {
-      "advice": "3-4 sentences of expert styling advice specific to this look.",
-      "suggestedOutfit": {
-        "top": "product id or null",
-        "bottom": "product id or null",
-        "shoes": "product id or null",
-        "accessory": "product id or null",
-        "reasoning": "Why this specific combination works for the occasion."
-      }
-    }`;
+    const prompt = await getPrompt("stylist", {
+        persona,
+        gender: userPreferences.gender,
+        style: userPreferences.style,
+        occasion: userPreferences.occasion,
+        budget: userPreferences.budget || "Flexible",
+        colors: userPreferences.colors?.join(", ") || "Any",
+        productList: JSON.stringify(productList, null, 2)
+    });
 
     // Using DeepSeek-R1 Distill Llama 70B for reasoning
     const result = await callLLMForJSON<{
