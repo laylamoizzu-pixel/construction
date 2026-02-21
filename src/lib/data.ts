@@ -106,9 +106,25 @@ export interface HighlightsContent {
     description: string;
 }
 
-// Get site content by section - cached per section
+import { getEdgeConfigValue, hasEdgeConfigKey } from "@/lib/edge-config";
+
+// Get site content by section - cached per section (with Edge Config fallback)
 async function _fetchSiteContent<T>(section: string): Promise<T | null> {
     try {
+        // 1. Try fetching from Edge Config first for ultra-low latency
+        const edgeConfigKey = `siteContent_${section}`;
+        const hasKey = await hasEdgeConfigKey(edgeConfigKey);
+
+        if (hasKey) {
+            console.log(`[Edge Config] Serving ${section} from edge`);
+            const edgeData = await getEdgeConfigValue<T>(edgeConfigKey);
+            if (edgeData) {
+                return edgeData;
+            }
+        }
+
+        // 2. Fallback to Firestore
+        console.log(`[Firestore] Serving ${section} from database`);
         const doc = await getAdminDb().collection("siteContent").doc(section).get();
         if (doc.exists) {
             const data = doc.data();

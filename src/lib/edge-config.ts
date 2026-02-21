@@ -3,7 +3,7 @@ import { createClient } from '@vercel/edge-config';
 // Initialize the Edge Config client.
 // It uses process.env.EDGE_CONFIG by default, but we can explicitly pass it if needed.
 // This connection string is provided by Vercel when you create an Edge Config.
-const edgeConfig = createClient(process.env.EDGE_CONFIG);
+const edgeConfig = process.env.EDGE_CONFIG ? createClient(process.env.EDGE_CONFIG) : null;
 
 /**
  * Retrieves a value from Edge Config.
@@ -11,7 +11,7 @@ const edgeConfig = createClient(process.env.EDGE_CONFIG);
  * @returns The value associated with the key, or null if not found/error.
  */
 export async function getEdgeConfigValue<T>(key: string): Promise<T | null> {
-    if (!process.env.EDGE_CONFIG) {
+    if (!edgeConfig) {
         console.warn('EDGE_CONFIG environment variable is not set. Skipping Edge Config read.');
         return null;
     }
@@ -32,7 +32,7 @@ export async function getEdgeConfigValue<T>(key: string): Promise<T | null> {
  * Checks if a key exists in Edge Config.
  */
 export async function hasEdgeConfigKey(key: string): Promise<boolean> {
-    if (!process.env.EDGE_CONFIG) return false;
+    if (!edgeConfig) return false;
     try {
         return await edgeConfig.has(key);
     } catch (error) {

@@ -956,7 +956,8 @@ export async function generateStylistAdvice(
         occasion: string;
         budget?: string;
         colors?: string[];
-    }
+    },
+    products: Product[] = []
 ): Promise<{
     advice: string;
     suggestedOutfit: {
@@ -967,7 +968,21 @@ export async function generateStylistAdvice(
         reasoning: string
     }
 }> {
-    const prompt = `You are a world-class fashion stylist for Smart Avenue.
+    const config = await getAIConfig();
+    const persona = config.personaName;
+
+    // Map of product IDs to full products for easy lookup later
+    const validProducts = new Map(products.map(p => [p.id, p]));
+
+    const productList = products.map(p => ({
+        id: p.id,
+        name: p.name,
+        category: p.categoryId,
+        price: p.price,
+        colors: p.tags
+    }));
+
+    const prompt = `You are ${persona}, a world-class fashion stylist for Smart Avenue.
     
     User Profile:
     - Gender: ${userPreferences.gender}
@@ -976,31 +991,30 @@ export async function generateStylistAdvice(
     - Budget: ${userPreferences.budget || "Flexible"}
     - Preferred Colors: ${userPreferences.colors?.join(", ") || "Any"}
 
-    Available Product Categories/Types (Abstract):
-    - Tops: Shirts, T-Shirts, Blouses, Kurtas
-    - Bottoms: Jeans, Trousers, Skirts, Chinos
-    - Footwear: Sneakers, Loafers, Heels, Boots
-    - Accessories: Watches, Bags, Jewelry
+    Available Products Catalog:
+    ${JSON.stringify(productList, null, 2)}
 
     Task:
     1. Analyze the user's request and occasion.
-    2. Curate a complete outfit from the available types.
-    3. Provide expert styling advice on *how* to wear it (tucking, layering, color coordination).
+    2. Curate a complete outfit STRICTLY from the "Available Products Catalog" provided.
+    3. Provide expert styling advice on *how* to wear it.
+    
+    CRITICAL: For the suggestedOutfit fields, you MUST return the exact "id" of the chosen product from the catalog. Do NOT return product names or invent items. If you cannot find a suitable item for a category, return null for that field.
 
     Respond with a JSON object in this exact format:
     {
       "advice": "3-4 sentences of expert styling advice specific to this look.",
       "suggestedOutfit": {
-        "top": "specific item type and color (e.g., 'White Linen Shirt')",
-        "bottom": "specific item type and color",
-        "shoes": "specific item type",
-        "accessory": "specific accessory",
+        "top": "product id or null",
+        "bottom": "product id or null",
+        "shoes": "product id or null",
+        "accessory": "product id or null",
         "reasoning": "Why this specific combination works for the occasion."
       }
     }`;
 
     // Using DeepSeek-R1 Distill Llama 70B for reasoning
-    return await callLLMForJSON<{
+    const result = await callLLMForJSON<{
         advice: string;
         suggestedOutfit: {
             top?: string;
@@ -1010,6 +1024,36 @@ export async function generateStylistAdvice(
             reasoning: string
         }
     }>(prompt, "groq", GROQ_MODEL_REASONING);
+
+    // Map IDs back to product names to satisfy the UI without requiring frontend changes, 
+    // while ensuring strict catalog validation (removing hallucinations).
+    if (result.suggestedOutfit) {
+        if (result.suggestedOutfit.top && validProducts.has(result.suggestedOutfit.top)) {
+            result.suggestedOutfit.top = validProducts.get(result.suggestedOutfit.top)?.name;
+        } else {
+            result.suggestedOutfit.top = undefined;
+        }
+
+        if (result.suggestedOutfit.bottom && validProducts.has(result.suggestedOutfit.bottom)) {
+            result.suggestedOutfit.bottom = validProducts.get(result.suggestedOutfit.bottom)?.name;
+        } else {
+            result.suggestedOutfit.bottom = undefined;
+        }
+
+        if (result.suggestedOutfit.shoes && validProducts.has(result.suggestedOutfit.shoes)) {
+            result.suggestedOutfit.shoes = validProducts.get(result.suggestedOutfit.shoes)?.name;
+        } else {
+            result.suggestedOutfit.shoes = undefined;
+        }
+
+        if (result.suggestedOutfit.accessory && validProducts.has(result.suggestedOutfit.accessory)) {
+            result.suggestedOutfit.accessory = validProducts.get(result.suggestedOutfit.accessory)?.name;
+        } else {
+            result.suggestedOutfit.accessory = undefined;
+        }
+    }
+
+    return result;
 }
 
 /**
@@ -1022,12 +1066,26 @@ export async function generateGiftRecommendations(
         interests: string[];
         occasion: string;
         budget: string;
-    }
+    },
+    products: Product[] = []
 ): Promise<{
     thoughtProcess: string;
     recommendations: Array<{ item: string; reason: string; category: string }>;
 }> {
-    const prompt = `You are the specific 'Gift Concierge' for Smart Avenue.
+    const config = await getAIConfig();
+    const persona = config.personaName;
+
+    const validProducts = new Map(products.map(p => [p.id, p]));
+
+    const productList = products.map(p => ({
+        id: p.id,
+        name: p.name,
+        category: p.categoryId,
+        price: p.price,
+        description: p.description.substring(0, 100) + "..."
+    }));
+
+    const prompt = `You are ${persona}, the specific 'Gift Concierge' for Smart Avenue.
     
     Recipient Profile:
     - Relation: ${recipient.relation}
@@ -1036,26 +1094,50 @@ export async function generateGiftRecommendations(
     - Occasion: ${recipient.occasion}
     - Budget: ${recipient.budget}
 
+    Available Products Catalog:
+    ${JSON.stringify(productList, null, 2)}
+
     Task:
     1. Think deeply about what this person would actually value based on their psychology and interests.
-    2. Suggest 3 unique gift ideas that are likely to be found in a modern lifestyle store (Fashion, Tech, Accessories, Home Decor).
+    2. Suggest 3 unique gift ideas STRICTLY from the "Available Products Catalog" provided. Do NOT invent items.
     3. Explain the emotional or practical value of each.
+
+    CRITICAL: For the "productId" field, you MUST return the exact "id" from the catalog.
 
     Respond with a JSON object:
     {
       "thoughtProcess": "A brief explanation of your gifting strategy for this persona.",
       "recommendations": [
-        { "item": "Name of the item type", "reason": "Why they will love it", "category": "General category (e.g. Electronics)" },
-        { "item": "Name of the item type", "reason": "Why they will love it", "category": "General category" },
-        { "item": "Name of the item type", "reason": "Why they will love it", "category": "General category" }
+        { "productId": "ID of the item from catalog", "reason": "Why they will love it", "category": "General category (e.g. Fashion)" },
+        { "productId": "ID of the item from catalog", "reason": "Why they will love it", "category": "General category" },
+        { "productId": "ID of the item from catalog", "reason": "Why they will love it", "category": "General category" }
       ]
     }`;
 
     // Using DeepSeek-R1 Distill Qwen 32B for creative/empathetic tasks
-    return await callLLMForJSON<{
+    const result = await callLLMForJSON<{
         thoughtProcess: string;
-        recommendations: Array<{ item: string; reason: string; category: string }>;
+        recommendations: Array<{ productId?: string; item?: string; reason: string; category: string }>;
     }>(prompt, "groq", GROQ_MODEL_GIFT);
+
+    // Validate IDs and map to product names for the frontend
+    const validatedRecommendations = [];
+    for (const rec of result.recommendations) {
+        if (!rec.productId) continue;
+        const product = validProducts.get(rec.productId);
+        if (product) {
+            validatedRecommendations.push({
+                item: product.name,
+                reason: rec.reason,
+                category: rec.category || product.categoryId
+            });
+        }
+    }
+
+    return {
+        thoughtProcess: result.thoughtProcess,
+        recommendations: validatedRecommendations
+    };
 }
 
 /**
