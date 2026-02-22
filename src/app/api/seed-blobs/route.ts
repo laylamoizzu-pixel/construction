@@ -33,7 +33,7 @@ export async function GET(req: Request) {
         console.log("Seeded LLMO settings");
 
         // 3. Seed AI Prompts
-        const prompts: Record<string, any> = {};
+        const prompts: Record<string, unknown> = {};
         for (const [id, data] of Object.entries(DEFAULT_PROMPTS)) {
             prompts[id] = { ...data, id };
         }

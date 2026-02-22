@@ -1,6 +1,6 @@
 "use server";
 
-import { put, head } from "@vercel/blob";
+import { put } from "@vercel/blob";
 
 /**
  * A generic utility to store and retrieve JSON configuration files

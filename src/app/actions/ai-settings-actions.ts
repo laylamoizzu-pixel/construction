@@ -1,6 +1,5 @@
 "use server";
 
-import { getAdminDb, admin } from "@/lib/firebase-admin";
 import { revalidatePath } from "next/cache";
 import { invalidateAIConfig } from "@/lib/ai-config";
 

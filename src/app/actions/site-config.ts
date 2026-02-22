@@ -1,15 +1,11 @@
 "use server";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { getAdminDb } from "@/lib/firebase-admin";
 import { SiteConfig, DEFAULT_SITE_CONFIG } from "@/types/site-config";
 import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 import { getBlobJson, updateBlobJson } from "./blob-json";
 
 const BLOB_FILENAME = "site_config.json";
-
-const CONFIG_COLLECTION = "site_config";
-const CONFIG_DOC_ID = "main";
 
 /**
  * Deep merges two objects.
