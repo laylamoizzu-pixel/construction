@@ -61,10 +61,40 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-// Optimized Layout that injects config into ClientLayout
+// Optimized Layout that fetches config ONCE and injects into ClientLayout + scripts
 async function ConfigLoader({ children }: { children: React.ReactNode }) {
-  const siteConfig = await getSiteConfig();
-  return <ClientLayout initialConfig={siteConfig}>{children}</ClientLayout>;
+  const config = await getSiteConfig();
+  return (
+    <>
+      {config.system.scripts.customHeadScript && (
+        <script
+          dangerouslySetInnerHTML={{
+            __html: config.system.scripts.customHeadScript.replace(/<script[^>]*>/i, "").replace(/<\/script>/i, ""),
+          }}
+        />
+      )}
+      {config.system.scripts.googleAnalyticsId && (
+        <>
+          <Script
+            src={`https://www.googletagmanager.com/gtag/js?id=${config.system.scripts.googleAnalyticsId}`}
+            strategy="afterInteractive"
+          />
+          <Script id="google-analytics" strategy="afterInteractive">
+            {`
+                  window.dataLayer = window.dataLayer || [];
+                  function gtag(){dataLayer.push(arguments);}
+                  gtag('js', new Date());
+                  gtag('config', '${config.system.scripts.googleAnalyticsId}');
+                  `}
+          </Script>
+        </>
+      )}
+      <ClientLayout initialConfig={config}>{children}</ClientLayout>
+      {config.system.scripts.customBodyScript && (
+        <div dangerouslySetInnerHTML={{ __html: config.system.scripts.customBodyScript }} />
+      )}
+    </>
+  );
 }
 
 export default async function RootLayout({
@@ -72,45 +102,14 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const config = await getSiteConfig();
-
   return (
     <html lang="en">
-      <head>
-        {config.system.scripts.customHeadScript && (
-          <script
-            dangerouslySetInnerHTML={{
-              __html: config.system.scripts.customHeadScript.replace(/<script[^>]*>/i, "").replace(/<\/script>/i, ""),
-            }}
-          />
-        )}
-        {config.system.scripts.googleAnalyticsId && (
-          <>
-            <Script
-              src={`https://www.googletagmanager.com/gtag/js?id=${config.system.scripts.googleAnalyticsId}`}
-              strategy="afterInteractive"
-            />
-            <Script id="google-analytics" strategy="afterInteractive">
-              {`
-                    window.dataLayer = window.dataLayer || [];
-                    function gtag(){dataLayer.push(arguments);}
-                    gtag('js', new Date());
-                    gtag('config', '${config.system.scripts.googleAnalyticsId}');
-                    `}
-            </Script>
-          </>
-        )}
-      </head>
       <body
         className={`${inter.variable} ${outfit.variable} antialiased bg-slate-50 text-slate-900 flex flex-col min-h-screen`}
       >
         <Suspense fallback={<ClientLayout initialConfig={DEFAULT_SITE_CONFIG}>{children}</ClientLayout>}>
           <ConfigLoader>{children}</ConfigLoader>
         </Suspense>
-
-        {config.system.scripts.customBodyScript && (
-          <div dangerouslySetInnerHTML={{ __html: config.system.scripts.customBodyScript }} />
-        )}
 
         <SpeedInsights />
       </body>
