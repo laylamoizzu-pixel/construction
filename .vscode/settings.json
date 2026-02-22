@@ -1,0 +1,16 @@
+{
+    "files.exclude": {
+        "**/.cursorrules": true,
+        "**/.clinerules": true,
+        "**/.windsurfrules": true,
+        "**/AGENTS.md": true,
+        "**/.gemini/AGENTS.md": true
+    },
+    "search.exclude": {
+        "**/.cursorrules": true,
+        "**/.clinerules": true,
+        "**/.windsurfrules": true,
+        "**/AGENTS.md": true,
+        "**/.gemini/AGENTS.md": true
+    }
+}
