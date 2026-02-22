@@ -7,7 +7,6 @@ import { getSiteConfig } from "@/app/actions/site-config";
 import { DEFAULT_SITE_CONFIG } from "@/types/site-config";
 import { Suspense } from "react";
 import Script from "next/script";
-import LanguageAssistant from "@/components/ai/LanguageAssistant";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -79,7 +78,11 @@ export default async function RootLayout({
     <html lang="en">
       <head>
         {config.system.scripts.customHeadScript && (
-          <div dangerouslySetInnerHTML={{ __html: config.system.scripts.customHeadScript }} />
+          <script
+            dangerouslySetInnerHTML={{
+              __html: config.system.scripts.customHeadScript.replace(/<script[^>]*>/i, "").replace(/<\/script>/i, ""),
+            }}
+          />
         )}
         {config.system.scripts.googleAnalyticsId && (
           <>
@@ -110,7 +113,6 @@ export default async function RootLayout({
         )}
 
         <SpeedInsights />
-        <LanguageAssistant />
       </body>
     </html>
   );

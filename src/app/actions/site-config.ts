@@ -4,6 +4,9 @@
 import { getAdminDb } from "@/lib/firebase-admin";
 import { SiteConfig, DEFAULT_SITE_CONFIG } from "@/types/site-config";
 import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
+import { getBlobJson, updateBlobJson } from "./blob-json";
+
+const BLOB_FILENAME = "site_config.json";
 
 const CONFIG_COLLECTION = "site_config";
 const CONFIG_DOC_ID = "main";
@@ -35,21 +38,12 @@ function deepMerge(target: any, source: any): any {
 }
 
 /**
- * Fetches the site configuration from Firestore.
- * Returns the default config if the document doesn't exist.
+ * Fetches the site configuration from Vercel Blob.
+ * Returns the default config if the file doesn't exist.
  */
 async function _fetchSiteConfig(): Promise<SiteConfig> {
     try {
-        const adminDb = getAdminDb();
-        const docRef = adminDb.collection(CONFIG_COLLECTION).doc(CONFIG_DOC_ID);
-        const docSnap = await docRef.get();
-
-        if (!docSnap.exists) {
-            await docRef.set(DEFAULT_SITE_CONFIG);
-            return DEFAULT_SITE_CONFIG;
-        }
-
-        const data = docSnap.data() as Partial<SiteConfig>;
+        const data = await getBlobJson<Partial<SiteConfig>>(BLOB_FILENAME, DEFAULT_SITE_CONFIG);
         const mergedConfig = deepMerge(DEFAULT_SITE_CONFIG, data) as SiteConfig;
 
         if (!mergedConfig.hero.slides && (mergedConfig.hero as any).title) {
@@ -68,7 +62,7 @@ async function _fetchSiteConfig(): Promise<SiteConfig> {
 
         return mergedConfig;
     } catch (error) {
-        console.error("Error fetching site config:", error);
+        console.error("Error fetching site config form Blob:", error);
         return DEFAULT_SITE_CONFIG;
     }
 }
@@ -79,22 +73,15 @@ export const getSiteConfig = unstable_cache(_fetchSiteConfig, ["site-config"], {
 });
 
 /**
- * Updates the site configuration in Firestore.
+ * Updates the site configuration in Vercel Blob.
  */
 export async function updateSiteConfig(newConfig: SiteConfig): Promise<{ success: boolean; error?: string }> {
     try {
-        const adminDb = getAdminDb();
-        const docRef = adminDb.collection(CONFIG_COLLECTION).doc(CONFIG_DOC_ID);
-        await docRef.set(newConfig);
+        const result = await updateBlobJson(BLOB_FILENAME, newConfig);
 
-        // Verification step: Read back to ensure persistence
-        // This catches issues where we might be using a mock DB (due to missing creds) or write failures
-        const verifySnap = await docRef.get();
-        if (!verifySnap.exists) {
-            throw new Error("Verification failed: Document does not exist after save. Check database connection.");
+        if (!result.success) {
+            throw new Error(result.error || "Failed to save to Blob");
         }
-
-        // Optional: Deep compare specific critical fields if needed, but existence is the main check for Mock DB
 
         // Revalidate all pages since this affects global layout/theme
         revalidatePath("/", "layout");
@@ -102,7 +89,7 @@ export async function updateSiteConfig(newConfig: SiteConfig): Promise<{ success
 
         return { success: true };
     } catch (error) {
-        console.error("Error updating site config:", error);
+        console.error("Error updating site config in Blob:", error);
         return {
             success: false,
             error: error instanceof Error ? error.message : "Failed to update configuration"

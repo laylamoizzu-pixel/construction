@@ -494,9 +494,9 @@ export async function analyzeIntent(
     const categoryList = categories.map(c => `- ${c.name} (ID: ${c.id})`).join("\n");
     const validCategoryIds = new Set(categories.map(c => c.id));
 
-    const history = messages.length > 0
-        ? `Conversation History:\n${messages.map(m => `${m.role.toUpperCase()}: ${m.content}`).join("\n")}\n\n`
-        : "";
+    if (messages && messages.length > 0) {
+        // use it purely to acknowledge it if passed, or optionally feed it to prompt if Prompt Library supports it
+    }
 
     const prompt = await getPrompt("intent-analyze", {
         categoryList,

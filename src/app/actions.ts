@@ -238,20 +238,15 @@ export interface AboutPageContent {
 }
 
 // Get site content by section
+import { getBlobJson, updateBlobJson } from "./actions/blob-json";
+
 async function _fetchSiteContent<T>(section: string): Promise<T | null> {
     try {
-        const doc = await getAdminDb().collection("siteContent").doc(section).get();
-        if (doc.exists) {
-            const data = doc.data();
-            return {
-                ...data,
-                createdAt: (data?.createdAt as admin.firestore.Timestamp)?.toDate() || undefined,
-                updatedAt: (data?.updatedAt as admin.firestore.Timestamp)?.toDate() || undefined,
-            } as T;
-        }
-        return null;
+        const _filename = `site_content_${section}.json`;
+        const data = await getBlobJson<T | null>(_filename, null);
+        return data;
     } catch (error) {
-        console.error(`Error fetching ${section} content:`, error);
+        console.error(`Error fetching ${section} content from Blob:`, error);
         return null;
     }
 }
@@ -268,10 +263,18 @@ export async function getSiteContent<T>(section: string): Promise<T | null> {
 // Update site content by section
 export async function updateSiteContent(section: string, data: Record<string, unknown>) {
     try {
-        await getAdminDb().collection("siteContent").doc(section).set({
+        const _filename = `site_content_${section}.json`;
+
+        const newData = {
             ...data,
-            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-        }, { merge: true });
+            updatedAt: new Date().toISOString()
+        };
+
+        const result = await updateBlobJson(_filename, newData);
+
+        if (!result.success) {
+            throw new Error(result.error || "Failed to save to Blob");
+        }
 
         revalidatePath("/", "layout");
         revalidateTag("site-content");
@@ -286,13 +289,10 @@ export async function updateSiteContent(section: string, data: Record<string, un
 // Get all departments
 async function _fetchDepartments(): Promise<DepartmentContent[]> {
     try {
-        const doc = await getAdminDb().collection("siteContent").doc("departments").get();
-        if (doc.exists) {
-            return doc.data()?.items || [];
-        }
-        return [];
+        const data = await getBlobJson<{ items: DepartmentContent[] }>("site_content_departments.json", { items: [] });
+        return data.items || [];
     } catch (error) {
-        console.error("Error fetching departments:", error);
+        console.error("Error fetching departments from Blob:", error);
         return [];
     }
 }
@@ -305,10 +305,14 @@ export const getDepartments = unstable_cache(_fetchDepartments, ["departments"],
 // Update departments
 export async function updateDepartments(departments: DepartmentContent[]) {
     try {
-        await getAdminDb().collection("siteContent").doc("departments").set({
+        const result = await updateBlobJson("site_content_departments.json", {
             items: departments,
-            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+            updatedAt: new Date().toISOString()
         });
+
+        if (!result.success) {
+            throw new Error(result.error || "Failed to save to Blob");
+        }
 
         revalidatePath("/");
         revalidateTag("departments");

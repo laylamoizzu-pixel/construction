@@ -1,28 +1,27 @@
 "use server";
 
-import { admin } from "@/lib/firebase-admin";
 import { AIPrompt, DEFAULT_PROMPTS } from "@/lib/prompt-defaults";
 import { invalidatePromptRegistry } from "@/lib/prompt-registry";
 
-const COLLECTION_NAME = "ai_prompts";
+import { getBlobJson, updateBlobJson } from "./blob-json";
+
+const BLOB_FILENAME = "llmo_prompts.json";
 
 /**
- * Get all customized prompts from Firestore.
+ * Get all customized prompts from Vercel Blob.
  * If none exist, returns an empty array (loader will merge with defaults).
  */
 export async function getAIPrompts(): Promise<AIPrompt[]> {
     try {
-        const snapshot = await admin.firestore().collection(COLLECTION_NAME).get();
+        const data = await getBlobJson<Record<string, AIPrompt>>(BLOB_FILENAME, {});
+
         const prompts: AIPrompt[] = [];
-
-        snapshot.forEach((doc) => {
-            const data = doc.data() as AIPrompt;
+        for (const [id, promptData] of Object.entries(data)) {
             prompts.push({
-                ...data,
-                id: doc.id
+                ...promptData,
+                id
             });
-        });
-
+        }
         return prompts;
     } catch (error) {
         console.error("Error fetching AI prompts:", error);
@@ -31,7 +30,7 @@ export async function getAIPrompts(): Promise<AIPrompt[]> {
 }
 
 /**
- * Save or update a specific prompt in Firestore.
+ * Save or update a specific prompt in Vercel Blob.
  */
 export async function updateAIPrompt(id: string, updateData: Partial<AIPrompt>): Promise<{ success: boolean; error?: string }> {
     try {
@@ -40,17 +39,16 @@ export async function updateAIPrompt(id: string, updateData: Partial<AIPrompt>):
             return { success: false, error: "Invalid prompt ID" };
         }
 
-        const docRef = admin.firestore().collection(COLLECTION_NAME).doc(id);
-        const docSnap = await docRef.get();
-
         const now = new Date().toISOString();
+        const currentData = await getBlobJson<Record<string, AIPrompt>>(BLOB_FILENAME, {});
 
-        if (docSnap.exists) {
+        if (currentData[id]) {
             // Update existing record
-            await docRef.update({
+            currentData[id] = {
+                ...currentData[id],
                 ...updateData,
                 updatedAt: now
-            });
+            };
         } else {
             // Create new record from defaults + updateData
             const defaultPrompt = DEFAULT_PROMPTS[id];
@@ -58,12 +56,17 @@ export async function updateAIPrompt(id: string, updateData: Partial<AIPrompt>):
                 return { success: false, error: "Prompt ID does not exist in defaults" };
             }
 
-            await docRef.set({
+            currentData[id] = {
                 ...defaultPrompt,
                 ...updateData,
                 updatedAt: now,
                 createdAt: now
-            });
+            };
+        }
+
+        const result = await updateBlobJson(BLOB_FILENAME, currentData);
+        if (!result.success) {
+            throw new Error(result.error || "Failed to save to Blob");
         }
 
         // Extremely important: bust the cache so the app uses the new prompt immediately
@@ -82,20 +85,29 @@ export async function updateAIPrompt(id: string, updateData: Partial<AIPrompt>):
  */
 export async function seedDefaultPrompts(): Promise<{ success: boolean; error?: string }> {
     try {
-        const batch = admin.firestore().batch();
         const now = new Date().toISOString();
+        const currentData = await getBlobJson<Record<string, AIPrompt>>(BLOB_FILENAME, {});
 
+        let changed = false;
         for (const [id, promptData] of Object.entries(DEFAULT_PROMPTS)) {
-            const docRef = admin.firestore().collection(COLLECTION_NAME).doc(id);
-            batch.set(docRef, {
-                ...promptData,
-                updatedAt: now,
-                createdAt: now
-            }, { merge: true }); // Merge so we don't overwrite if they exist
+            if (!currentData[id]) {
+                currentData[id] = {
+                    ...promptData,
+                    updatedAt: now,
+                    createdAt: now
+                };
+                changed = true;
+            }
         }
 
-        await batch.commit();
-        invalidatePromptRegistry();
+        if (changed) {
+            const result = await updateBlobJson(BLOB_FILENAME, currentData);
+            if (!result.success) {
+                throw new Error(result.error || "Failed to save to Blob");
+            }
+            invalidatePromptRegistry();
+        }
+
         return { success: true };
     } catch (error) {
         console.error("Error seeding default AI prompts:", error);

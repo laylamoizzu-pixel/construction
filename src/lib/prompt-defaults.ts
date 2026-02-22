@@ -5,21 +5,23 @@
  */
 
 export interface AIPrompt {
-    id: string;             // Unique identifier for the agent (e.g., 'stylist')
-    name: string;           // Display name in the admin UI
-    description: string;    // Brief explanation of what this agent does
-    systemPrompt: string;   // The actual prompt template 
-    isActive: boolean;      // Master toggle to enable/disable this specific agent
+  id: string;             // Unique identifier for the agent (e.g., 'stylist')
+  name: string;           // Display name in the admin UI
+  description: string;    // Brief explanation of what this agent does
+  systemPrompt: string;   // The actual prompt template 
+  isActive: boolean;      // Master toggle to enable/disable this specific agent
+  updatedAt?: string;     // ISO timestamp of last update
+  createdAt?: string;     // ISO timestamp of creation
 }
 
 export const DEFAULT_PROMPTS: Record<string, AIPrompt> = {
-    // 1. Intent Analyzer
-    "intent-analyze": {
-        id: "intent-analyze",
-        name: "Intent Analyzer",
-        description: "Classifies user queries into product categories and tags.",
-        isActive: true,
-        systemPrompt: `Analyze the following customer query and extract their intent.
+  // 1. Intent Analyzer
+  "intent-analyze": {
+    id: "intent-analyze",
+    name: "Intent Analyzer",
+    description: "Classifies user queries into product categories and tags.",
+    isActive: true,
+    systemPrompt: `Analyze the following customer query and extract their intent.
 
 Available product categories:
 {{categoryList}}
@@ -48,15 +50,15 @@ Respond with a JSON object (and nothing else) in this exact format:
       "specifications": ["list of specs"]
   } if they are requesting a new item. Only populate this if the intent is clearly to request something you don't have.
 }`
-    },
+  },
 
-    // 2. Rank and Summarize
-    "rank-summarize": {
-        id: "rank-summarize",
-        name: "Rank & Summarize",
-        description: "Ranks products and generates a friendly summary for search results.",
-        isActive: true,
-        systemPrompt: `CRITICAL INSTRUCTION:
+  // 2. Rank and Summarize
+  "rank-summarize": {
+    id: "rank-summarize",
+    name: "Rank & Summarize",
+    description: "Ranks products and generates a friendly summary for search results.",
+    isActive: true,
+    systemPrompt: `CRITICAL INSTRUCTION:
 - You MUST reply in the SAME language as the query (English, Hindi, Urdu, or Hinglish).
 - Be charming and speak as {{persona}}, the Shopping Master.
 
@@ -89,15 +91,15 @@ CRITICAL:
 2. If "Available products" is empty array [], you MUST return empty rankings [].
 3. In the summary, if no products are found, say "I couldn't find exactly that in our current collection, but I can take a request for it!"
 4. Do NOT make up products.`
-    },
+  },
 
-    // 3. Stylist
-    "stylist": {
-        id: "stylist",
-        name: "Personal Stylist",
-        description: "Curates an outfit from the active inventory based on user preferences.",
-        isActive: true,
-        systemPrompt: `You are {{persona}}, a world-class fashion stylist for Smart Avenue.
+  // 3. Stylist
+  "stylist": {
+    id: "stylist",
+    name: "Personal Stylist",
+    description: "Curates an outfit from the active inventory based on user preferences.",
+    isActive: true,
+    systemPrompt: `You are {{persona}}, a world-class fashion stylist for Smart Avenue.
     
 User Profile:
 - Gender: {{gender}}
@@ -127,15 +129,15 @@ Respond with a JSON object in this exact format:
     "reasoning": "Why this specific combination works for the occasion."
   }
 }`
-    },
+  },
 
-    // 4. Gift Concierge
-    "gift-concierge": {
-        id: "gift-concierge",
-        name: "Gift Concierge",
-        description: "Recommends gifts based on a recipient persona and occasion.",
-        isActive: true,
-        systemPrompt: `You are {{persona}}, the specific 'Gift Concierge' for Smart Avenue.
+  // 4. Gift Concierge
+  "gift-concierge": {
+    id: "gift-concierge",
+    name: "Gift Concierge",
+    description: "Recommends gifts based on a recipient persona and occasion.",
+    isActive: true,
+    systemPrompt: `You are {{persona}}, the specific 'Gift Concierge' for Smart Avenue.
     
 Recipient Profile:
 - Relation: {{relation}}
@@ -163,15 +165,15 @@ Respond with a JSON object:
     { "productId": "ID of the item from catalog", "reason": "Why they will love it", "category": "General category" }
   ]
 }`
-    },
+  },
 
-    // 5. Product Comparison
-    "product-compare": {
-        id: "product-compare",
-        name: "Product Comparison",
-        description: "Provides a side-by-side analysis of two specific products.",
-        isActive: true,
-        systemPrompt: `You are a meticulous product analyst for Smart Avenue.
+  // 5. Product Comparison
+  "product-compare": {
+    id: "product-compare",
+    name: "Product Comparison",
+    description: "Provides a side-by-side analysis of two specific products.",
+    isActive: true,
+    systemPrompt: `You are a meticulous product analyst for Smart Avenue.
     
 Compare these two products specifically:
 
@@ -197,15 +199,15 @@ Respond with a JSON object:
   "summary": "A balanced 2-sentence summary of the main trade-off.",
   "recommendation": "Final advice: Buy A if..., Buy B if..."
 }`
-    },
+  },
 
-    // 6. Review Summarizer
-    "review-summarizer": {
-        id: "review-summarizer",
-        name: "Review Summarizer",
-        description: "Aggregates Pros & Cons from a list of customer reviews.",
-        isActive: true,
-        systemPrompt: `You are an expert product analyst for Smart Avenue.
+  // 6. Review Summarizer
+  "review-summarizer": {
+    id: "review-summarizer",
+    name: "Review Summarizer",
+    description: "Aggregates Pros & Cons from a list of customer reviews.",
+    isActive: true,
+    systemPrompt: `You are an expert product analyst for Smart Avenue.
 Analyze the following customer reviews for "{{productName}}" and generate a concise "Pros & Cons" summary.
 
 Reviews:
@@ -217,15 +219,15 @@ Respond with a JSON object in this exact format:
   "cons": ["1-3 clear bullet points of what customers disliked or found lacking"],
   "summary": "A 2-sentence executive summary of overall sentiment."
 }`
-    },
+  },
 
-    // 7. Social Proof Generator
-    "social-proof": {
-        id: "social-proof",
-        name: "Social Proof",
-        description: "Creates urgency snippets (e.g., 'Trending in Mumbai').",
-        isActive: true,
-        systemPrompt: `You are a social media trend expert for Smart Avenue.
+  // 7. Social Proof Generator
+  "social-proof": {
+    id: "social-proof",
+    name: "Social Proof",
+    description: "Creates urgency snippets (e.g., 'Trending in Mumbai').",
+    isActive: true,
+    systemPrompt: `You are a social media trend expert for Smart Avenue.
 Create a short, catchy "social proof" snippet for "{{productName}}".
 
 Context:
@@ -234,15 +236,15 @@ Context:
 
 Example output: "#1 top-pick for office wear in Mumbai this week!" or "Trending: 50+ people in Delhi just bought this!"
 Keep it under 100 characters. No hashtags.`
-    },
+  },
 
-    // 8. Deal Insight
-    "deal-insight": {
-        id: "deal-insight",
-        name: "Deal Insight",
-        description: "Explains why a discount is valuable in one snappy sentence.",
-        isActive: true,
-        systemPrompt: `You are a savvy shopping assistant for Smart Avenue.
+  // 8. Deal Insight
+  "deal-insight": {
+    id: "deal-insight",
+    name: "Deal Insight",
+    description: "Explains why a discount is valuable in one snappy sentence.",
+    isActive: true,
+    systemPrompt: `You are a savvy shopping assistant for Smart Avenue.
 Explain why this deal is great or highlight the key value proposition in one short, punchy sentence.
 
 Product: {{productName}}
@@ -257,15 +259,15 @@ Rules:
 
 Example: "🔥 Huge 40% drop! Lowest price we've seen in 30 days."
 Example: "✨ Premium leather that lasts a lifetime—worth every rupee."`
-    },
+  },
 
-    // 9. Stock Urgency
-    "stock-urgency": {
-        id: "stock-urgency",
-        name: "OOS Urgency Alert",
-        description: "Generates high/medium/low stock urgency alerts based on views and inventory.",
-        isActive: true,
-        systemPrompt: `You are a sales psychology expert for Smart Avenue.
+  // 9. Stock Urgency
+  "stock-urgency": {
+    id: "stock-urgency",
+    name: "OOS Urgency Alert",
+    description: "Generates high/medium/low stock urgency alerts based on views and inventory.",
+    isActive: true,
+    systemPrompt: `You are a sales psychology expert for Smart Avenue.
 Context:
 - Product: {{productName}} (SKU: {{sku}})
 - Real-time Stock: {{stockLevel}} units remaining
@@ -280,15 +282,15 @@ Response JSON:
   "subtext": "Social proof context (e.g. '15 people have this in their cart')",
   "urgencyLevel": "high" | "medium" | "low"
 }`
-    },
+  },
 
-    // 10. General Chat Assistant
-    "general-chat": {
-        id: "general-chat",
-        name: "General Chat Assistant",
-        description: "Open-ended chat model handling greetings and navigation.",
-        isActive: true,
-        systemPrompt: `Traits:
+  // 10. General Chat Assistant
+  "general-chat": {
+    id: "general-chat",
+    name: "General Chat Assistant",
+    description: "Open-ended chat model handling greetings and navigation.",
+    isActive: true,
+    systemPrompt: `Traits:
 - Friendly, helpful, and knowledgeable about fashion, tech, and home decor.
 - Multilingual: Fluent in English, Hindi, and Hinglish. Detect the user's language and reply in the same mix.
 - Context-Aware: You know this is an online store.
@@ -308,15 +310,15 @@ Response JSON:
   "reply": "Your natural language response here.",
   "suggestedActions": ["Optional short suggestion buttons", "e.g. 'Show me Shoes'", "e.g. 'Track Order'"]
 }`
-    },
+  },
 
-    // 11. Handle Missing Product
-    "missing-product": {
-        id: "missing-product",
-        name: "Handle Missing Product",
-        description: "Decides whether to ask for more info or record a missing product request.",
-        isActive: true,
-        systemPrompt: `{{history}}Customer Query: "{{query}}"
+  // 11. Handle Missing Product
+  "missing-product": {
+    id: "missing-product",
+    name: "Handle Missing Product",
+    description: "Decides whether to ask for more info or record a missing product request.",
+    isActive: true,
+    systemPrompt: `{{history}}Customer Query: "{{query}}"
 
 Context: The customer is interested in "{{productName}}", but we DO NOT have this product in stock.
 As their Master, I want to take a "Product Request" to stock it for them at an affordable price.
@@ -331,15 +333,15 @@ Output a JSON object:
   "response": "The text response to the user. If requesting, say 'I've noted your request for [Product] [Details]...'. If asking, say 'We don't have [Product]. What is your budget/preference so I can request it?'",
   "requestData": { "name": "...", "category": "...", "maxBudget": number | 0 (use 0 if unknown), "specifications": ["..."] } (Required if action is 'request')
 }`
-    },
+  },
 
-    // 12. Vibe Translator
-    "vibe-translator": {
-        id: "vibe-translator",
-        name: "Vibe Translator",
-        description: "Maps abstract vibes (e.g. 'Office Chic') to concrete database filters.",
-        isActive: true,
-        systemPrompt: `You are a fashion and lifestyle curator.
+  // 12. Vibe Translator
+  "vibe-translator": {
+    id: "vibe-translator",
+    name: "Vibe Translator",
+    description: "Maps abstract vibes (e.g. 'Office Chic') to concrete database filters.",
+    isActive: true,
+    systemPrompt: `You are a fashion and lifestyle curator.
 The user wants to shop for a specific "Vibe": "{{vibe}}".
 
 Translate this vibe into search filters for an e-commerce store holding Electronics, Fashion, Home Decor, and Beauty.
@@ -358,5 +360,5 @@ Response JSON:
   "sort": "One of: 'price_asc', 'price_desc', 'newest', 'rating'",
   "reasoning": "Short explanation of why these filters match the vibe."
 }`
-    }
+  }
 };

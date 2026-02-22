@@ -35,29 +35,23 @@ const DEFAULT_AI_SETTINGS: AISettings = {
 
 // ==================== SERVER ACTIONS ====================
 
+import { getBlobJson, updateBlobJson } from "./blob-json";
+
+const BLOB_FILENAME = "llmo.json";
+
 /**
- * Get AI settings from Firestore (admin use)
+ * Get AI settings from Vercel Blob (admin use)
  */
 export async function getAISettings(): Promise<AISettings> {
-    try {
-        const doc = await getAdminDb().collection("settings").doc("aiConfig").get();
-        if (doc.exists) {
-            const data = doc.data();
-            return {
-                ...DEFAULT_AI_SETTINGS,
-                ...data,
-                updatedAt: (data?.updatedAt as admin.firestore.Timestamp)?.toDate() || undefined,
-            };
-        }
-        return { ...DEFAULT_AI_SETTINGS };
-    } catch (error) {
-        console.error("[AI Settings] Error fetching:", error);
-        return { ...DEFAULT_AI_SETTINGS };
-    }
+    const data = await getBlobJson<Partial<AISettings>>(BLOB_FILENAME, DEFAULT_AI_SETTINGS);
+    return {
+        ...DEFAULT_AI_SETTINGS,
+        ...data,
+    };
 }
 
 /**
- * Update AI settings in Firestore (admin use)
+ * Update AI settings in Vercel Blob (admin use)
  */
 export async function updateAISettings(data: Partial<AISettings>): Promise<{ success: boolean; error?: string }> {
     try {
@@ -71,17 +65,18 @@ export async function updateAISettings(data: Partial<AISettings>): Promise<{ suc
             return { success: false, error: "Max tokens must be between 256 and 8192" };
         }
 
-        // Remove updatedAt from data if present (we'll set it server-side)
-        const { updatedAt, ...cleanData } = data as Partial<AISettings> & { updatedAt?: any };
-        if (updatedAt) { /* ignore */ }
+        const currentSettings = await getAISettings();
+        const newSettings = {
+            ...currentSettings,
+            ...data,
+            updatedAt: new Date()
+        };
 
-        await getAdminDb().collection("settings").doc("aiConfig").set(
-            {
-                ...cleanData,
-                updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-            },
-            { merge: true }
-        );
+        const result = await updateBlobJson(BLOB_FILENAME, newSettings);
+
+        if (!result.success) {
+            throw new Error(result.error || "Failed to save to Blob");
+        }
 
         revalidatePath("/admin/ai-settings");
 

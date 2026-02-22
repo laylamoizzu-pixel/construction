@@ -8,7 +8,7 @@ import { getSiteContent, FeaturesContent, CTAContent, HighlightsContent } from "
 import { getSiteConfig } from "@/app/actions/site-config";
 import { Suspense } from "react";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300; // Enable ISR, revalidating every 5 minutes
 
 export default async function Home() {
   const [featuresRes, ctaRes, highlightsRes, config] = await Promise.all([
