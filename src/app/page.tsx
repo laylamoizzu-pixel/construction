@@ -9,7 +9,7 @@ const Highlights = dynamic(() => import("@/components/Highlights"));
 const Features = dynamic(() => import("@/components/Features"));
 const CTA = dynamic(() => import("@/components/CTA"));
 const Promotions = dynamic(() => import("@/components/Promotions"));
-const VibeSelector = dynamic(() => import("@/components/ai/VibeSelector"), { ssr: false });
+const VibeSelector = dynamic(() => import("@/components/ai/VibeSelector"));
 
 export const revalidate = 300; // Enable ISR, revalidating every 5 minutes
 
