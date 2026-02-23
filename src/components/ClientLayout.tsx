@@ -6,6 +6,8 @@ import { SiteConfigProvider } from "@/context/SiteConfigContext";
 import Header from "./Header";
 import Footer from "./Footer";
 import { ErrorBoundary } from "./ErrorBoundary";
+import { DebugProvider, useDebug } from "@/context/DebugContext";
+import { ErrorInspector } from "./debug/ErrorInspector";
 
 import { SiteConfig } from "@/types/site-config";
 
@@ -15,6 +17,23 @@ const PwaInstallPrompt = dynamic(() => import("./PwaInstallPrompt"), { ssr: fals
 const SwUpdateBanner = dynamic(() => import("./SwUpdateBanner"), { ssr: false });
 const VersionManager = dynamic(() => import("./VersionManager"), { ssr: false });
 
+function DebugErrorBoundary({ children }: { children: React.ReactNode }) {
+    const { addError } = useDebug();
+    return (
+        <ErrorBoundary
+            onCatch={(error, info) => {
+                addError({
+                    message: error.message,
+                    stack: error.stack,
+                    context: { componentStack: info.componentStack }
+                });
+            }}
+        >
+            {children}
+        </ErrorBoundary>
+    );
+}
+
 export default function ClientLayout({
     children,
     initialConfig,
@@ -23,18 +42,21 @@ export default function ClientLayout({
     initialConfig: SiteConfig;
 }) {
     return (
-        <ErrorBoundary>
-            <AuthProvider>
-                <SiteConfigProvider initialConfig={initialConfig}>
-                    <Header />
-                    {children}
-                    <AssistantChat />
-                    <PwaInstallPrompt />
-                    <SwUpdateBanner />
-                    <VersionManager />
-                    <Footer />
-                </SiteConfigProvider>
-            </AuthProvider>
-        </ErrorBoundary>
+        <DebugProvider>
+            <DebugErrorBoundary>
+                <AuthProvider>
+                    <SiteConfigProvider initialConfig={initialConfig}>
+                        <Header />
+                        {children}
+                        <AssistantChat />
+                        <PwaInstallPrompt />
+                        <SwUpdateBanner />
+                        <VersionManager />
+                        <Footer />
+                        <ErrorInspector />
+                    </SiteConfigProvider>
+                </AuthProvider>
+            </DebugErrorBoundary>
+        </DebugProvider>
     );
 }

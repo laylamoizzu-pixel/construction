@@ -23,40 +23,48 @@ const outfit = Outfit({
 
 export async function generateMetadata(): Promise<Metadata> {
   const config = await getSiteConfig();
-  const { branding, system } = config;
 
   return {
-    metadataBase: new URL("https://smartavenue99.com"),
+    metadataBase: new URL('https://smartavenue99.com'),
     title: {
-      default: branding.siteName || "Smart Avenue 99",
-      template: `%s | ${branding.siteName || "Smart Avenue 99"}`,
+      default: config.seo.siteTitle,
+      template: config.seo.titleTemplate,
     },
-    description: branding.tagline || "Shop the best products online.",
+    description: config.seo.metaDescription,
+    keywords: config.seo.keywords,
+    openGraph: {
+      title: config.seo.siteTitle,
+      description: config.seo.metaDescription,
+      url: 'https://smartavenue99.com',
+      siteName: config.branding.siteName,
+      images: [
+        {
+          url: config.seo.ogImageUrl || "/logo.png",
+          width: 1200,
+          height: 630,
+        },
+      ],
+      locale: 'en_IN',
+      type: 'website',
+    },
+    twitter: {
+      card: "summary_large_image",
+      creator: config.seo.twitterHandle,
+      site: config.seo.twitterHandle,
+      images: [config.seo.ogImageUrl || "/logo.png"],
+    },
+    verification: {
+      google: config.seo.googleVerification,
+    },
     icons: {
-      icon: branding.faviconUrl || "/favicon.ico",
+      icon: config.branding.faviconUrl || "/favicon.ico",
     },
-    robots: system.robotsTxt ? null : {
+    robots: config.system.robotsTxt ? null : {
       index: true,
       follow: true
     },
-    openGraph: {
-      type: "website",
-      locale: "en_US",
-      url: "https://smartavenue99.com",
-      title: branding.siteName,
-      description: branding.tagline,
-      siteName: branding.siteName,
-      images: [
-        {
-          url: branding.logoUrl || "/logo.png",
-          width: 512,
-          height: 512,
-          alt: branding.siteName,
-        },
-      ],
-    },
     other: {
-      ...(system.scripts.googleAnalyticsId ? {} : { "google-site-verification": "P58XCY_8uZe5I7QC5eNh2wivKElDpu2ckaI60IgD5yc" })
+      ...(config.system.scripts.googleAnalyticsId ? {} : { "google-site-verification": config.seo.googleVerification })
     }
   };
 }
@@ -102,11 +110,56 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const siteConfig = await getSiteConfig();
+
+  const organizationSchema = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": siteConfig.seo.jsonLd.name,
+    "url": siteConfig.seo.jsonLd.url,
+    "logo": siteConfig.seo.jsonLd.logo,
+    "description": siteConfig.seo.jsonLd.description,
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "telephone": siteConfig.contact.phone,
+      "email": siteConfig.contact.email,
+      "contactType": "customer service"
+    },
+    "sameAs": [
+      siteConfig.contact.instagramUrl,
+      siteConfig.contact.facebookUrl,
+      siteConfig.contact.twitterUrl
+    ].filter(Boolean)
+  };
+
+  const websiteSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": siteConfig.seo.jsonLd.name,
+    "url": siteConfig.seo.jsonLd.url,
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": {
+        "@type": "EntryPoint",
+        "urlTemplate": `${siteConfig.seo.jsonLd.url}/products?q={search_term_string}`
+      },
+      "query-input": "required name=search_term_string"
+    }
+  };
+
   return (
     <html lang="en">
       <body
         className={`${inter.variable} ${outfit.variable} antialiased bg-slate-50 text-slate-900 flex flex-col min-h-screen`}
       >
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
+        />
         <Suspense fallback={<ClientLayout initialConfig={DEFAULT_SITE_CONFIG}>{children}</ClientLayout>}>
           <ConfigLoader>{children}</ConfigLoader>
         </Suspense>

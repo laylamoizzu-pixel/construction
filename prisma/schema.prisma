@@ -18,10 +18,13 @@ model Product {
   subcategoryId String?
   imageUrl      String?
   images        String[]
+  videoUrl      String?
   available     Boolean  @default(true)
   featured      Boolean  @default(false)
   offerId       String?
   tags          String[]
+  highlights    String[]
+  specifications Json?
   averageRating Float?   @default(0)
   reviewCount   Int?     @default(0)
   createdAt     DateTime @default(now())

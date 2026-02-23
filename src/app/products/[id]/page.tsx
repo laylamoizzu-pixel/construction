@@ -12,8 +12,28 @@ import RestockTracker from "@/components/ai/RestockTracker";
 import DealInsight from "@/components/ai/DealInsight";
 import SocialProofBadge from "@/components/ai/SocialProofBadge";
 import { Suspense } from "react";
+import { getSiteConfig } from "@/app/actions/site-config";
+import { constructMetadata } from "@/lib/seo-utils";
+import { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+    const { id } = await params;
+    const [product, config] = await Promise.all([getProduct(id), getSiteConfig()]);
+
+    if (!product) {
+        return { title: 'Product Not Found' };
+    }
+
+    return constructMetadata({
+        title: product.name,
+        description: product.description.substring(0, 160),
+        urlPath: `/products/${id}`,
+        imageUrl: product.imageUrl,
+        config
+    });
+}
 
 export default async function ProductPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
@@ -76,6 +96,36 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
                     </nav>
                 </div>
             </div>
+
+            {/* Product JSON-LD Schema */}
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{
+                    __html: JSON.stringify({
+                        "@context": "https://schema.org/",
+                        "@type": "Product",
+                        "name": product.name,
+                        "image": product.images?.length > 0 ? product.images : [product.imageUrl],
+                        "description": product.description,
+                        "sku": product.id,
+                        "offers": {
+                            "@type": "Offer",
+                            "url": `https://smartavenue99.com/products/${product.id}`,
+                            "priceCurrency": "INR",
+                            "price": product.price,
+                            "itemCondition": "https://schema.org/NewCondition",
+                            "availability": product.available ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+                        },
+                        ...(product.reviewCount && product.reviewCount > 0 ? {
+                            "aggregateRating": {
+                                "@type": "AggregateRating",
+                                "ratingValue": product.averageRating,
+                                "reviewCount": product.reviewCount
+                            }
+                        } : {})
+                    })
+                }}
+            />
 
             <main className="container mx-auto px-4 max-w-7xl py-12">
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 mb-20">

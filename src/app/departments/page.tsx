@@ -1,8 +1,21 @@
 import { getDepartments, getSiteContent, DepartmentsPageContent } from "@/app/actions";
+import { getSiteConfig } from "@/app/actions/site-config";
 import DepartmentsGrid from "@/components/DepartmentsGrid";
 import Image from "next/image";
+import { constructMetadata } from "@/lib/seo-utils";
+import { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata(): Promise<Metadata> {
+    const config = await getSiteConfig();
+    return constructMetadata({
+        title: "Departments",
+        description: "Explore our curated departments including Electronics, Fashion, Home Goods, and Groceries at Smart Avenue 99.",
+        urlPath: "/departments",
+        config
+    });
+}
 
 export default async function DepartmentsPage() {
     const [departments, pageContent] = await Promise.all([

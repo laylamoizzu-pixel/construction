@@ -1,9 +1,22 @@
 import { getFilteredProducts, getCategories, getOffers, getSiteContent, ProductsPageContent } from "@/app/actions";
+import { getSiteConfig } from "@/app/actions/site-config";
 import Image from "next/image";
 import FilterSidebar from "@/components/FilterSidebar";
 import InfiniteProductGrid from "@/components/InfiniteProductGrid";
+import { constructMetadata } from "@/lib/seo-utils";
+import { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata(): Promise<Metadata> {
+    const config = await getSiteConfig();
+    return constructMetadata({
+        title: "All Products",
+        description: "Browse our entire catalog of high-quality products across all departments at Smart Avenue 99. Discover great deals and curated selections.",
+        urlPath: "/products",
+        config
+    });
+}
 
 export default async function ProductsPage({
     searchParams

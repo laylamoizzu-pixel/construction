@@ -1,9 +1,22 @@
 import { getOffers, getSiteContent, OffersPageContent } from "@/app/actions";
+import { getSiteConfig } from "@/app/actions/site-config";
 import OffersList from "@/components/OffersList";
 import Image from "next/image";
 import OfferFilterSidebar from "@/components/OfferFilterSidebar";
+import { constructMetadata } from "@/lib/seo-utils";
+import { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata(): Promise<Metadata> {
+    const config = await getSiteConfig();
+    return constructMetadata({
+        title: "Weekly Offers & Deals",
+        description: "Discover exclusive deals, weekly offers, and smart club privileges at Smart Avenue 99.",
+        urlPath: "/offers",
+        config
+    });
+}
 
 export default async function OffersPage({
     searchParams

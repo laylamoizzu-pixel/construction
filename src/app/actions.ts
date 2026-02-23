@@ -73,11 +73,12 @@ export async function deleteOffer(id: string) {
 
 export async function updateOffer(id: string, data: Partial<Omit<Offer, 'id' | 'createdAt'>>) {
     try {
+        const updateData = { ...data };
+        // Clean out undefined or empty string, Prisma expects null or omit entirely
+
         await prisma.offer.update({
             where: { id },
-            data: {
-                ...data,
-            }
+            data: updateData
         });
 
         revalidatePath("/offers");
@@ -87,6 +88,7 @@ export async function updateOffer(id: string, data: Partial<Omit<Offer, 'id' | '
 
         return { success: true };
     } catch (error: unknown) {
+        console.error("Prisma updateOffer error:", error);
         return { success: false, error: error instanceof Error ? error.message : "Unknown error" };
     }
 }
@@ -377,9 +379,9 @@ export async function createStaffMember(email: string, name: string, role: strin
 export async function updateStaffMember(id: string, data: Partial<StaffMember>) {
     try {
         // Create a new object to avoid modifying the original 'data' and ensure type safety
-        const updateData: Omit<Partial<StaffMember>, 'id' | 'createdAt'> = { ...data };
-        delete (updateData as Partial<StaffMember>).id; // Cast to allow deletion if 'id' was explicitly in 'data'
-        delete (updateData as Partial<StaffMember>).createdAt; // Cast to allow deletion if 'createdAt' was explicitly in 'data'
+        const updateData: any = { ...data };
+        delete updateData.id; // Cast to allow deletion if 'id' was explicitly in 'data'
+        delete updateData.createdAt; // Cast to allow deletion if 'createdAt' was explicitly in 'data'
 
         await prisma.staff.update({
             where: { id },
@@ -390,6 +392,7 @@ export async function updateStaffMember(id: string, data: Partial<StaffMember>) 
 
         return { success: true };
     } catch (error: unknown) {
+        console.error("Prisma updateStaffMember error:", error);
         return { success: false, error: error instanceof Error ? error.message : "Unknown error" };
     }
 }
@@ -499,12 +502,14 @@ export async function createCategory(name: string, parentId: string | null = nul
 
 export async function updateCategory(id: string, data: Partial<Category>) {
     try {
+        const updateData: any = { ...data };
+        delete updateData.id;
+        delete updateData.createdAt;
+        if (updateData.parentId === undefined || updateData.parentId === "") updateData.parentId = null;
+
         await prisma.category.update({
             where: { id },
-            data: {
-                ...data,
-                // Prisma handles updatedAt automatically
-            }
+            data: updateData
         });
 
         revalidatePath("/products");
@@ -513,6 +518,7 @@ export async function updateCategory(id: string, data: Partial<Category>) {
 
         return { success: true };
     } catch (error: unknown) {
+        console.error("Prisma updateCategory error:", error);
         return { success: false, error: error instanceof Error ? error.message : "Unknown error" };
     } finally {
         getSearchCache().delete(CacheKeys.categories());
@@ -810,10 +816,17 @@ export async function getProduct(id: string): Promise<Product | null> {
 // Add new product
 export async function createProduct(data: Record<string, unknown>) {
     try {
+        // Strip out any empty/undefined relations to null instead so Prisma accepts them
+        const cleanedData = { ...data };
+        if (cleanedData.subcategoryId === undefined || cleanedData.subcategoryId === "") cleanedData.subcategoryId = null;
+        if (cleanedData.offerId === undefined || cleanedData.offerId === "") cleanedData.offerId = null;
+        if (cleanedData.videoUrl === undefined || cleanedData.videoUrl === "") cleanedData.videoUrl = null;
+        if (cleanedData.originalPrice === undefined || cleanedData.originalPrice === "") cleanedData.originalPrice = null;
+
         const doc = await prisma.product.create({
             data: {
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                ...data as any,
+                ...cleanedData as any,
             }
         });
 
@@ -824,6 +837,7 @@ export async function createProduct(data: Record<string, unknown>) {
 
         return { success: true, id: doc.id };
     } catch (error: unknown) {
+        console.error("Prisma createProduct error:", error);
         return { success: false, error: error instanceof Error ? error.message : "Unknown error" };
     } finally {
         getSearchCache().clearPrefix("products");
@@ -834,11 +848,19 @@ export async function createProduct(data: Record<string, unknown>) {
 // Update product
 export async function updateProduct(id: string, data: Record<string, unknown>) {
     try {
+        // Turn undefined / empty strings into null for nullable fields so they are properly unset
+        const cleanedData = { ...data };
+        delete cleanedData.id; // ensure ID is never updated
+        if (cleanedData.subcategoryId === undefined || cleanedData.subcategoryId === "") cleanedData.subcategoryId = null;
+        if (cleanedData.offerId === undefined || cleanedData.offerId === "") cleanedData.offerId = null;
+        if (cleanedData.videoUrl === undefined || cleanedData.videoUrl === "") cleanedData.videoUrl = null;
+        if (cleanedData.originalPrice === undefined || cleanedData.originalPrice === "") cleanedData.originalPrice = null;
+
         await prisma.product.update({
             where: { id },
             data: {
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                ...data as any,
+                ...cleanedData as any,
             }
         });
 
@@ -851,6 +873,7 @@ export async function updateProduct(id: string, data: Record<string, unknown>) {
 
         return { success: true };
     } catch (error: unknown) {
+        console.error("Prisma updateProduct error:", error);
         return { success: false, error: error instanceof Error ? error.message : "Unknown error" };
     } finally {
         getSearchCache().clearPrefix("products");
