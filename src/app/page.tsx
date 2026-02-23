@@ -2,6 +2,7 @@ import Hero from "@/components/Hero";
 import dynamic from "next/dynamic";
 import { getSiteContent, FeaturesContent, CTAContent, HighlightsContent } from "@/app/actions";
 import { getSiteConfig } from "@/app/actions/site-config";
+import { getAISettings } from "@/app/actions/ai-settings-actions";
 import { Suspense } from "react";
 
 // Lazy-load below-the-fold components
@@ -14,11 +15,12 @@ const VibeSelector = dynamic(() => import("@/components/ai/VibeSelector"));
 export const revalidate = 300; // Enable ISR, revalidating every 5 minutes
 
 export default async function Home() {
-  const [featuresRes, ctaRes, highlightsRes, config] = await Promise.all([
+  const [featuresRes, ctaRes, highlightsRes, config, aiSettings] = await Promise.all([
     getSiteContent<FeaturesContent>("features"),
     getSiteContent<CTAContent>("cta"),
     getSiteContent<HighlightsContent>("highlights"),
     getSiteConfig(),
+    getAISettings(),
   ]);
 
   const featuresContent = featuresRes || undefined;
@@ -29,7 +31,7 @@ export default async function Home() {
     <div className="flex flex-col min-h-screen bg-slate-50">
       <Hero />
 
-      <VibeSelector />
+      {aiSettings.enabled && <VibeSelector />}
 
       <Promotions config={config.promotions} />
 
@@ -43,7 +45,7 @@ export default async function Home() {
       </Suspense>
 
       <Suspense fallback={<div className="h-96 animate-pulse bg-slate-100" />}>
-        <CTA content={ctaContent} />
+        <CTA content={ctaContent} aiEnabled={aiSettings.enabled} />
       </Suspense>
     </div>
   );

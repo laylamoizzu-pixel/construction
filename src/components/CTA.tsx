@@ -7,7 +7,7 @@ import { ArrowRight } from "lucide-react";
 import ChatTriggerButton from "@/components/ChatTriggerButton";
 import { CTAContent } from "@/app/actions";
 
-export default function CTA({ content }: { content?: CTAContent }) {
+export default function CTA({ content, aiEnabled = true }: { content?: CTAContent; aiEnabled?: boolean }) {
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
     const images = useMemo(() => {
@@ -76,14 +76,14 @@ export default function CTA({ content }: { content?: CTAContent }) {
                         {content.ctaPrimary} <ArrowRight className="w-5 h-5" />
                     </Link>
                     {/* Secondary Action - dynamic check if it's "Chat with Us" or a link */}
-                    {content.ctaSecondary === "Chat with Us" ? (
+                    {content.ctaSecondary === "Chat with Us" && aiEnabled ? (
                         <ChatTriggerButton />
                     ) : (
                         <Link
                             href="/register"
                             className="px-8 py-4 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-white font-bold rounded-full transition-all"
                         >
-                            {content.ctaSecondary}
+                            {content.ctaSecondary === "Chat with Us" ? "Register Now" : content.ctaSecondary}
                         </Link>
                     )}
                 </div>
