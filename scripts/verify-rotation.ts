@@ -1,10 +1,13 @@
 import * as dotenv from 'dotenv';
 import path from 'path';
-import { getAPIKeyManager } from '@/lib/api-key-manager';
-import { LLMProvider } from '@/types/assistant-types';
+import { getAPIKeyManager } from '../src/lib/api-key-manager';
+import { LLMProvider } from '../src/types/assistant-types';
+
 
 // Load environment variables from .env.local
-dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
+dotenv.config(); // Loads .env by default
+dotenv.config({ path: path.resolve(process.cwd(), '.env.local') }); // Also try .env.local
+
 
 async function verifyRotation() {
     console.log("--- API Key Rotation Verification ---");

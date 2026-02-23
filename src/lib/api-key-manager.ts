@@ -15,7 +15,8 @@ import {
     KeyHealthStatus,
     APIKeyExhaustedError,
     LLMProvider
-} from "@/types/assistant-types";
+} from "../types/assistant-types";
+
 
 // Cooldown duration in milliseconds after a key is rate-limited
 const RATE_LIMIT_COOLDOWN_MS = 60 * 1000; // 1 minute

@@ -1,6 +1,6 @@
 "use server";
 
-import { put } from "@vercel/blob";
+import { put, list } from "@vercel/blob";
 import { revalidateTag } from "next/cache";
 
 /**
@@ -10,19 +10,25 @@ import { revalidateTag } from "next/cache";
 
 export async function getBlobJson<T>(filename: string, defaultData: T): Promise<T> {
     try {
-        const url = `https://${process.env.VERCEL_PROJECT_ID}.public.blob.vercel-storage.com/${filename}`;
+        // Use the Vercel Blob API to find the file dynamically rather than guessing the URL
+        const { blobs } = await list({
+            prefix: filename,
+            limit: 1,
+            token: process.env.BLOB_READ_WRITE_TOKEN
+        });
 
-        // We fetch the data from the public URL.
+        if (blobs.length === 0) {
+            return defaultData;
+        }
+
+        const url = blobs[0].url;
+
+        // Fetch data from the actual public URL
         const response = await fetch(url, {
-            // Using Next.js fetch caching capabilities
             next: { revalidate: 300, tags: [`blob-${filename}`] }
         });
 
         if (!response.ok) {
-            // If the file doesn't exist yet, we silently return the default data
-            if (response.status === 404) {
-                return defaultData;
-            }
             throw new Error(`Failed to fetch ${filename}: ${response.statusText}`);
         }
 
