@@ -51,6 +51,7 @@ export interface IntentAnalysis {
     preferences: string[];
     useCase: string;
     confidence: number; // 0-1
+    isGeneralChat?: boolean;
 }
 
 // ==================== PRODUCT MATCHING ====================

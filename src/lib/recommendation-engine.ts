@@ -67,6 +67,20 @@ export async function getRecommendations(
         const intentResponse = await analyzeIntent(query, categories, request.messages);
         const intent = mapIntentResponse(intentResponse);
 
+        // Handle general chat (greetings, etc.)
+        if (intentResponse.isGeneralChat) {
+            const { chatWithAssistant } = await import("./llm-service");
+            const chatResponse = await chatWithAssistant(query, request.messages || []);
+
+            return {
+                success: true,
+                intent,
+                recommendations: [],
+                summary: chatResponse.reply,
+                processingTime: Date.now() - startTime,
+            };
+        }
+
         // Handle explicit product request (using new structure)
         if (intentResponse.productRequestData) {
             const { createProductRequest } = await import("@/app/actions/request-actions");
@@ -210,6 +224,7 @@ function mapIntentResponse(response: LLMIntentResponse): IntentAnalysis {
         preferences: response.preferences || [],
         useCase: response.useCase || "",
         confidence: response.confidence || 0.5,
+        isGeneralChat: response.isGeneralChat || false,
     };
 }
 

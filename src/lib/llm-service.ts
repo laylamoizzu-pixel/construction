@@ -528,7 +528,7 @@ export async function analyzeIntent(
     query: string,
     categories: Category[],
     messages: Array<{ role: string; content: string }> = [],
-    provider: LLMProvider = "google"
+    provider: LLMProvider = "auto"
 ): Promise<LLMIntentResponse> {
     const categoryList = categories.map(c => `- ${c.name} (ID: ${c.id})`).join("\n");
     const validCategoryIds = new Set(categories.map(c => c.id));

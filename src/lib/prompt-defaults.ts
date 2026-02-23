@@ -51,7 +51,7 @@ Respond with a JSON object (and nothing else) in this exact format:
       "maxBudget": number or null,
       "specifications": ["list of specs"]
   } if they are requesting a new item. Only populate this if the intent is clearly to request something you don't have.
-}
+}`
   },
 
   // 2. Rank and Summarize
