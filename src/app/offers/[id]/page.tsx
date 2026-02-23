@@ -4,8 +4,8 @@ import { constructMetadata } from "@/lib/seo-utils";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Clock, Tag, MessageSquare, Zap } from "lucide-react";
-import { useSiteConfig } from "@/context/SiteConfigContext";
+import { ArrowLeft, Clock, Tag, Zap } from "lucide-react";
+
 
 export const dynamic = "force-dynamic";
 

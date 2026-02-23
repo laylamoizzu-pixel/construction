@@ -113,7 +113,7 @@ export default function DeviceVisibilityPreview({
             <div className="bg-amber-50 border border-amber-100 rounded-lg p-3">
                 <p className="text-[10px] text-amber-800 flex items-center gap-2">
                     <span className="font-bold">Pro Tip:</span>
-                    Since we use "object-cover", your subject should be in the center of the photo to ensure it remains visible on all devices.
+                    Since we use &quot;object-cover&quot;, your subject should be in the center of the photo to ensure it remains visible on all devices.
                 </p>
             </div>
         </div>
