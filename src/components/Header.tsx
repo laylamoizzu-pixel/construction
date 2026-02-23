@@ -350,30 +350,39 @@ export default function Header() {
                 )}
             </AnimatePresence>
 
-            {/* Mobile Menu */}
+            {/* Mobile Menu Overlay */}
             <AnimatePresence>
                 {isMenuOpen && (
-                    <motion.div
-                        initial={{ x: '100%' }}
-                        animate={{ x: 0 }}
-                        exit={{ x: '100%' }}
-                        transition={{ type: "spring", damping: 25, stiffness: 200 }}
-                        className="fixed inset-y-0 right-0 w-[80%] max-w-sm bg-white shadow-2xl z-[60] md:hidden flex flex-col pt-24"
-                    >
-                        <div className="px-6 space-y-2">
-                            {NAV_LINKS.map((link) => (
-                                <Link
-                                    key={link.href}
-                                    href={link.href}
-                                    onClick={() => setIsMenuOpen(false)}
-                                    className={`block py-4 text-xl font-medium border-b border-slate-200 ${pathname === link.href ? "text-brand-blue" : "text-slate-800"
-                                        }`}
-                                >
-                                    {link.label}
-                                </Link>
-                            ))}
-                        </div>
-                    </motion.div>
+                    <>
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setIsMenuOpen(false)}
+                            className="fixed inset-0 bg-black/50 z-[55] md:hidden"
+                        />
+                        <motion.div
+                            initial={{ x: '100%' }}
+                            animate={{ x: 0 }}
+                            exit={{ x: '100%' }}
+                            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                            className="fixed inset-y-0 right-0 w-[80%] max-w-sm bg-white/80 backdrop-blur-xl shadow-2xl z-[60] md:hidden flex flex-col pt-24 border-l border-white/20"
+                        >
+                            <div className="px-6 space-y-2">
+                                {NAV_LINKS.map((link) => (
+                                    <Link
+                                        key={link.href}
+                                        href={link.href}
+                                        onClick={() => setIsMenuOpen(false)}
+                                        className={`block py-4 text-xl font-medium border-b border-black/5 ${pathname === link.href ? "text-brand-blue" : "text-slate-800"
+                                            }`}
+                                    >
+                                        {link.label}
+                                    </Link>
+                                ))}
+                            </div>
+                        </motion.div>
+                    </>
                 )}
             </AnimatePresence>
         </header>
