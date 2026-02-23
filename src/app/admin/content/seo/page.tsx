@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/auth-context";
 import { getSiteConfig, updateSiteConfig } from "@/app/actions/site-config";
 import { SiteConfig, SeoConfig, DEFAULT_SITE_CONFIG } from "@/types/site-config";
-import { ArrowLeft, Save, Loader2, Search, Plus, Trash2 } from "lucide-react";
+import { ArrowLeft, Save, Loader2, Search, Plus, Trash2, Bot, ListPlus } from "lucide-react";
 import Link from "next/link";
 
 
@@ -17,7 +17,10 @@ export default function SeoEditor() {
     const router = useRouter();
     const [config, setConfig] = useState<SiteConfig | null>(null);
     const [seo, setSeo] = useState<SeoConfig>(DEFAULT_SITE_CONFIG.seo);
+    const [llm, setLlm] = useState(DEFAULT_SITE_CONFIG.llm);
     const [newKeyword, setNewKeyword] = useState("");
+    const [newFaqQuestion, setNewFaqQuestion] = useState("");
+    const [newFaqAnswer, setNewFaqAnswer] = useState("");
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [saved, setSaved] = useState(false);
@@ -42,6 +45,9 @@ export default function SeoEditor() {
             if (data.seo) {
                 setSeo({ ...DEFAULT_SITE_CONFIG.seo, ...data.seo });
             }
+            if (data.llm) {
+                setLlm({ ...DEFAULT_SITE_CONFIG.llm, ...data.llm });
+            }
         } catch (error) {
             console.error("Failed to load config:", error);
         } finally {
@@ -55,7 +61,7 @@ export default function SeoEditor() {
         setSaving(true);
         setSaved(false);
 
-        const updatedConfig = { ...config, seo };
+        const updatedConfig = { ...config, seo, llm };
         const result = await updateSiteConfig(updatedConfig);
 
         if (result.success) {
@@ -76,6 +82,21 @@ export default function SeoEditor() {
 
     const removeKeyword = (index: number) => {
         setSeo({ ...seo, keywords: seo.keywords.filter((_, i) => i !== index) });
+    };
+
+    const addFaq = () => {
+        if (newFaqQuestion.trim() && newFaqAnswer.trim()) {
+            setLlm({
+                ...llm,
+                faqItems: [...llm.faqItems, { question: newFaqQuestion.trim(), answer: newFaqAnswer.trim() }]
+            });
+            setNewFaqQuestion("");
+            setNewFaqAnswer("");
+        }
+    };
+
+    const removeFaq = (index: number) => {
+        setLlm({ ...llm, faqItems: llm.faqItems.filter((_, i) => i !== index) });
     };
 
     if (authLoading || !user) {
@@ -301,6 +322,105 @@ export default function SeoEditor() {
                                         placeholder="₹₹"
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                                     />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* LLM & AI Bots Configuration */}
+                        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                            <h2 className="text-lg font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-100 flex items-center gap-2">
+                                <Bot className="w-5 h-5 text-amber-600" />
+                                LLM & AI Discovery (GEO)
+                            </h2>
+                            <div className="space-y-6">
+                                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-100">
+                                    <div>
+                                        <h3 className="text-sm font-medium text-gray-800">Allow AI Bots to Crawl</h3>
+                                        <p className="text-xs text-gray-500 mt-1">If enabled, explicitly allows GPTBot, ClaudeBot, Google-Extended, etc. in robots.txt.</p>
+                                    </div>
+                                    <label className="relative inline-flex items-center cursor-pointer">
+                                        <input
+                                            type="checkbox"
+                                            className="sr-only peer"
+                                            checked={llm.allowAiBots}
+                                            onChange={(e) => setLlm({ ...llm, allowAiBots: e.target.checked })}
+                                        />
+                                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-brand-green/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
+                                    </label>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Brand Identity / About Context</label>
+                                    <p className="text-xs text-gray-500 mb-2">Used by AI chatbots (ChatGPT, Gemini) to understand what your business does.</p>
+                                    <textarea
+                                        value={llm.brandIdentityText}
+                                        onChange={(e) => setLlm({ ...llm, brandIdentityText: e.target.value })}
+                                        rows={4}
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                                        placeholder="Describe your brand for an AI assistant..."
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">llms.txt Context File Content</label>
+                                    <p className="text-xs text-gray-500 mb-2">Machine-readable text served at <code>/llms.txt</code>.</p>
+                                    <textarea
+                                        value={llm.llmsTxtContent}
+                                        onChange={(e) => setLlm({ ...llm, llmsTxtContent: e.target.value })}
+                                        rows={8}
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 font-mono text-xs bg-gray-50"
+                                        placeholder="# LLM Context..."
+                                    />
+                                </div>
+
+                                {/* FAQ Manager */}
+                                <div className="pt-4 border-t border-gray-100">
+                                    <h3 className="text-sm font-medium text-gray-800 flex items-center gap-2 mb-3">
+                                        <ListPlus className="w-4 h-4 text-gray-500" />
+                                        FAQ Schema Builder
+                                    </h3>
+                                    <p className="text-xs text-gray-500 mb-4">Adds FAQPage JSON-LD to help rank in AI-generated search summaries (Google SGE / Perplexity).</p>
+
+                                    <div className="space-y-3 mb-4">
+                                        {llm.faqItems.map((item, index) => (
+                                            <div key={index} className="p-3 bg-gray-50 border border-gray-200 rounded-lg relative group">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => removeFaq(index)}
+                                                    className="absolute top-2 right-2 p-1.5 bg-white text-gray-400 hover:text-red-600 rounded-md shadow-sm opacity-0 group-hover:opacity-100 transition-opacity"
+                                                >
+                                                    <Trash2 className="w-3.5 h-3.5" />
+                                                </button>
+                                                <div className="font-medium text-sm text-gray-800 pr-8">Q: {item.question}</div>
+                                                <div className="text-sm text-gray-600 mt-1">A: {item.answer}</div>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    <div className="grid grid-cols-1 gap-3 p-4 bg-amber-50 rounded-lg border border-amber-100">
+                                        <input
+                                            type="text"
+                                            value={newFaqQuestion}
+                                            onChange={(e) => setNewFaqQuestion(e.target.value)}
+                                            placeholder="Question (e.g., Do you offer free delivery?)"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-sm"
+                                        />
+                                        <textarea
+                                            value={newFaqAnswer}
+                                            onChange={(e) => setNewFaqAnswer(e.target.value)}
+                                            placeholder="Answer..."
+                                            rows={2}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-sm"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={addFaq}
+                                            disabled={!newFaqQuestion.trim() || !newFaqAnswer.trim()}
+                                            className="ml-auto px-4 py-2 bg-white border border-gray-300 hover:bg-gray-50 disabled:opacity-50 text-gray-700 text-sm font-medium rounded-lg transition-colors flex items-center gap-2"
+                                        >
+                                            <Plus className="w-4 h-4" /> Add FAQ
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>

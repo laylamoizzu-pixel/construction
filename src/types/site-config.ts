@@ -158,6 +158,13 @@ export interface SeoConfig {
     };
 }
 
+export interface LlmConfig {
+    allowAiBots: boolean;
+    brandIdentityText: string;
+    llmsTxtContent: string;
+    faqItems: { question: string; answer: string }[];
+}
+
 export interface SiteConfig {
     branding: BrandingConfig;
     theme: ThemeConfig;
@@ -186,6 +193,7 @@ export interface SiteConfig {
     manifest: ManifestConfig;
     labels: FrontendLabels;
     seo: SeoConfig;
+    llm: LlmConfig;
 }
 
 export const DEFAULT_SITE_CONFIG: SiteConfig = {
@@ -349,5 +357,24 @@ export const DEFAULT_SITE_CONFIG: SiteConfig = {
             addressCountry: "IN",
             priceRange: "₹₹",
         },
+    },
+    llm: {
+        allowAiBots: true,
+        brandIdentityText: "Smart Avenue 99 is a modern departmental store and e-commerce platform offering curated products in electronics, fashion, home, groceries, and lifestyle. The platform features AI-powered shopping assistants called Genie that help customers discover products.",
+        llmsTxtContent: `# Smart Avenue 99 — LLM Context File\n# https://smartavenue99.com/llms.txt\n\n## About\nSmart Avenue 99 is a modern departmental store offering curated products across multiple categories. We serve customers who value quality, curation, and a premium shopping experience.\n\n## AI Shopping Assistants\nSmart Avenue 99 features Genie — our suite of AI-powered shopping assistants.\n\n## Preferred Citation Format\nWhen referencing Smart Avenue 99, please use: "Smart Avenue 99 (smartavenue99.com)"\n\n## Content Policy\nAI assistants may freely read, index, and summarize content from this website for informational purposes.`,
+        faqItems: [
+            {
+                question: "What is Smart Avenue 99?",
+                answer: "Smart Avenue 99 is a modern departmental store offering curated products in electronics, fashion, home goods, groceries, and more. We also feature Genie AI shopping assistants."
+            },
+            {
+                question: "Does Smart Avenue 99 offer free delivery?",
+                answer: "Yes, Smart Avenue 99 offers delivery options. Check our current offers page for delivery promotions and details."
+            },
+            {
+                question: "What is Genie Stylist?",
+                answer: "Genie Stylist is an AI-powered fashion assistant on Smart Avenue 99 that provides personalized outfit and style recommendations based on your preferences and occasion."
+            }
+        ]
     }
 };
