@@ -5,7 +5,7 @@
  * 
  * Returns the health status of the recommendation system,
  * including API key usage and availability.
- * Now syncs keys from Firestore before returning status.
+ * Now syncs keys from the database before returning status.
  */
 
 import { NextResponse } from "next/server";
@@ -14,7 +14,7 @@ import { syncAPIKeysToManager } from "@/app/api-key-actions";
 
 export async function GET() {
     try {
-        // Sync keys from Firestore before checking health
+        // Sync keys from the database before checking health
         await syncAPIKeysToManager();
 
         const keyManager = getAPIKeyManager();

@@ -3,7 +3,7 @@
 /**
  * API Key Management Actions
  * 
- * Server actions for managing Gemini API keys in Firestore.
+ * Server actions for managing Gemini API keys in Prisma/PostgreSQL.
  */
 
 import prisma from "@/lib/db";
@@ -303,7 +303,7 @@ export async function testAPIKey(keyOrId: string, isId: boolean = false, provide
 // ==================== SYNC WITH API KEY MANAGER ====================
 
 /**
- * Load active API keys from Firestore into the API Key Manager
+ * Load active API keys from the database into the API Key Manager
  */
 export async function syncAPIKeysToManager() {
     try {
@@ -318,7 +318,7 @@ export async function syncAPIKeysToManager() {
         })).filter(k => k.key && k.key.trim() !== "");
 
         const manager = getAPIKeyManager();
-        manager.loadFirestoreKeys(keys); // Still using the same method name as the local api key manager expects it
+        manager.loadDatabaseKeys(keys);
 
         return { success: true, keyCount: keys.length };
     } catch (error) {
@@ -331,7 +331,7 @@ export async function syncAPIKeysToManager() {
  * Get the current health status of the API Key Manager
  */
 export async function getAPIKeyManagerHealth() {
-    // First sync keys from Firestore
+    // First sync keys from the database
     await syncAPIKeysToManager();
 
     const manager = getAPIKeyManager();

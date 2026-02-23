@@ -6,7 +6,7 @@
  * 
  * Keys can be loaded from:
  * 1. Environment variables (GEMINI_API_KEY_*, OPENAI_API_KEY, ANTHROPIC_API_KEY)
- * 2. Firestore collection (apiKeys) - managed via admin UI
+ * 2. Database (Prisma/PostgreSQL) - managed via admin UI
  */
 
 import {
@@ -26,8 +26,8 @@ const ERROR_COOLDOWN_MS = 30 * 1000; // 30 seconds
 // Max consecutive errors before key cooldown
 const MAX_CONSECUTIVE_ERRORS = 3;
 
-// Cache duration for Firestore keys
-const FIRESTORE_CACHE_MS = 60 * 1000; // 1 minute
+// Cache duration for database keys
+const DATABASE_CACHE_MS = 60 * 1000; // 1 minute
 
 export interface KeyInfo {
     key: string;
@@ -45,8 +45,8 @@ class APIKeyManager {
     };
     private lastRotation: Date | null = null;
     private initialized: boolean = false;
-    private lastFirestoreLoad: Date | null = null;
-    private firestoreKeys: KeyInfo[] = [];
+    private lastDatabaseLoad: Date | null = null;
+    private databaseKeys: KeyInfo[] = [];
 
     constructor() {
         this.initializeFromEnv();
@@ -95,7 +95,7 @@ class APIKeyManager {
             }
         });
 
-        this.rebuildKeyList(envKeys, this.firestoreKeys);
+        this.rebuildKeyList(envKeys, this.databaseKeys);
         this.initialized = true;
 
         if (this.keys.length === 0) {
@@ -106,19 +106,19 @@ class APIKeyManager {
     }
 
     /**
-     * Load keys from Firestore (to be called externally with Firestore data)
+     * Load keys from the database (to be called externally with database data)
      */
-    public loadFirestoreKeys(keys: KeyInfo[]): void {
+    public loadDatabaseKeys(keys: KeyInfo[]): void {
         const validKeys = keys.filter(k => k.key && k.key.trim() !== "");
 
         // Simple check for changes
-        const currentKeysJson = JSON.stringify(this.firestoreKeys);
+        const currentKeysJson = JSON.stringify(this.databaseKeys);
         const newKeysJson = JSON.stringify(validKeys);
 
         if (currentKeysJson !== newKeysJson) {
-            console.log(`[APIKeyManager] Loading ${validKeys.length} key(s) from Firestore`);
-            this.firestoreKeys = validKeys;
-            this.lastFirestoreLoad = new Date();
+            console.log(`[APIKeyManager] Loading ${validKeys.length} key(s) from database`);
+            this.databaseKeys = validKeys;
+            this.lastDatabaseLoad = new Date();
 
             // Re-read env keys to merge
             const envKeys: KeyInfo[] = [];
@@ -162,12 +162,12 @@ class APIKeyManager {
         }
     }
 
-    private rebuildKeyList(envKeys: KeyInfo[], firestoreKeys: KeyInfo[]): void {
+    private rebuildKeyList(envKeys: KeyInfo[], databaseKeys: KeyInfo[]): void {
         // Combine keys, avoiding duplicates (based on key string)
         const allKeysMap = new Map<string, KeyInfo>();
 
-        // Firestore keys take precedence
-        firestoreKeys.forEach(k => allKeysMap.set(k.key, k));
+        // Database keys take precedence
+        databaseKeys.forEach(k => allKeysMap.set(k.key, k));
 
         // Add env keys if not already present
         envKeys.forEach(k => {
@@ -204,11 +204,11 @@ class APIKeyManager {
     }
 
     /**
-     * Check if Firestore cache needs refresh
+     * Check if database cache needs refresh
      */
-    public needsFirestoreRefresh(): boolean {
-        if (!this.lastFirestoreLoad) return true;
-        return Date.now() - this.lastFirestoreLoad.getTime() > FIRESTORE_CACHE_MS;
+    public needsDatabaseRefresh(): boolean {
+        if (!this.lastDatabaseLoad) return true;
+        return Date.now() - this.lastDatabaseLoad.getTime() > DATABASE_CACHE_MS;
     }
 
     /**
@@ -353,7 +353,7 @@ class APIKeyManager {
     }
 
     public invalidateCache(): void {
-        this.lastFirestoreLoad = null;
+        this.lastDatabaseLoad = null;
     }
 }
 
