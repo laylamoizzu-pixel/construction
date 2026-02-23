@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import CloudinaryUpload from "@/components/CloudinaryUpload";
+import DeviceVisibilityPreview from "@/components/admin/DeviceVisibilityPreview";
 
 // Fallback for generating unique IDs without external dependency
 const generateId = () => {
@@ -327,6 +328,18 @@ export default function HeroEditor() {
                                             />
                                         </div>
                                     </div>
+
+                                    {/* Device Preview Section - Full Width under columns if needed or appended here */}
+                                    {slide.backgroundImageUrl && (
+                                        <div className="col-span-1 md:col-span-2 pt-6 border-t border-gray-100">
+                                            <DeviceVisibilityPreview
+                                                imageUrl={slide.backgroundImageUrl}
+                                                title={slide.title}
+                                                subtitle={slide.subtitle}
+                                                overlayOpacity={slide.overlayOpacity}
+                                            />
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         ))}
@@ -354,6 +367,6 @@ export default function HeroEditor() {
                     </form>
                 )}
             </div>
-        </div>
+        </div >
     );
 }
