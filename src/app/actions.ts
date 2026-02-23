@@ -326,12 +326,10 @@ export interface StaffMember {
 
 export async function getStaffMembers(): Promise<StaffMember[]> {
     try {
-        const snapshot = await getAdminDb().collection("staff").orderBy("createdAt", "desc").get();
-        return snapshot.docs.map((doc: admin.firestore.QueryDocumentSnapshot) => ({
-            id: doc.id,
-            ...doc.data(),
-            createdAt: (doc.data().createdAt as admin.firestore.Timestamp)?.toDate() || new Date(),
-        })) as StaffMember[];
+        const staff = await prisma.staff.findMany({
+            orderBy: { createdAt: "desc" }
+        });
+        return staff as unknown as StaffMember[];
     } catch (error) {
         console.error("Error fetching staff:", error);
         return [];
@@ -340,17 +338,18 @@ export async function getStaffMembers(): Promise<StaffMember[]> {
 
 export async function createStaffMember(email: string, name: string, role: string, permissions: string[]) {
     try {
-        const docRef = await getAdminDb().collection("staff").add({
-            email,
-            name,
-            role,
-            permissions,
-            createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        const staff = await prisma.staff.create({
+            data: {
+                email,
+                name,
+                role,
+                permissions,
+            }
         });
 
         revalidatePath("/admin/staff");
 
-        return { success: true, id: docRef.id };
+        return { success: true, id: staff.id };
     } catch (error: unknown) {
         return { success: false, error: error instanceof Error ? error.message : "Unknown error" };
     }
@@ -358,9 +357,13 @@ export async function createStaffMember(email: string, name: string, role: strin
 
 export async function updateStaffMember(id: string, data: Partial<StaffMember>) {
     try {
-        await getAdminDb().collection("staff").doc(id).update({
-            ...data,
-            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        const updateData = { ...data } as any;
+        delete updateData.id;
+        delete updateData.createdAt;
+
+        await prisma.staff.update({
+            where: { id },
+            data: updateData
         });
 
         revalidatePath("/admin/staff");
@@ -373,7 +376,9 @@ export async function updateStaffMember(id: string, data: Partial<StaffMember>) 
 
 export async function deleteStaffMember(id: string) {
     try {
-        await getAdminDb().collection("staff").doc(id).delete();
+        await prisma.staff.delete({
+            where: { id }
+        });
 
         revalidatePath("/admin/staff");
 
@@ -394,12 +399,14 @@ export async function getStaffData(email: string) {
             };
         }
 
-        const snapshot = await getAdminDb().collection("staff").where("email", "==", email).limit(1).get();
-        if (!snapshot.empty) {
-            const data = snapshot.docs[0].data();
+        const staff = await prisma.staff.findUnique({
+            where: { email }
+        });
+
+        if (staff) {
             return {
-                role: data.role ? data.role.charAt(0).toUpperCase() + data.role.slice(1) : "Staff",
-                permissions: data.permissions || []
+                role: staff.role ? staff.role.charAt(0).toUpperCase() + staff.role.slice(1) : "Staff",
+                permissions: staff.permissions || []
             };
         }
         return null;
@@ -974,15 +981,17 @@ export interface AdminProfile {
 
 export async function getAdminProfile(email: string): Promise<AdminProfile | null> {
     try {
-        const snapshot = await getAdminDb().collection("staff").where("email", "==", email).limit(1).get();
-        if (!snapshot.empty) {
-            const data = snapshot.docs[0].data();
+        const staff = await prisma.staff.findUnique({
+            where: { email }
+        });
+
+        if (staff) {
             return {
-                name: data.name || "",
-                email: data.email || email,
-                phone: data.phone || "",
-                role: data.role ? data.role.charAt(0).toUpperCase() + data.role.slice(1) : "Staff",
-                photoUrl: data.photoUrl || "",
+                name: staff.name || "",
+                email: staff.email || email,
+                phone: staff.phone || "",
+                role: staff.role ? staff.role.charAt(0).toUpperCase() + staff.role.slice(1) : "Staff",
+                photoUrl: staff.photoUrl || "",
             };
         }
         // For the hardcoded super admin
@@ -1004,28 +1013,30 @@ export async function getAdminProfile(email: string): Promise<AdminProfile | nul
 
 export async function updateAdminProfile(email: string, data: { name?: string; phone?: string }) {
     try {
-        const db = getAdminDb();
-        const snapshot = await db.collection("staff").where("email", "==", email).limit(1).get();
+        const existingStaff = await prisma.staff.findUnique({
+            where: { email }
+        });
 
-        if (!snapshot.empty) {
-            const docId = snapshot.docs[0].id;
-            await db.collection("staff").doc(docId).update({
-                ...data,
-                updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        if (existingStaff) {
+            await prisma.staff.update({
+                where: { email },
+                data
             });
         } else {
-            // Create a staff record if none exists (e.g. for super admin)
-            await db.collection("staff").add({
-                email,
-                ...data,
-                role: "admin",
-                permissions: ["*"],
-                createdAt: admin.firestore.FieldValue.serverTimestamp(),
+            await prisma.staff.create({
+                data: {
+                    email,
+                    name: data.name || "Admin",
+                    phone: data.phone || "",
+                    role: "admin",
+                    permissions: ["*"],
+                }
             });
         }
 
         // Also update the Firebase Auth display name
         try {
+            const { getAdminAuth } = await import("@/lib/firebase-admin");
             const authUser = await getAdminAuth().getUserByEmail(email);
             if (authUser) {
                 await getAdminAuth().updateUser(authUser.uid, {
@@ -1048,6 +1059,7 @@ export async function updateAdminProfile(email: string, data: { name?: string; p
 export async function updateAdminEmail(currentEmail: string, newEmail: string) {
     try {
         // Update Firebase Auth email
+        const { getAdminAuth } = await import("@/lib/firebase-admin");
         const authUser = await getAdminAuth().getUserByEmail(currentEmail);
         if (!authUser) {
             return { success: false, error: "User not found in Firebase Auth" };
@@ -1055,13 +1067,15 @@ export async function updateAdminEmail(currentEmail: string, newEmail: string) {
 
         await getAdminAuth().updateUser(authUser.uid, { email: newEmail });
 
-        // Update the Firestore staff record
-        const db = getAdminDb();
-        const snapshot = await db.collection("staff").where("email", "==", currentEmail).limit(1).get();
-        if (!snapshot.empty) {
-            await db.collection("staff").doc(snapshot.docs[0].id).update({
-                email: newEmail,
-                updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        // Update the Postgres staff record
+        const existingStaff = await prisma.staff.findUnique({
+            where: { email: currentEmail }
+        });
+
+        if (existingStaff) {
+            await prisma.staff.update({
+                where: { email: currentEmail },
+                data: { email: newEmail }
             });
         }
 
