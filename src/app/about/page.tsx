@@ -3,6 +3,7 @@ import { getSiteConfig } from "@/app/actions/site-config";
 import AboutContent from "@/components/AboutContent";
 import { constructMetadata } from "@/lib/seo-utils";
 import { Metadata } from "next";
+import { Suspense } from "react";
 
 export const dynamic = "force-dynamic";
 
@@ -16,7 +17,7 @@ export async function generateMetadata(): Promise<Metadata> {
     });
 }
 
-export default async function AboutPage() {
+async function AboutPageContentLoader() {
     const [pageContent, siteConfig] = await Promise.all([
         getSiteContent<AboutPageContent>("about-page"),
         getSiteConfig()
@@ -75,5 +76,13 @@ export default async function AboutPage() {
             )}
             <AboutContent content={pageContent} contact={contactContent} />
         </>
+    );
+}
+
+export default function AboutPage() {
+    return (
+        <Suspense fallback={<div className="min-h-screen bg-slate-50 animate-pulse" />}>
+            <AboutPageContentLoader />
+        </Suspense>
     );
 }
