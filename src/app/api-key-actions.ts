@@ -104,15 +104,15 @@ export async function addAPIKey(name: string, key: string, provider: LLMProvider
  */
 export async function updateAPIKey(id: string, data: { name?: string; key?: string; provider?: LLMProvider; isActive?: boolean }) {
     try {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const updateData: any = { ...data };
-
+        const updateData: any = {};
         if (data.name !== undefined) updateData.name = data.name.trim();
         if (data.key !== undefined) {
             updateData.key = data.key.trim();
             updateData.isValid = null;
             updateData.lastTested = null;
         }
+        if (data.provider !== undefined) updateData.provider = data.provider;
+        if (data.isActive !== undefined) updateData.isActive = data.isActive;
 
         await prisma.apiKey.update({
             where: { id },
@@ -124,7 +124,7 @@ export async function updateAPIKey(id: string, data: { name?: string; key?: stri
 
         return { success: true };
     } catch (error) {
-        console.error("[updateAPIKey] Error:", error);
+        console.error("[updateAPIKey] Prisma Error:", error);
         return { success: false, error: error instanceof Error ? error.message : "Unknown error" };
     }
 }
