@@ -79,7 +79,7 @@ export default function CloudinaryWidget({ cloudName, apiKey }: CloudinaryWidget
     }, [scriptLoaded, cloudName, apiKey]);
 
     return (
-        <div className="w-full h-full flex flex-col">
+        <div className="w-full flex-1 flex flex-col min-h-full">
             <Script
                 src="https://media-library.cloudinary.com/global/all.js"
                 strategy="afterInteractive"
@@ -88,15 +88,15 @@ export default function CloudinaryWidget({ cloudName, apiKey }: CloudinaryWidget
             />
 
             {error ? (
-                <div className="flex items-center justify-center h-full">
+                <div className="flex items-center justify-center flex-1">
                     <div className="text-center p-8 bg-red-500/10 border border-red-500/20 rounded-xl">
                         <p className="text-red-400 font-medium">{error}</p>
                     </div>
                 </div>
             ) : !scriptLoaded ? (
-                <div className="flex items-center justify-center h-96">
-                    <div className="flex flex-col items-center gap-3 text-white/50">
-                        <div className="w-8 h-8 border-2 border-white/20 border-t-brand-gold rounded-full animate-spin" />
+                <div className="flex items-center justify-center flex-1">
+                    <div className="flex flex-col items-center gap-3 text-gray-500">
+                        <div className="w-8 h-8 border-2 border-gray-200 border-t-amber-600 rounded-full animate-spin" />
                         <p className="text-sm">Loading Media Library...</p>
                     </div>
                 </div>
@@ -106,8 +106,8 @@ export default function CloudinaryWidget({ cloudName, apiKey }: CloudinaryWidget
             <div
                 id="cloudinary-media-library-container"
                 ref={containerRef}
-                className="flex-1 w-full rounded-xl overflow-hidden border border-white/10"
-                style={{ minHeight: "75vh" }}
+                className="w-full flex-1 rounded-xl overflow-hidden border border-gray-100"
+                style={{ height: "100%", minHeight: "600px" }}
             />
         </div>
     );

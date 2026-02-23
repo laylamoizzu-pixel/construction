@@ -30,8 +30,8 @@ export default function MediaLibraryPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-100 p-6">
-            <div className="max-w-7xl mx-auto">
+        <div className="min-h-screen bg-gray-100 p-6 flex flex-col">
+            <div className="max-w-7xl mx-auto w-full flex-1 flex flex-col">
                 {/* Header */}
                 <div className="flex items-center gap-4 mb-6">
                     <Link href="/admin" className="p-2 hover:bg-gray-200 rounded-lg transition-colors">
@@ -49,7 +49,7 @@ export default function MediaLibraryPage() {
                 </div>
 
                 {/* Info Banner */}
-                <div className="mb-4 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 flex items-start gap-3">
+                <div className="mb-4 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 flex items-start gap-3 flex-shrink-0">
                     <div className="mt-0.5 w-4 h-4 flex-shrink-0 text-amber-600">ℹ️</div>
                     <p className="text-sm text-amber-700">
                         You are viewing your Cloudinary media library. You may be asked to log in with your
@@ -58,7 +58,7 @@ export default function MediaLibraryPage() {
                 </div>
 
                 {/* Widget */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-2">
+                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-2 flex-1 flex flex-col min-h-[600px]">
                     <CloudinaryWidget
                         cloudName={CLOUDINARY_CLOUD_NAME}
                         apiKey={CLOUDINARY_API_KEY}
