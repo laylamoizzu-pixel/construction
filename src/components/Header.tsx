@@ -195,14 +195,13 @@ export default function Header() {
                 <nav className="hidden lg:flex items-center gap-1">
                     {NAV_LINKS.map((link) => {
                         const isActive = pathname === link.href;
-                        const isSpecial = link.label === "Special Offers" || link.label === "Offers";
                         return (
                             <Link
                                 key={link.href}
                                 href={link.href}
                                 className={`relative px-4 py-2 text-sm font-medium rounded-full transition-all duration-300 ${isActive ? "text-white" : "hover:text-cyan-500 dark:hover:text-cyan-400"
                                     }`}
-                                style={{ color: isActive ? "#ffffff" : isSpecial ? "#06b6d4" : (config.theme.navbarTextColor || config.theme.textColor) }}
+                                style={{ color: isActive ? "#ffffff" : (config.theme.navbarTextColor || config.theme.textColor) }}
                             >
                                 {isActive && (
                                     <motion.div
@@ -213,12 +212,6 @@ export default function Header() {
                                     />
                                 )}
                                 <span className="relative z-10">{link.label}</span>
-                                {isSpecial && !isActive && (
-                                    <span className="absolute -top-1 -right-1 flex h-2 w-2">
-                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
-                                        <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span>
-                                    </span>
-                                )}
                             </Link>
                         );
                     })}
@@ -424,18 +417,7 @@ export default function Header() {
                                 })}
                             </div>
 
-                            <div className="p-8 border-t border-black/5 dark:border-white/5 bg-slate-50/50 dark:bg-slate-900/50">
-                                <p className="text-sm text-slate-500 mb-4 font-medium uppercase tracking-widest">Connect with us</p>
-                                <div className="flex items-center gap-4">
-                                    {/* Placeholder for social icons if needed */}
-                                    <div className="w-10 h-10 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 hover:text-cyan-500 transition-colors shadow-sm">
-                                        <Mic className="w-5 h-5" />
-                                    </div>
-                                    <div className="w-10 h-10 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 hover:text-cyan-500 transition-colors shadow-sm text-xs font-bold">
-                                        GA
-                                    </div>
-                                </div>
-                            </div>
+
                         </motion.div>
                     </>
                 )}
