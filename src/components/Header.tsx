@@ -164,15 +164,10 @@ export default function Header() {
 
     return (
         <header
-            className={`fixed left-0 right-0 z-50 transition-all duration-500 ease-in-out ${isScrolled
-                ? "top-4 flex justify-center px-4"
-                : "top-0 w-full"
-                }`}
+            className="fixed left-0 right-0 z-50 top-4 flex justify-center px-4 transition-all duration-500 ease-in-out"
         >
             <div
-                className={`flex items-center justify-between transition-all duration-500 ease-in-out ${isScrolled
-                    ? "container max-w-5xl bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-full border border-white/20 shadow-2xl px-6 py-2"
-                    : "w-full bg-white/80 dark:bg-slate-950/80 backdrop-blur-md border-b border-slate-200/50 dark:border-slate-800/50 px-4 md:px-8 py-4"
+                className={`flex items-center justify-between transition-all duration-500 ease-in-out container max-w-5xl bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-full border border-white/20 shadow-2xl px-6 py-2 ${isScrolled ? "shadow-cyan-500/10" : ""
                     }`}
                 style={{
                     color: config.theme.navbarTextColor || config.theme.textColor || "#0f172a",
@@ -180,7 +175,7 @@ export default function Header() {
             >
                 {/* Logo */}
                 <Link href="/" className="flex items-center gap-2 group relative z-50">
-                    <div className={`relative transition-all duration-500 ${isScrolled ? 'w-12 h-12' : 'w-20 h-20'} group-hover:scale-110 flex items-center justify-center`}>
+                    <div className="relative transition-all duration-500 w-12 h-12 group-hover:scale-110 flex items-center justify-center">
                         {/* Premium Glow/Ring Effect */}
                         <div className="absolute inset-0 bg-gradient-to-r from-cyan-400/20 to-lime-400/20 rounded-full blur-md group-hover:from-cyan-400/40 group-hover:to-lime-400/40 transition-all duration-500" />
                         <div className="absolute inset-0 border border-white/20 dark:border-white/10 rounded-full shadow-lg shadow-black/5" />
@@ -308,8 +303,7 @@ export default function Header() {
                             setIsSearchOpen(!isSearchOpen);
                             setIsMenuOpen(false);
                         }}
-                        className={`p-2 rounded-full transition-all duration-300 ${isScrolled ? 'bg-cyan-500/10 text-cyan-500' : ''}`}
-                        style={{ color: isScrolled ? undefined : (config.theme.navbarTextColor || config.theme.textColor) }}
+                        className="p-2 rounded-full transition-all duration-300 bg-cyan-500/10 text-cyan-500"
                         aria-label={isSearchOpen ? "Close search" : "Open search"}
                     >
                         <Search className="w-5 h-5" />
@@ -319,8 +313,7 @@ export default function Header() {
                             setIsMenuOpen(!isMenuOpen);
                             setIsSearchOpen(false);
                         }}
-                        className={`p-2 rounded-full transition-all duration-300 ${isScrolled ? 'bg-cyan-500/10 text-cyan-500' : ''}`}
-                        style={{ color: isScrolled ? undefined : (config.theme.navbarTextColor || config.theme.textColor) }}
+                        className="p-2 rounded-full transition-all duration-300 bg-cyan-500/10 text-cyan-500"
                         aria-label={isMenuOpen ? "Close menu" : "Open menu"}
                     >
                         {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}

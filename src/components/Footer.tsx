@@ -19,14 +19,20 @@ export default function Footer() {
 
                     {/* Brand / Logo Section (Spans 3) */}
                     <div className="lg:col-span-3 p-6 lg:p-10 flex flex-col items-center md:items-start text-center md:text-left bg-brand-dark/50 backdrop-blur-sm">
-                        <Link href="/" className="mb-6 group">
-                            <div className="relative w-48 h-12 transition-transform duration-300 group-hover:scale-105">
-                                <Image
-                                    src={config.branding.logoUrl || "/logo.png"}
-                                    alt={config.branding.siteName}
-                                    fill
-                                    className="object-contain"
-                                />
+                        <Link href="/" className="mb-8 group block">
+                            <div className="relative w-24 h-24 transition-all duration-500 group-hover:scale-110 flex items-center justify-center">
+                                {/* Premium Glow/Ring Effect */}
+                                <div className="absolute inset-0 bg-gradient-to-r from-cyan-400/20 to-lime-400/20 rounded-full blur-xl group-hover:from-cyan-400/40 group-hover:to-lime-400/40 transition-all duration-500" />
+                                <div className="absolute inset-0 border border-white/10 rounded-full shadow-2xl shadow-cyan-500/10" />
+
+                                <div className="relative w-full h-full p-2">
+                                    <Image
+                                        src={config.branding.logoUrl || "/logo.png"}
+                                        alt={config.branding.siteName}
+                                        fill
+                                        className="object-contain drop-shadow-[0_0_15px_rgba(34,211,238,0.3)]"
+                                    />
+                                </div>
                             </div>
                         </Link>
                         <p className="text-slate-400 max-w-sm leading-relaxed">
