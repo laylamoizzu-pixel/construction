@@ -20,6 +20,7 @@ interface InfiniteProductGridProps {
         maxPrice?: number;
         sort?: string;
         rating?: number;
+        available?: boolean;
     };
 }
 
@@ -31,14 +32,19 @@ export default function InfiniteProductGrid({
 }: InfiniteProductGridProps) {
     const [products, setProducts] = useState<Product[]>(initialProducts);
     const [loading, setLoading] = useState(false);
-    const [hasMore, setHasMore] = useState(initialProducts.length === 20); // Assuming batch size 20
+
+    // We only enable pagination if NO filters are active (except category/subcategory)
+    // because our getFilteredProducts returns ALL matches at once.
+    const hasActiveFilters = !!(filters.search || filters.minPrice !== undefined || filters.maxPrice !== undefined || filters.available !== undefined || (filters.sort && filters.sort !== 'newest'));
+
+    const [hasMore, setHasMore] = useState(!hasActiveFilters && initialProducts.length === 20); // Assuming batch size 20
     const [lastId, setLastId] = useState<string | undefined>(
         initialProducts.length > 0 ? initialProducts[initialProducts.length - 1].id : undefined
     );
 
     const observer = useRef<IntersectionObserver | null>(null);
     const loadMore = useCallback(async () => {
-        if (loading || !hasMore) return;
+        if (loading || !hasMore || hasActiveFilters) return;
         setLoading(true);
 
         try {
@@ -47,7 +53,7 @@ export default function InfiniteProductGrid({
 
             const nextBatch = await getProducts(
                 activeCategory,
-                true,
+                filters.available,
                 20,
                 lastId,
                 filters.subcategory
@@ -66,7 +72,7 @@ export default function InfiniteProductGrid({
         } finally {
             setLoading(false);
         }
-    }, [loading, hasMore, lastId, filters.category, filters.subcategory]);
+    }, [loading, hasMore, lastId, filters.category, filters.subcategory, filters.available, hasActiveFilters]);
 
     const lastProductElementRef = useCallback((node: HTMLAnchorElement | null) => {
         if (loading) return;
@@ -79,40 +85,19 @@ export default function InfiniteProductGrid({
         if (node) observer.current.observe(node);
     }, [loading, hasMore, loadMore]);
 
-    // Reset when filters change (since we are doing server-side fetching for batches)
-    // However, if we want to support the current client-side filtering logic, things get tricky.
-    // For now, let's assume filtering happened on the server OR we fetch all.
-    // Given the user request, we want to fetch "slowly in batches".
-
+    // Reset when initialProducts change
     useEffect(() => {
         setProducts(initialProducts);
-        setHasMore(initialProducts.length === 20);
+        setHasMore(!hasActiveFilters && initialProducts.length === 20);
         setLastId(initialProducts.length > 0 ? initialProducts[initialProducts.length - 1].id : undefined);
-    }, [initialProducts]);
+    }, [initialProducts, hasActiveFilters]);
 
 
     const getCategoryName = (id: string) => categories.find(c => c.id === id)?.name || "Unknown";
     const getOffer = (id?: string) => id ? offers.find(o => o.id === id) : null;
 
-    // Client-side filtering for Search and Price (since Firestore is limited)
-    // We apply these to the products we've loaded so far.
-    // Note: In a production app, we'd use a search engine like Algolia for this.
-    let displayProducts = products;
-
-    if (filters.search) {
-        const lower = filters.search.toLowerCase();
-        displayProducts = displayProducts.filter(p =>
-            p.name.toLowerCase().includes(lower) ||
-            (p.description && p.description.toLowerCase().includes(lower))
-        );
-    }
-
-    if (filters.minPrice !== undefined) {
-        displayProducts = displayProducts.filter(p => p.price >= filters.minPrice!);
-    }
-    if (filters.maxPrice !== undefined) {
-        displayProducts = displayProducts.filter(p => p.price <= filters.maxPrice!);
-    }
+    // displayProducts is now exactly the products array (which comprises initialProducts populated from getFilteredProducts + any paginated ones)
+    const displayProducts = products;
 
     if (displayProducts.length === 0 && !loading && !hasMore) {
         return (

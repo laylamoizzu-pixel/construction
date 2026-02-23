@@ -79,7 +79,18 @@ export default function CloudinaryWidget({ cloudName, apiKey }: CloudinaryWidget
     }, [scriptLoaded, cloudName, apiKey]);
 
     return (
-        <div className="w-full flex-1 flex flex-col min-h-full">
+        <div className="w-full flex-1 flex flex-col" style={{ height: "100%" }}>
+            {/* Force the Cloudinary-injected iframe to fill the container */}
+            <style>{`
+                #cloudinary-media-library-container iframe {
+                    width: 100% !important;
+                    height: 100% !important;
+                    min-height: 700px !important;
+                    border: none !important;
+                    display: block !important;
+                }
+            `}</style>
+
             <Script
                 src="https://media-library.cloudinary.com/global/all.js"
                 strategy="afterInteractive"
@@ -107,7 +118,7 @@ export default function CloudinaryWidget({ cloudName, apiKey }: CloudinaryWidget
                 id="cloudinary-media-library-container"
                 ref={containerRef}
                 className="w-full flex-1 rounded-xl overflow-hidden border border-gray-100"
-                style={{ height: "100%", minHeight: "600px" }}
+                style={{ height: "calc(100vh - 220px)", minHeight: "700px" }}
             />
         </div>
     );

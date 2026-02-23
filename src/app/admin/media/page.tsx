@@ -58,7 +58,7 @@ export default function MediaLibraryPage() {
                 </div>
 
                 {/* Widget */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-2 flex-1 flex flex-col min-h-[600px]">
+                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-2 flex flex-col">
                     <CloudinaryWidget
                         cloudName={CLOUDINARY_CLOUD_NAME}
                         apiKey={CLOUDINARY_API_KEY}

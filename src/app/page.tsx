@@ -31,7 +31,7 @@ export default async function Home() {
     <div className="flex flex-col min-h-screen bg-slate-50">
       <Hero />
 
-      {aiSettings.enabled && <VibeSelector />}
+      {aiSettings.showVibeSelector && <VibeSelector />}
 
       <Promotions config={config.promotions} />
 

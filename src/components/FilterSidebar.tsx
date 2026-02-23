@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Filter, ChevronDown, Check } from "lucide-react";
@@ -13,11 +13,24 @@ interface FilterSidebarProps {
     settings?: Partial<ProductsPageContent>;
 }
 
+// Simple debounce hook for applying text/number filters
+function useDebounce<T>(value: T, delay: number): T {
+    const [debouncedValue, setDebouncedValue] = useState<T>(value);
+    useEffect(() => {
+        const timer = setTimeout(() => setDebouncedValue(value), delay);
+        return () => clearTimeout(timer);
+    }, [value, delay]);
+    return debouncedValue;
+}
+
 export default function FilterSidebar({ categories, settings }: FilterSidebarProps) {
     const router = useRouter();
     const searchParams = useSearchParams();
     const [isOpen, setIsOpen] = useState(false);
     const [filters, setFilters] = useState<FilterState>(() => parseSearchParams(searchParams));
+
+    // Ref to skip initial render effect
+    const initialRender = useRef(true);
 
     // Default visibility settings
     const vis = {
@@ -28,21 +41,26 @@ export default function FilterSidebar({ categories, settings }: FilterSidebarPro
         showAvailability: settings?.showAvailability ?? true,
     };
 
-    // Update local state when URL params change
+    // Update local state when URL params change (e.g. from back button)
     useEffect(() => {
         setFilters(parseSearchParams(searchParams));
     }, [searchParams]);
 
-    const updateFilters = (newFilters: Partial<FilterState>) => {
-        const updated = { ...filters, ...newFilters };
-        setFilters(updated);
-        // Debounce URL update or update on "Apply"
-    };
+    const debouncedFilters = useDebounce(filters, 400);
 
-    const applyFilters = () => {
-        const params = buildSearchParams(filters);
+    // Apply filters to URL when debounced state changes
+    useEffect(() => {
+        if (initialRender.current) {
+            initialRender.current = false;
+            return;
+        }
+
+        const params = buildSearchParams(debouncedFilters);
         router.push(`/products?${params.toString()}`);
-        setIsOpen(false);
+    }, [debouncedFilters, router]);
+
+    const updateFilters = (newFilters: Partial<FilterState>) => {
+        setFilters(prev => ({ ...prev, ...newFilters }));
     };
 
     const clearFilters = () => {
@@ -55,7 +73,6 @@ export default function FilterSidebar({ categories, settings }: FilterSidebarPro
             available: false
         };
         setFilters(reset);
-        router.push("/products");
         setIsOpen(false);
     };
 
@@ -80,7 +97,6 @@ export default function FilterSidebar({ categories, settings }: FilterSidebarPro
                             placeholder="Search products..."
                             value={filters.search || ""}
                             onChange={(e) => updateFilters({ search: e.target.value })}
-                            onKeyDown={(e) => e.key === "Enter" && applyFilters()}
                             className="w-full pl-3 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-brand-blue/50 outline-none"
                         />
                     </div>
@@ -190,16 +206,10 @@ export default function FilterSidebar({ categories, settings }: FilterSidebarPro
             {/* Actions */}
             <div className="pt-6 border-t border-slate-100 flex flex-col gap-3">
                 <button
-                    onClick={applyFilters}
-                    className="w-full py-3 bg-brand-dark text-white rounded-xl font-bold hover:bg-black transition-colors shadow-lg shadow-brand-dark/20"
-                >
-                    Apply Filters
-                </button>
-                <button
                     onClick={clearFilters}
                     className="w-full py-3 bg-slate-100 text-slate-600 rounded-xl font-medium hover:bg-slate-200 transition-colors"
                 >
-                    Clear All
+                    Clear All Filters
                 </button>
             </div>
         </div>

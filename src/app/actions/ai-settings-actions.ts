@@ -7,6 +7,7 @@ import { invalidateAIConfig } from "@/lib/ai-config";
 
 export interface AISettings {
     enabled: boolean;
+    showVibeSelector: boolean;
     personaName: string;
     greeting: string;
     systemPrompt: string;
@@ -21,6 +22,7 @@ export interface AISettings {
 
 const DEFAULT_AI_SETTINGS: AISettings = {
     enabled: true,
+    showVibeSelector: true,
     personaName: "Genie",
     greeting: "Hi, I'm Genie, your personal Shopping Master! 🧞‍♂️ How can I help you today? Would you like me to curate some amazing products for you?",
     systemPrompt: "You are Genie, a charming and helpful AI Shopping Master at Smart Avenue. You help customers find products, give styling advice, and provide excellent shopping assistance. Be friendly, knowledgeable, and persuasive. Support English, Hindi, and Hinglish.",

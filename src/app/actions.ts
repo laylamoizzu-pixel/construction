@@ -625,6 +625,90 @@ export async function getProducts(
 }
 
 /**
+ * Get products matching a complex set of filters using DB-level filtering via Prisma.
+ * This is scalable to any number of products — no in-memory limit.
+ */
+export async function getFilteredProducts(filters: {
+    search?: string;
+    category?: string | string[];
+    subcategory?: string;
+    minPrice?: number;
+    maxPrice?: number;
+    available?: boolean;
+    sort?: string;
+}): Promise<Product[]> {
+    // Build the Prisma where clause from the filter parameters
+    const where: Prisma.ProductWhereInput = {};
+
+    // 1. Availability — only include if explicitly requested
+    if (filters.available === true) {
+        where.available = true;
+    }
+
+    // 2. Category / Subcategory
+    if (filters.subcategory) {
+        where.subcategoryId = filters.subcategory;
+    } else if (filters.category) {
+        const cats = Array.isArray(filters.category) ? filters.category : [filters.category];
+        if (cats.length > 0) {
+            where.categoryId = { in: cats };
+        }
+    }
+
+    // 3. Price range
+    if ((filters.minPrice !== undefined && !isNaN(filters.minPrice)) ||
+        (filters.maxPrice !== undefined && !isNaN(filters.maxPrice))) {
+        where.price = {};
+        if (filters.minPrice !== undefined && !isNaN(filters.minPrice)) {
+            where.price.gte = filters.minPrice;
+        }
+        if (filters.maxPrice !== undefined && !isNaN(filters.maxPrice)) {
+            where.price.lte = filters.maxPrice;
+        }
+    }
+
+    // 4. Text search — Postgres ILIKE (case-insensitive contains)
+    if (filters.search && filters.search.trim()) {
+        where.OR = [
+            { name: { contains: filters.search.trim(), mode: "insensitive" } },
+            { description: { contains: filters.search.trim(), mode: "insensitive" } },
+            { tags: { has: filters.search.trim().toLowerCase() } },
+        ];
+    }
+
+    // 5. Sorting — map to Prisma orderBy
+    let orderBy: Prisma.ProductOrderByWithRelationInput;
+    switch (filters.sort) {
+        case "price_asc":
+            orderBy = { price: "asc" };
+            break;
+        case "price_desc":
+            orderBy = { price: "desc" };
+            break;
+        case "rating":
+            orderBy = { averageRating: "desc" };
+            break;
+        case "newest":
+        default:
+            orderBy = { createdAt: "desc" };
+            break;
+    }
+
+    try {
+        const products = await prisma.product.findMany({
+            where,
+            orderBy,
+            // No limit — fetch all matching products for the current filter set
+            // This replaces the hardcoded 2000 cap; Postgres handles pagination internally
+        });
+        return products as unknown as Product[];
+    } catch (error) {
+        console.error("Error in getFilteredProducts:", error);
+        return [];
+    }
+}
+
+/**
  * Get ALL products for export (no pagination/limit)
  * Warning: heavy operation, use sparingly
  */

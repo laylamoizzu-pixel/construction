@@ -1,4 +1,4 @@
-import { getProducts, getCategories, getOffers, getSiteContent, ProductsPageContent } from "@/app/actions";
+import { getFilteredProducts, getCategories, getOffers, getSiteContent, ProductsPageContent } from "@/app/actions";
 import Image from "next/image";
 import FilterSidebar from "@/components/FilterSidebar";
 import InfiniteProductGrid from "@/components/InfiniteProductGrid";
@@ -11,10 +11,20 @@ export default async function ProductsPage({
     searchParams: Promise<{ category?: string | string[]; subcategory?: string; search?: string; minPrice?: string; maxPrice?: string; sort?: string; rating?: string; available?: string }>
 }) {
     const params = await searchParams;
-    const activeCategory = Array.isArray(params.category) ? params.category[0] : params.category;
 
-    // Fetch data - Initial batch of 20 for better performance
-    const productsPromise = getProducts(activeCategory, true, 20, undefined, params.subcategory);
+    const filters = {
+        category: params.category,
+        subcategory: params.subcategory,
+        search: params.search,
+        minPrice: params.minPrice ? Number(params.minPrice) : undefined,
+        maxPrice: params.maxPrice ? Number(params.maxPrice) : undefined,
+        sort: params.sort,
+        available: params.available === "true" ? true : undefined,
+        rating: params.rating ? Number(params.rating) : undefined
+    };
+
+    // Fetch data using the new in-memory comprehensive filter
+    const productsPromise = getFilteredProducts(filters);
     const categoriesPromise = getCategories();
     const offersPromise = getOffers();
     const contentPromise = getSiteContent<ProductsPageContent>("products-page");
@@ -25,16 +35,6 @@ export default async function ProductsPage({
         offersPromise,
         contentPromise
     ]);
-
-    const filters = {
-        category: params.category,
-        subcategory: params.subcategory,
-        search: params.search,
-        minPrice: params.minPrice ? Number(params.minPrice) : undefined,
-        maxPrice: params.maxPrice ? Number(params.maxPrice) : undefined,
-        sort: params.sort,
-        rating: params.rating ? Number(params.rating) : undefined
-    };
 
     const maxPriceVal = Math.max(...allProducts.map(p => p.price), 10000);
     const heroTitle = pageContent?.heroTitle || "Our Box";

@@ -41,6 +41,7 @@ export default function AISettingsPage() {
     const [toast, setToast] = useState<Toast | null>(null);
     const [settings, setSettings] = useState<AISettings>({
         enabled: true,
+        showVibeSelector: true,
         personaName: "Genie",
         greeting: "",
         systemPrompt: "",
@@ -377,6 +378,13 @@ export default function AISettingsPage() {
                             </h3>
                             <div className="space-y-4">
                                 {[
+                                    {
+                                        key: "showVibeSelector" as keyof AISettings,
+                                        label: "Shop by Vibe",
+                                        description: "Show the AI-powered 'Shop by Vibe' section on the homepage",
+                                        icon: Sparkles,
+                                        color: "text-amber-500",
+                                    },
                                     {
                                         key: "enableVoiceInput" as keyof AISettings,
                                         label: "Voice Input",
