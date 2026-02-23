@@ -536,6 +536,8 @@ export interface Product {
     stockLevel?: number;
 }
 
+import { Prisma } from "@prisma/client";
+
 async function _fetchProducts(
     categoryId?: string,
     available?: boolean,
@@ -544,57 +546,30 @@ async function _fetchProducts(
     subcategoryId?: string
 ): Promise<Product[]> {
     try {
-        let query: admin.firestore.Query = getAdminDb().collection("products");
+        const where: Prisma.ProductWhereInput = {};
+        if (categoryId) where.categoryId = categoryId;
+        if (subcategoryId) where.subcategoryId = subcategoryId;
+        if (available !== undefined) where.available = available;
 
-        // Apply filters
-        if (subcategoryId) {
-            query = query.where("subcategoryId", "==", subcategoryId);
-        } else if (categoryId) {
-            query = query.where("categoryId", "==", categoryId);
-        }
-
-        if (available !== undefined) {
-            query = query.where("available", "==", available);
-        }
-
-        let orderedQuery = query.orderBy("createdAt", "desc");
+        let cursorDetails = {};
+        let skipAmount = 0;
 
         if (startAfterId) {
-            const startAfterDoc = await getAdminDb().collection("products").doc(startAfterId).get();
-            if (startAfterDoc.exists) {
-                orderedQuery = orderedQuery.startAfter(startAfterDoc);
-            }
+            cursorDetails = { cursor: { id: startAfterId } };
+            skipAmount = 1;
         }
 
-        const snapshot = await orderedQuery.limit(limitCount).get();
+        const products = await prisma.product.findMany({
+            where,
+            orderBy: { createdAt: "desc" },
+            take: limitCount,
+            ...cursorDetails,
+            skip: skipAmount
+        });
 
-        return snapshot.docs.map((doc: admin.firestore.QueryDocumentSnapshot) => ({
-            id: doc.id,
-            ...doc.data(),
-            createdAt: (doc.data().createdAt as admin.firestore.Timestamp)?.toDate() || new Date(),
-            updatedAt: (doc.data().updatedAt as admin.firestore.Timestamp)?.toDate() || undefined,
-        })) as Product[];
+        return products as unknown as Product[];
     } catch (error) {
-        console.error("Error fetching products:", error);
-        if (error instanceof Error && error.message.includes("index")) {
-            console.warn("Falling back to unordered query due to missing index.");
-            try {
-                let fallbackQuery: admin.firestore.Query = getAdminDb().collection("products");
-                if (subcategoryId) fallbackQuery = fallbackQuery.where("subcategoryId", "==", subcategoryId);
-                else if (categoryId) fallbackQuery = fallbackQuery.where("categoryId", "==", categoryId);
-                if (available !== undefined) fallbackQuery = fallbackQuery.where("available", "==", available);
-
-                const snapshot = await fallbackQuery.limit(limitCount).get();
-                return snapshot.docs.map((doc: admin.firestore.QueryDocumentSnapshot) => ({
-                    id: doc.id,
-                    ...doc.data(),
-                    createdAt: (doc.data().createdAt as admin.firestore.Timestamp)?.toDate() || new Date(),
-                    updatedAt: (doc.data().updatedAt as admin.firestore.Timestamp)?.toDate() || undefined,
-                })) as Product[];
-            } catch (fallbackError) {
-                console.error("Fallback query also failed:", fallbackError);
-            }
-        }
+        console.error("Error fetching products from Postgres:", error);
         return [];
     }
 }
@@ -628,15 +603,12 @@ export async function getProducts(
  */
 export async function getAllProductsForExport(): Promise<Product[]> {
     try {
-        const snapshot = await getAdminDb().collection("products").orderBy("createdAt", "desc").get();
-        return snapshot.docs.map((doc: admin.firestore.QueryDocumentSnapshot) => ({
-            id: doc.id,
-            ...doc.data(),
-            createdAt: (doc.data().createdAt as admin.firestore.Timestamp)?.toDate() || new Date(),
-            updatedAt: (doc.data().updatedAt as admin.firestore.Timestamp)?.toDate() || undefined,
-        })) as Product[];
+        const products = await prisma.product.findMany({
+            orderBy: { createdAt: "desc" }
+        });
+        return products as unknown as Product[];
     } catch (error) {
-        console.error("Error fetching all products for export:", error);
+        console.error("Error fetching all products for export from Postgres:", error);
         return [];
     }
 }
@@ -689,20 +661,18 @@ export async function searchProducts(
 
 async function _fetchProduct(id: string): Promise<Product | null> {
     try {
-        const doc = await getAdminDb().collection("products").doc(id).get();
-        if (doc.exists) {
-            const data = doc.data();
+        const product = await prisma.product.findUnique({
+            where: { id }
+        });
+        if (product) {
             return {
-                id: doc.id,
-                ...data,
-                createdAt: (data?.createdAt as admin.firestore.Timestamp)?.toDate() || new Date(),
-                updatedAt: (data?.updatedAt as admin.firestore.Timestamp)?.toDate() || undefined,
-                stockLevel: data?.available ? Math.floor(Math.random() * 15) + 1 : 0,
+                ...product as any,
+                stockLevel: product.available ? Math.floor(Math.random() * 15) + 1 : 0,
             } as Product;
         }
         return null;
     } catch (error) {
-        console.error("Error fetching product:", error);
+        console.error("Error fetching product from Postgres:", error);
         return null;
     }
 }
