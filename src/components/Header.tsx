@@ -370,16 +370,35 @@ export default function Header() {
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
                             onClick={() => setIsMenuOpen(false)}
-                            className="fixed inset-0 bg-black/50 z-[55] md:hidden"
+                            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[55] lg:hidden"
                         />
                         <motion.div
                             initial={{ x: '100%' }}
                             animate={{ x: 0 }}
                             exit={{ x: '100%' }}
-                            transition={{ type: "spring", damping: 28, stiffness: 220 }}
-                            className="fixed inset-y-0 right-0 w-[85%] max-w-sm bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl shadow-2xl z-[60] lg:hidden flex flex-col pt-24 border-l border-white/10"
+                            transition={{ type: "spring", damping: 30, stiffness: 200 }}
+                            className="fixed inset-y-0 right-0 w-[85%] max-w-sm bg-white/90 dark:bg-slate-950/90 backdrop-blur-3xl shadow-2xl z-[60] lg:hidden flex flex-col border-l border-white/20"
                         >
-                            <div className="px-8 space-y-4">
+                            <div className="flex items-center justify-between p-6 border-b border-black/5 dark:border-white/5">
+                                <Link href="/" onClick={() => setIsMenuOpen(false)}>
+                                    <div className="relative w-32 h-8">
+                                        <Image
+                                            src={config.branding.logoUrl || "/logo.png"}
+                                            alt={config.branding.siteName || "Smart Avenue"}
+                                            fill
+                                            className="object-contain"
+                                        />
+                                    </div>
+                                </Link>
+                                <button
+                                    onClick={() => setIsMenuOpen(false)}
+                                    className="p-2 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500"
+                                >
+                                    <X className="w-5 h-5" />
+                                </button>
+                            </div>
+
+                            <div className="flex-1 overflow-y-auto py-8 px-8 space-y-2">
                                 {NAV_LINKS.map((link, idx) => {
                                     const isActive = pathname === link.href;
                                     return (
@@ -387,20 +406,35 @@ export default function Header() {
                                             key={link.href}
                                             initial={{ opacity: 0, x: 20 }}
                                             animate={{ opacity: 1, x: 0 }}
-                                            transition={{ delay: 0.1 + idx * 0.05 }}
+                                            transition={{ delay: idx * 0.05 }}
                                         >
                                             <Link
                                                 href={link.href}
                                                 onClick={() => setIsMenuOpen(false)}
-                                                className={`group flex items-center justify-between py-3 text-lg font-semibold transition-colors ${isActive ? "text-cyan-500" : "text-slate-800 dark:text-slate-200"
+                                                className={`group flex items-center justify-between py-4 text-xl font-bold transition-all ${isActive
+                                                    ? "text-cyan-500 translate-x-1"
+                                                    : "text-slate-800 dark:text-slate-100 hover:text-cyan-400 hover:translate-x-1"
                                                     }`}
                                             >
                                                 <span>{link.label}</span>
-                                                <div className={`h-1.5 w-1.5 rounded-full bg-cyan-500 transition-all duration-300 ${isActive ? 'opacity-100 scale-100' : 'opacity-0 scale-0 group-hover:opacity-50 group-hover:scale-100'}`} />
+                                                <div className={`h-2 w-2 rounded-full bg-gradient-to-r from-cyan-400 to-lime-400 transition-all duration-500 ${isActive ? 'opacity-100 scale-100 shadow-[0_0_10px_rgba(34,211,238,0.5)]' : 'opacity-0 scale-0'}`} />
                                             </Link>
                                         </motion.div>
                                     );
                                 })}
+                            </div>
+
+                            <div className="p-8 border-t border-black/5 dark:border-white/5 bg-slate-50/50 dark:bg-slate-900/50">
+                                <p className="text-sm text-slate-500 mb-4 font-medium uppercase tracking-widest">Connect with us</p>
+                                <div className="flex items-center gap-4">
+                                    {/* Placeholder for social icons if needed */}
+                                    <div className="w-10 h-10 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 hover:text-cyan-500 transition-colors shadow-sm">
+                                        <Mic className="w-5 h-5" />
+                                    </div>
+                                    <div className="w-10 h-10 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 hover:text-cyan-500 transition-colors shadow-sm text-xs font-bold">
+                                        GA
+                                    </div>
+                                </div>
                             </div>
                         </motion.div>
                     </>
