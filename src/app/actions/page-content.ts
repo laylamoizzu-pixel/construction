@@ -1,10 +1,8 @@
 "use server";
 
-import { getAdminDb } from "@/lib/firebase-admin";
+import prisma from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { cache } from "react";
-
-const PAGES_COLLECTION = "pages";
 
 export interface PageContent {
     title: string;
@@ -66,20 +64,31 @@ export const getPageContent = cache(async function getPageContent(
     pageId: string
 ): Promise<PageContent> {
     try {
-        const adminDb = getAdminDb();
-        const docRef = adminDb.collection(PAGES_COLLECTION).doc(pageId);
-        const docSnap = await docRef.get();
+        const page = await prisma.page.findUnique({
+            where: { id: pageId }
+        });
 
-        if (!docSnap.exists) {
+        if (!page) {
             const defaultContent = DEFAULT_PAGES[pageId];
             if (defaultContent) {
-                await docRef.set(defaultContent);
+                await prisma.page.create({
+                    data: {
+                        id: pageId,
+                        title: defaultContent.title,
+                        content: defaultContent.content,
+                        lastUpdated: defaultContent.lastUpdated,
+                    }
+                });
                 return defaultContent;
             }
             return { title: "", content: "", lastUpdated: "" };
         }
 
-        return docSnap.data() as PageContent;
+        return {
+            title: page.title,
+            content: page.content,
+            lastUpdated: page.lastUpdated,
+        };
     } catch (error) {
         console.error(`Error fetching page content for ${pageId}:`, error);
         return DEFAULT_PAGES[pageId] || { title: "", content: "", lastUpdated: "" };
@@ -94,9 +103,20 @@ export async function updatePageContent(
     data: PageContent
 ): Promise<{ success: boolean; error?: string }> {
     try {
-        const adminDb = getAdminDb();
-        const docRef = adminDb.collection(PAGES_COLLECTION).doc(pageId);
-        await docRef.set(data);
+        await prisma.page.upsert({
+            where: { id: pageId },
+            update: {
+                title: data.title,
+                content: data.content,
+                lastUpdated: data.lastUpdated,
+            },
+            create: {
+                id: pageId,
+                title: data.title,
+                content: data.content,
+                lastUpdated: data.lastUpdated,
+            }
+        });
 
         revalidatePath(`/${pageId}`);
         revalidatePath(`/admin/content/${pageId}`);
