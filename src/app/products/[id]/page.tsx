@@ -1,4 +1,4 @@
-import { getProduct, getReviews, getCategories, getSiteContent, ProductDetailPageContent } from "@/app/actions";
+import { getProduct, getReviews, getCategories, getSiteContent, ProductDetailPageContent, Product } from "@/app/actions";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ChevronRight, MapPin, Phone, Clock, ShieldCheck, Check, Star } from "lucide-react";
@@ -35,7 +35,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     });
 }
 
-async function AvailabilitySection({ product }: { product: any }) {
+async function AvailabilitySection({ product }: { product: Product }) {
     const siteContent = await getSiteContent<ProductDetailPageContent>("product-detail-page");
 
     // Default fallbacks in case content is not set

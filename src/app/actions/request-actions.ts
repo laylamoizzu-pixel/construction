@@ -1,7 +1,7 @@
 "use server";
 
 import prisma from "@/lib/db";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 import { z } from "zod";
 
 // --- Types & Schema ---
@@ -42,6 +42,7 @@ export async function createProductRequest(data: ProductRequestInput) {
 
         // Revalidate admin requests page
         revalidatePath("/admin/requests");
+        revalidateTag("requests");
 
         return { success: true, id: doc.id };
     } catch (error) {
@@ -50,7 +51,7 @@ export async function createProductRequest(data: ProductRequestInput) {
     }
 }
 
-export async function getProductRequests(status?: string) {
+async function _fetchProductRequests(status?: string): Promise<ProductRequest[]> {
     try {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const where = status ? { status: status as any } : {};
@@ -65,6 +66,15 @@ export async function getProductRequests(status?: string) {
         console.error("Error fetching product requests from Postgres:", error);
         return [];
     }
+}
+
+export async function getProductRequests(status?: string): Promise<ProductRequest[]> {
+    const cachedFetch = unstable_cache(
+        () => _fetchProductRequests(status),
+        [`requests-${status || "all"}`],
+        { revalidate: 300, tags: ["requests"] }
+    );
+    return cachedFetch();
 }
 
 export async function updateRequestStatus(id: string, status: string, notes?: string) {
@@ -82,6 +92,7 @@ export async function updateRequestStatus(id: string, status: string, notes?: st
         });
 
         revalidatePath("/admin/requests");
+        revalidateTag("requests");
         return { success: true };
     } catch (error) {
         console.error("Error updating product request:", error);

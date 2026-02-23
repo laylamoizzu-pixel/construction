@@ -20,7 +20,7 @@ interface InfiniteProductGridProps {
         maxPrice?: number;
         sort?: string;
         rating?: number;
-        available?: boolean;
+        available?: boolean | "all";
     };
 }
 

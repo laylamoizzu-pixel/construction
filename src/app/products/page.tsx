@@ -52,7 +52,17 @@ async function ProductsHeader() {
     );
 }
 
-async function ProductsContent({ filters }: { filters: any }) {
+interface ProductFilters {
+    search?: string;
+    category?: string | string[];
+    subcategory?: string;
+    minPrice?: number;
+    maxPrice?: number;
+    available?: boolean | "all";
+    sort?: string;
+}
+
+async function ProductsContent({ filters }: { filters: ProductFilters }) {
     const productsPromise = getFilteredProducts(filters);
     const categoriesPromise = getCategories();
     const offersPromise = getOffers();

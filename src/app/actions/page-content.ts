@@ -1,8 +1,7 @@
 "use server";
 
 import prisma from "@/lib/db";
-import { revalidatePath } from "next/cache";
-import { cache } from "react";
+import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 
 export interface PageContent {
     title: string;
@@ -58,11 +57,9 @@ const DEFAULT_PAGES: Record<string, PageContent> = {
 };
 
 /**
- * Fetches page content from Firestore.
+ * Internal fetcher for page content.
  */
-export const getPageContent = cache(async function getPageContent(
-    pageId: string
-): Promise<PageContent> {
+async function _fetchPageContent(pageId: string): Promise<PageContent> {
     try {
         const page = await prisma.page.findUnique({
             where: { id: pageId }
@@ -93,7 +90,19 @@ export const getPageContent = cache(async function getPageContent(
         console.error(`Error fetching page content for ${pageId}:`, error);
         return DEFAULT_PAGES[pageId] || { title: "", content: "", lastUpdated: "" };
     }
-});
+}
+
+/**
+ * Fetches page content with caching.
+ */
+export async function getPageContent(pageId: string): Promise<PageContent> {
+    const cachedFetch = unstable_cache(
+        () => _fetchPageContent(pageId),
+        [`page-content-${pageId}`],
+        { revalidate: 300, tags: ["pages", `page-${pageId}`] }
+    );
+    return cachedFetch();
+}
 
 /**
  * Updates page content in Firestore.
@@ -120,6 +129,8 @@ export async function updatePageContent(
 
         revalidatePath(`/${pageId}`);
         revalidatePath(`/admin/content/${pageId}`);
+        revalidateTag("pages");
+        revalidateTag(`page-${pageId}`);
 
         return { success: true };
     } catch (error) {

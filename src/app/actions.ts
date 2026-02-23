@@ -345,7 +345,7 @@ export interface StaffMember {
     createdAt: Date;
 }
 
-export async function getStaffMembers(): Promise<StaffMember[]> {
+async function _fetchStaffMembers(): Promise<StaffMember[]> {
     try {
         const staff = await prisma.staff.findMany({
             orderBy: { createdAt: "desc" }
@@ -356,6 +356,11 @@ export async function getStaffMembers(): Promise<StaffMember[]> {
         return [];
     }
 }
+
+export const getStaffMembers = unstable_cache(_fetchStaffMembers, ["staff"], {
+    revalidate: 300,
+    tags: ["staff"],
+});
 
 export async function createStaffMember(email: string, name: string, role: string, permissions: string[]) {
     try {
@@ -369,6 +374,7 @@ export async function createStaffMember(email: string, name: string, role: strin
         });
 
         revalidatePath("/admin/staff");
+        revalidateTag("staff");
 
         return { success: true, id: staff.id };
     } catch (error: unknown) {
@@ -389,6 +395,7 @@ export async function updateStaffMember(id: string, data: Partial<StaffMember>) 
         });
 
         revalidatePath("/admin/staff");
+        revalidateTag("staff");
 
         return { success: true };
     } catch (error: unknown) {
@@ -404,6 +411,7 @@ export async function deleteStaffMember(id: string) {
         });
 
         revalidatePath("/admin/staff");
+        revalidateTag("staff");
 
         return { success: true };
     } catch (error: unknown) {
@@ -1021,6 +1029,11 @@ export async function addReview(productId: string, userId: string, userName: str
             });
         });
 
+        revalidatePath(`/products/${productId}`);
+        revalidateTag("products");
+        revalidateTag("reviews");
+        revalidateTag(`reviews-${productId}`);
+
         return { success: true };
     } catch (error: unknown) {
         return { success: false, error: error instanceof Error ? error.message : "Unknown error" };
@@ -1087,6 +1100,11 @@ export async function deleteReview(reviewId: string, productId: string, rating: 
             });
         });
 
+        revalidatePath(`/products/${productId}`);
+        revalidateTag("products");
+        revalidateTag("reviews");
+        revalidateTag(`reviews-${productId}`);
+
         return { success: true };
     } catch (error: unknown) {
         return { success: false, error: error instanceof Error ? error.message : "Unknown error" };
@@ -1123,7 +1141,7 @@ export interface AdminProfile {
     photoUrl?: string;
 }
 
-export async function getAdminProfile(email: string): Promise<AdminProfile | null> {
+async function _fetchAdminProfile(email: string): Promise<AdminProfile | null> {
     try {
         const staff = await prisma.staff.findUnique({
             where: { email }
@@ -1153,6 +1171,15 @@ export async function getAdminProfile(email: string): Promise<AdminProfile | nul
         console.error("Error fetching admin profile:", error);
         return null;
     }
+}
+
+export async function getAdminProfile(email: string): Promise<AdminProfile | null> {
+    const cachedFetch = unstable_cache(
+        () => _fetchAdminProfile(email),
+        [`admin-profile-${email}`],
+        { revalidate: 300, tags: ["admin-profile", `admin-profile-${email}`] }
+    );
+    return cachedFetch();
 }
 
 export async function updateAdminProfile(email: string, data: { name?: string; phone?: string }) {
@@ -1193,6 +1220,8 @@ export async function updateAdminProfile(email: string, data: { name?: string; p
 
         revalidatePath("/admin/settings");
         revalidatePath("/admin/staff");
+        revalidateTag("admin-profile");
+        revalidateTag("staff");
 
         return { success: true };
     } catch (error: unknown) {
@@ -1225,6 +1254,8 @@ export async function updateAdminEmail(currentEmail: string, newEmail: string) {
 
         revalidatePath("/admin/settings");
         revalidatePath("/admin/staff");
+        revalidateTag("admin-profile");
+        revalidateTag("staff");
 
         return { success: true };
     } catch (error: unknown) {
