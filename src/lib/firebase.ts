@@ -32,9 +32,7 @@ try {
     // Provide dummy objects to prevent import crashes, but functional calls will fail
     app = null;
     auth = {} as any;
-    db = {} as any;
     analytics = Promise.resolve(null);
-    storage = {} as any;
     perf = {} as any;
 }
 
