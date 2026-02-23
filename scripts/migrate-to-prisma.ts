@@ -125,6 +125,24 @@ async function migrateOffers() {
 async function migrateProducts() {
     console.log("\n📦 Migrating Products...");
 
+    // First ensure an 'Uncategorized' category exists for orphan products
+    const UNCAT_ID = "uncategorized-orphan";
+    await prisma.category.upsert({
+        where: { id: UNCAT_ID },
+        update: {},
+        create: {
+            id: UNCAT_ID,
+            name: "Uncategorized",
+            slug: "uncategorized",
+            order: 999,
+        }
+    });
+
+    // Cache valid category IDs to avoid repeated DB hits
+    const validCategoryIds = new Set(
+        (await prisma.category.findMany({ select: { id: true } })).map(c => c.id)
+    );
+
     // Fetch in batches to avoid memory issues with 10k+ products
     const BATCH_SIZE = 500;
     let lastDoc: admin.firestore.QueryDocumentSnapshot | null = null;
@@ -145,6 +163,11 @@ async function migrateProducts() {
 
         for (const doc of snapshot.docs) {
             const data = doc.data();
+
+            // Safe foreign keys check
+            const safeCategoryId = validCategoryIds.has(data.categoryId) ? data.categoryId : UNCAT_ID;
+            const safeSubcategoryId = validCategoryIds.has(data.subcategoryId) ? data.subcategoryId : null;
+
             try {
                 await prisma.product.upsert({
                     where: { id: doc.id },
@@ -153,8 +176,8 @@ async function migrateProducts() {
                         description: data.description || "",
                         price: data.price ?? 0,
                         originalPrice: data.originalPrice ?? null,
-                        categoryId: data.categoryId,
-                        subcategoryId: data.subcategoryId ?? null,
+                        categoryId: safeCategoryId,
+                        subcategoryId: safeSubcategoryId,
                         imageUrl: data.imageUrl ?? null,
                         images: data.images ?? [],
                         available: data.available ?? true,
@@ -170,8 +193,8 @@ async function migrateProducts() {
                         description: data.description || "",
                         price: data.price ?? 0,
                         originalPrice: data.originalPrice ?? null,
-                        categoryId: data.categoryId,
-                        subcategoryId: data.subcategoryId ?? null,
+                        categoryId: safeCategoryId,
+                        subcategoryId: safeSubcategoryId,
                         imageUrl: data.imageUrl ?? null,
                         images: data.images ?? [],
                         available: data.available ?? true,
