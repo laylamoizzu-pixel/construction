@@ -132,9 +132,7 @@ export async function importProductsFromExcel(formData: FormData) {
                 }
 
                 // Determine Ref (Update vs Create)
-                const existingId = existingProductMap.get(Name);
-                const isUpdate = !!existingId;
-
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 const productData: any = {
                     name: Name,
                     price: Number(Price),

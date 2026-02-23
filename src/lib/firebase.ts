@@ -1,10 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
 
 import { getAnalytics, isSupported } from "firebase/analytics";
-import { getStorage } from "firebase/storage";
 import { getPerformance } from "firebase/performance";
 
 const firebaseConfig = {
@@ -19,18 +17,14 @@ const firebaseConfig = {
 // Initialize Firebase for SSR compatibility
 let app: any;
 let auth: any;
-let db: any;
 let analytics: any;
-let storage: any;
 let perf: any;
 
 try {
     app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
     auth = getAuth(app);
-    db = getFirestore(app);
     // Initialize Analytics only in the browser
     analytics = typeof window !== "undefined" ? isSupported().then((yes: boolean) => yes ? getAnalytics(app) : null) : null;
-    storage = getStorage(app);
     // Initialize Performance only in the browser
     perf = typeof window !== "undefined" ? getPerformance(app) : null;
 } catch (error) {
@@ -44,4 +38,4 @@ try {
     perf = {} as any;
 }
 
-export { app, auth, db, analytics, storage, perf };
+export { app, auth, analytics, perf };

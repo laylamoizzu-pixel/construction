@@ -51,6 +51,7 @@ export async function createProductRequest(data: ProductRequestInput) {
 
 export async function getProductRequests(status?: string) {
     try {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const where = status ? { status: status as any } : {};
 
         const requests = await prisma.productRequest.findMany({
@@ -75,6 +76,7 @@ export async function updateRequestStatus(id: string, status: string, notes?: st
 
         await prisma.productRequest.update({
             where: { id },
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             data: updateData as any
         });
 

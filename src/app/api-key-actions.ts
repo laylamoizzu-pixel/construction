@@ -104,16 +104,15 @@ export async function addAPIKey(name: string, key: string, provider: LLMProvider
  */
 export async function updateAPIKey(id: string, data: { name?: string; key?: string; provider?: LLMProvider; isActive?: boolean }) {
     try {
-        const updateData: any = {};
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const updateData: any = { ...data };
 
         if (data.name !== undefined) updateData.name = data.name.trim();
-        if (data.provider !== undefined) updateData.provider = data.provider;
         if (data.key !== undefined) {
             updateData.key = data.key.trim();
             updateData.isValid = null;
             updateData.lastTested = null;
         }
-        if (data.isActive !== undefined) updateData.isActive = data.isActive;
 
         await prisma.apiKey.update({
             where: { id },

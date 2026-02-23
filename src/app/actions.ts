@@ -2,7 +2,6 @@
 // Force re-compile
 
 
-import { getAdminAuth } from "@/lib/firebase-admin";
 import { getSearchCache, CacheKeys } from "@/lib/search-cache";
 import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 import prisma from "@/lib/db";
@@ -357,9 +356,10 @@ export async function createStaffMember(email: string, name: string, role: strin
 
 export async function updateStaffMember(id: string, data: Partial<StaffMember>) {
     try {
-        const updateData = { ...data } as any;
-        delete updateData.id;
-        delete updateData.createdAt;
+        // Create a new object to avoid modifying the original 'data' and ensure type safety
+        const updateData: Omit<Partial<StaffMember>, 'id' | 'createdAt'> = { ...data };
+        delete (updateData as Partial<StaffMember>).id; // Cast to allow deletion if 'id' was explicitly in 'data'
+        delete (updateData as Partial<StaffMember>).createdAt; // Cast to allow deletion if 'createdAt' was explicitly in 'data'
 
         await prisma.staff.update({
             where: { id },
