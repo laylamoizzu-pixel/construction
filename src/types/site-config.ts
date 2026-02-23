@@ -54,6 +54,11 @@ export interface PromotionItem {
     active: boolean;
 }
 
+export interface HeaderLink {
+    label: string;
+    href: string;
+}
+
 export interface FooterLink {
     name: string;
     href: string;
@@ -176,7 +181,7 @@ export interface SiteConfig {
         whatsappUrl?: string;
         storeHours: string;
     };
-    headerLinks?: FooterLink[];
+    headerLinks?: HeaderLink[];
     system: SystemConfig;
     manifest: ManifestConfig;
     labels: FrontendLabels;
@@ -277,11 +282,11 @@ export const DEFAULT_SITE_CONFIG: SiteConfig = {
         storeHours: "Monday - Sunday\n10:00 AM - 10:00 PM",
     },
     headerLinks: [
-        { name: "Home", href: "/" },
-        { name: "Products", href: "/products" },
-        { name: "Departments", href: "/departments" },
-        { name: "Special Offers", href: "/offers" },
-        { name: "About Us", href: "/about" },
+        { label: "Home", href: "/" },
+        { label: "Products", href: "/products" },
+        { label: "Departments", href: "/departments" },
+        { label: "Special Offers", href: "/offers" },
+        { label: "About Us", href: "/about" },
     ],
     system: {
         maintenanceMode: false,

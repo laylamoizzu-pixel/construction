@@ -32,7 +32,7 @@ export default function Header() {
     const { config } = useSiteConfig();
 
     // Use dynamic header links from config, fallback to defaults
-    const NAV_LINKS = (config as typeof config & { headerLinks?: { label: string; href: string }[] })?.headerLinks || DEFAULT_NAV_LINKS;
+    const NAV_LINKS = config?.headerLinks || DEFAULT_NAV_LINKS;
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();

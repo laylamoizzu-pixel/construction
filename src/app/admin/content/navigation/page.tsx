@@ -40,7 +40,7 @@ export default function NavigationEditor() {
             const data = await getSiteConfig();
             setConfig(data);
             // Load header links from config, or use defaults
-            const links = (data as SiteConfig & { headerLinks?: NavLink[] }).headerLinks || [
+            const links = data.headerLinks || [
                 { label: "Home", href: "/" },
                 { label: "Products", href: "/products" },
                 { label: "Offers", href: "/offers" },

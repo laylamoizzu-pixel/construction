@@ -56,6 +56,16 @@ async function _fetchSiteConfig(): Promise<SiteConfig> {
             }];
         }
 
+        // Migrate headerLinks from { name, href } to { label, href }
+        if (mergedConfig.headerLinks) {
+            mergedConfig.headerLinks = mergedConfig.headerLinks.map((link: any) => {
+                if ('name' in link && !('label' in link)) {
+                    return { ...link, label: link.name };
+                }
+                return link;
+            });
+        }
+
         return mergedConfig;
     } catch (error) {
         console.error("Error fetching site config form Blob:", error);
