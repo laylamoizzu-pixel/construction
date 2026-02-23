@@ -65,6 +65,7 @@ export async function getRecommendations(
 
         // Step 2: Analyze user intent (1st LLM call)
         const intentResponse = await analyzeIntent(query, categories, request.messages);
+        console.log("[DEBUG] intentResponse:", JSON.stringify(intentResponse, null, 2));
         const intent = mapIntentResponse(intentResponse);
 
         // Handle general chat (greetings, etc.)

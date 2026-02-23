@@ -7,7 +7,7 @@ dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
 
 async function testAssistant(query: string) {
     console.log(`\n--- Testing Assistant with: "${query}" ---`);
-    const url = "http://localhost:3006/api/assistant/recommend";
+    const url = "http://localhost:3000/api/assistant/recommend";
 
     try {
         const response = await fetch(url, {

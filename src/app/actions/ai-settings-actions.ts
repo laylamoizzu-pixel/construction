@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { invalidateAIConfig } from "@/lib/ai-config";
 
 // ==================== AI SETTINGS TYPES ====================
@@ -78,6 +78,8 @@ export async function updateAISettings(data: Partial<AISettings>): Promise<{ suc
         }
 
         revalidatePath("/admin/ai-settings");
+        revalidatePath("/", "layout"); // Revalidate homepage so Shop by Vibe toggles immediately
+        revalidateTag("blob-llmo.json"); // Invalidates the fetch cache used by getBlobJson
 
         // Invalidate cached AI config so next LLM call picks up new settings
         invalidateAIConfig();
