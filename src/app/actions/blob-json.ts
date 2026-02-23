@@ -41,6 +41,7 @@ export async function updateBlobJson<T>(filename: string, data: T): Promise<{ su
             access: 'public',
             contentType: 'application/json',
             addRandomSuffix: false, // Important: keep the filename static so the URL is predictable
+            allowOverwrite: true,
         });
 
         return { success: true, url: blob.url };

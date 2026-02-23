@@ -673,9 +673,9 @@ async function _fetchProduct(id: string): Promise<Product | null> {
         });
         if (product) {
             return {
-                ...product as any,
+                ...product,
                 stockLevel: product.available ? Math.floor(Math.random() * 15) + 1 : 0,
-            } as Product;
+            } as unknown as Product;
         }
         return null;
     } catch (error) {
@@ -700,6 +700,7 @@ export async function createProduct(data: Record<string, unknown>) {
     try {
         const doc = await prisma.product.create({
             data: {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 ...data as any,
             }
         });
@@ -724,6 +725,7 @@ export async function updateProduct(id: string, data: Record<string, unknown>) {
         await prisma.product.update({
             where: { id },
             data: {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 ...data as any,
             }
         });
@@ -791,6 +793,7 @@ export async function bulkUpdateProducts(ids: string[], data: Record<string, unk
         await prisma.product.updateMany({
             where: { id: { in: ids } },
             data: {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 ...data as any,
             }
         });

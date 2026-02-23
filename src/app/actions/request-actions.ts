@@ -34,6 +34,7 @@ export async function createProductRequest(data: ProductRequestInput) {
 
         const doc = await prisma.productRequest.create({
             data: {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 ...validated as any,
                 status: "PENDING",
             }
