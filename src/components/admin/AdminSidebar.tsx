@@ -23,7 +23,8 @@ import {
     ClipboardList,
     Smartphone,
     Settings,
-    Image
+    Image,
+    Images
 } from "lucide-react";
 
 // Define generic type for nav items to avoid TS errors in the component
@@ -122,6 +123,7 @@ const navGroups: NavGroup[] = [
             { name: "Brand Identity", href: "/admin/content/branding", icon: Image, permission: "branding" },
             { name: "Mobile App", href: "/admin/branding", icon: Smartphone, permission: "branding" },
             { name: "SEO & Metadata", href: "/admin/content/seo", icon: Search, permission: "seo" },
+            { name: "Media Library", href: "/admin/media", icon: Images, permission: "branding" },
         ]
     },
     {
