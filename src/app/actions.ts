@@ -880,38 +880,14 @@ export async function addReview(productId: string, userId: string, userName: str
 
 async function _fetchReviews(productId: string): Promise<Review[]> {
     try {
-        const db = getAdminDb();
+        const reviews = await prisma.review.findMany({
+            where: { productId },
+            orderBy: { createdAt: "desc" },
+        });
 
-        try {
-            const snapshot = await db
-                .collection("reviews")
-                .where("productId", "==", productId)
-                .orderBy("createdAt", "desc")
-                .get();
-
-            return snapshot.docs.map((doc: admin.firestore.QueryDocumentSnapshot) => ({
-                id: doc.id,
-                ...doc.data(),
-                createdAt: (doc.data().createdAt as admin.firestore.Timestamp)?.toDate() || new Date(),
-            })) as Review[];
-        } catch (orderError) {
-            console.warn(`[getReviews] Ordered query failed, attempting fallback:`, orderError instanceof Error ? orderError.message : String(orderError));
-
-            const snapshot = await db
-                .collection("reviews")
-                .where("productId", "==", productId)
-                .get();
-
-            const reviews = snapshot.docs.map((doc: admin.firestore.QueryDocumentSnapshot) => ({
-                id: doc.id,
-                ...doc.data(),
-                createdAt: (doc.data().createdAt as admin.firestore.Timestamp)?.toDate() || new Date(),
-            })) as Review[];
-
-            return reviews.sort((a, b) => (b.createdAt?.getTime() || 0) - (a.createdAt?.getTime() || 0));
-        }
+        return reviews as unknown as Review[];
     } catch (error) {
-        console.error("[getReviews] Fatal error fetching reviews:", error);
+        console.error("Error fetching reviews from Postgres:", error);
         return [];
     }
 }
@@ -927,39 +903,37 @@ export async function getReviews(productId: string): Promise<Review[]> {
 
 export async function deleteReview(reviewId: string, productId: string, rating: number) {
     try {
-        const db = getAdminDb();
-        const reviewRef = db.collection("reviews").doc(reviewId);
-        const productRef = db.collection("products").doc(productId);
+        await prisma.$transaction(async (tx) => {
+            const product = await tx.product.findUnique({
+                where: { id: productId }
+            });
 
-        await db.runTransaction(async (t) => {
-            const productDoc = await t.get(productRef);
-            if (!productDoc.exists) {
+            if (!product) {
                 throw new Error("Product not found");
             }
 
-            const productData = productDoc.data() as Product;
-            const currentCount = productData.reviewCount || 0;
-            const currentRating = productData.averageRating || 0;
+            const currentCount = product.reviewCount || 0;
+            const currentRating = product.averageRating || 0;
 
             if (currentCount <= 1) {
-                t.update(productRef, {
-                    reviewCount: 0,
-                    averageRating: 0,
-                    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+                await tx.product.update({
+                    where: { id: productId },
+                    data: { reviewCount: 0, averageRating: 0 }
                 });
             } else {
                 const newCount = currentCount - 1;
                 // Calculate new average: (oldAvg * oldCount - ratingToRemove) / newCount
                 const newAverage = ((currentRating * currentCount) - rating) / newCount;
 
-                t.update(productRef, {
-                    reviewCount: newCount,
-                    averageRating: newAverage,
-                    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+                await tx.product.update({
+                    where: { id: productId },
+                    data: { reviewCount: newCount, averageRating: newAverage }
                 });
             }
 
-            t.delete(reviewRef);
+            await tx.review.delete({
+                where: { id: reviewId }
+            });
         });
 
         return { success: true };
@@ -972,19 +946,18 @@ export async function deleteReview(reviewId: string, productId: string, rating: 
 
 export async function getAllReviews(): Promise<(Review & { productName?: string })[]> {
     try {
-        const snapshot = await getAdminDb().collection("reviews").orderBy("createdAt", "desc").limit(50).get();
-        // To show product name, we might need to fetch products or just show ID. 
-        // For efficiency, let's just return reviews and handle product name on frontend or fetch distinct products locally.
-        // A better approach for admin is to fetch basic product info or map it.
-        // Let's just return reviews for now.
+        const reviews = await prisma.review.findMany({
+            orderBy: { createdAt: "desc" },
+            take: 50,
+            include: { product: { select: { name: true } } }
+        });
 
-        return snapshot.docs.map((doc: admin.firestore.QueryDocumentSnapshot) => ({
-            id: doc.id,
-            ...doc.data(),
-            createdAt: (doc.data().createdAt as admin.firestore.Timestamp)?.toDate() || new Date(),
-        })) as Review[];
+        return reviews.map(r => ({
+            ...r,
+            productName: r.product?.name
+        })) as unknown as (Review & { productName?: string })[];
     } catch (error) {
-        console.error("Error fetching all reviews:", error);
+        console.error("Error fetching all reviews from Postgres:", error);
         return [];
     }
 }
