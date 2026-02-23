@@ -612,20 +612,22 @@ async function _fetchProducts(
 
 export async function getProducts(
     categoryId?: string,
-    available?: boolean,
+    available: boolean | "all" = true, // Default to true (storefront), "all" to bypass
     limitCount: number = 20,
     startAfterId?: string,
     subcategoryId?: string
 ): Promise<Product[]> {
+    const filterValue = available === "all" ? undefined : available;
+
     // Paginated queries cannot be cached because cursors are dynamic
     if (startAfterId) {
-        return _fetchProducts(categoryId, available, limitCount, startAfterId, subcategoryId);
+        return _fetchProducts(categoryId, filterValue, limitCount, startAfterId, subcategoryId);
     }
 
-    const cacheKey = `products-${categoryId || "all"}-${available ?? "any"}-${limitCount}-${subcategoryId || "none"}`;
+    const cacheKey = `products-${categoryId || "all"}-${available}-${limitCount}-${subcategoryId || "none"}`;
 
     const cachedFetch = unstable_cache(
-        () => _fetchProducts(categoryId, available, limitCount, undefined, subcategoryId),
+        () => _fetchProducts(categoryId, filterValue, limitCount, undefined, subcategoryId),
         [cacheKey],
         { revalidate: 300, tags: ["products"] }
     );
@@ -643,15 +645,17 @@ export async function getFilteredProducts(filters: {
     subcategory?: string;
     minPrice?: number;
     maxPrice?: number;
-    available?: boolean;
+    available?: boolean | "all";
     sort?: string;
 }): Promise<Product[]> {
     // Build the Prisma where clause from the filter parameters
     const where: Prisma.ProductWhereInput = {};
 
-    // 1. Availability — only include if explicitly requested
-    if (filters.available === true) {
+    // 1. Availability — default to true (Storefront behavior)
+    if (filters.available === undefined) {
         where.available = true;
+    } else if (filters.available !== "all") {
+        where.available = filters.available;
     }
 
     // 2. Category / Subcategory
@@ -750,21 +754,17 @@ export async function searchProducts(
     searchQuery: string,
     categoryId?: string,
     subcategoryId?: string,
-    available?: boolean // Changed from includeUnavailable to available
+    available: boolean | "all" = true // Default to true
 ): Promise<Product[]> {
     // For admin/global search, we want to fetch a larger batch to find items
     // Using 2000 to be safe, filtering in memory is fast
-    const allProducts = await getProducts(undefined, undefined, 2000);
+    const allProducts = await getProducts(undefined, "all", 2000);
 
     const searchLower = searchQuery.toLowerCase().trim();
 
     // 1. Filter by Availability
-    // If available is true -> ensure p.available is true
-    // If available is false -> ensure p.available is false
-    // If available is undefined -> allow all
     let filtered = allProducts;
-
-    if (available !== undefined) {
+    if (available !== "all") {
         filtered = filtered.filter(p => p.available === available);
     }
 
@@ -913,6 +913,7 @@ export async function deleteProducts(ids: string[]) {
         revalidatePath("/");
         revalidatePath("/products");
         revalidatePath("/admin/content/products");
+        revalidateTag("products");
 
         return { success: true };
     } catch (error: unknown) {
@@ -937,6 +938,7 @@ export async function bulkUpdateProducts(ids: string[], data: Record<string, unk
         revalidatePath("/");
         revalidatePath("/products");
         revalidatePath("/admin/content/products");
+        revalidateTag("products");
 
         return { success: true, count: ids.length };
     } catch (error: unknown) {
@@ -959,6 +961,8 @@ export async function toggleProductAvailability(id: string, available: boolean) 
         revalidatePath("/products");
         revalidatePath("/admin/content/products");
         revalidatePath(`/products/${id}`);
+        revalidateTag("products");
+        revalidateTag(`product-${id}`);
 
         return { success: true };
     } catch (error: unknown) {

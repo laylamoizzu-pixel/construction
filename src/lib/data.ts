@@ -269,21 +269,23 @@ async function _fetchProducts(
 
 export async function getProducts(
     categoryId?: string,
-    available?: boolean,
+    available: boolean | "all" = true,
     limitCount: number = 50,
     startAfterId?: string,
     subcategoryId?: string
 ): Promise<Product[]> {
+    const filterValue = available === "all" ? undefined : available;
+
     // Paginated queries (startAfterId) cannot be cached because the cursor is dynamic
     if (startAfterId) {
-        return _fetchProducts(categoryId, available, limitCount, startAfterId, subcategoryId);
+        return _fetchProducts(categoryId, filterValue, limitCount, startAfterId, subcategoryId);
     }
 
     // Build a stable cache key
-    const cacheKey = `products-${categoryId || "all"}-${available ?? "any"}-${limitCount}-${subcategoryId || "none"}`;
+    const cacheKey = `products-${categoryId || "all"}-${available}-${limitCount}-${subcategoryId || "none"}`;
 
     const cachedFetch = unstable_cache(
-        () => _fetchProducts(categoryId, available, limitCount, undefined, subcategoryId),
+        () => _fetchProducts(categoryId, filterValue, limitCount, undefined, subcategoryId),
         [cacheKey],
         { revalidate: 300, tags: ["products"] }
     );
@@ -296,11 +298,16 @@ import { Prisma } from "@prisma/client";
 export async function searchProducts(
     searchQuery: string,
     categoryId?: string,
-    subcategoryId?: string
+    subcategoryId?: string,
+    available: boolean | "all" = true // Default to true
 ): Promise<Product[]> {
     try {
         const searchLower = searchQuery.toLowerCase().trim();
-        const where: Prisma.ProductWhereInput = { available: true };
+        const where: Prisma.ProductWhereInput = {};
+
+        if (available !== "all") {
+            where.available = available;
+        }
 
         if (categoryId) where.categoryId = categoryId;
         if (subcategoryId) where.subcategoryId = subcategoryId;

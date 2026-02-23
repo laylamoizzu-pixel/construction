@@ -166,7 +166,7 @@ export default function ProductsManager() {
         }
 
         // Correctly parse available filter: "true" -> true, "false" -> false, "" -> undefined
-        const availableFilter = filterAvailable === "" ? undefined : filterAvailable === "true";
+        const availableFilter = filterAvailable === "" ? "all" : filterAvailable === "true";
 
         let data: Product[] = [];
 
