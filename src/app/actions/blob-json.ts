@@ -1,6 +1,7 @@
 "use server";
 
 import { put } from "@vercel/blob";
+import { revalidateTag } from "next/cache";
 
 /**
  * A generic utility to store and retrieve JSON configuration files
@@ -43,6 +44,9 @@ export async function updateBlobJson<T>(filename: string, data: T): Promise<{ su
             addRandomSuffix: false, // Important: keep the filename static so the URL is predictable
             allowOverwrite: true,
         });
+
+        // CRITICAL: Invalidate the underlying fetch cache for this specific blob
+        revalidateTag(`blob-${filename}`);
 
         return { success: true, url: blob.url };
     } catch (error) {
