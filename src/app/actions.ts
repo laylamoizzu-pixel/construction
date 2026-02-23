@@ -651,7 +651,15 @@ export async function getFilteredProducts(filters: {
     } else if (filters.category) {
         const cats = Array.isArray(filters.category) ? filters.category : [filters.category];
         if (cats.length > 0) {
-            where.categoryId = { in: cats };
+            // A selected ID might be a parent category OR a subcategory.
+            // Match products where EITHER field matches one of the selected IDs.
+            where.AND = where.AND || [];
+            (where.AND as any[]).push({
+                OR: [
+                    { categoryId: { in: cats } },
+                    { subcategoryId: { in: cats } }
+                ]
+            });
         }
     }
 
