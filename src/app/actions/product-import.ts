@@ -1,6 +1,6 @@
 "use server";
 
-import { getAdminDb, admin } from "@/lib/firebase-admin";
+import prisma from "@/lib/db";
 import { revalidatePath } from "next/cache";
 
 // Type definition for Excel row
@@ -27,27 +27,24 @@ export async function importProductsFromExcel(formData: FormData) {
             return { success: false, error: "Excel file is empty" };
         }
 
-        const db = getAdminDb();
-
         // 1. Prefetch master data (Categories & Offers)
-        const [categoriesSnap, offersSnap] = await Promise.all([
-            db.collection("categories").get(),
-            db.collection("offers").get()
+        const [categories, offers] = await Promise.all([
+            prisma.category.findMany(),
+            prisma.offer.findMany()
         ]);
 
         const categoryMap = new Map<string, string>(); // Name(lowercase) -> ID
         const offerMap = new Map<string, string>(); // Title(lowercase) -> ID
 
-        categoriesSnap.docs.forEach(doc => {
-            const data = doc.data();
-            if (data.name) categoryMap.set(data.name.toLowerCase(), doc.id);
-            categoryMap.set(doc.id, doc.id);
+        categories.forEach(cat => {
+            if (cat.name) categoryMap.set(cat.name.toLowerCase(), cat.id);
+            categoryMap.set(cat.id, cat.id);
+            if (cat.slug) categoryMap.set(cat.slug.toLowerCase(), cat.id);
         });
 
-        offersSnap.docs.forEach(doc => {
-            const data = doc.data();
-            if (data.title) offerMap.set(data.title.toLowerCase(), doc.id);
-            offerMap.set(doc.id, doc.id);
+        offers.forEach(off => {
+            if (off.title) offerMap.set(off.title.toLowerCase(), off.id);
+            offerMap.set(off.id, off.id);
         });
 
         // 2. Prepare data & Identify duplicates
@@ -73,123 +70,111 @@ export async function importProductsFromExcel(formData: FormData) {
             return { success: false, error: "No valid products found. Ensure columns 'Name' and 'Price' exist." };
         }
 
-        // 3. Batched check for existing products (Firestore limit: 30 items per 'in' query)
+        // 3. Batched check for existing products
         const productNameArray = Array.from(productNames);
-        const existingProductMap = new Map<string, admin.firestore.DocumentReference>(); // Name -> Ref
+        const existingProductMap = new Map<string, string>(); // Name -> Id
 
-        const CHUNK_SIZE = 30;
+        const CHUNK_SIZE = 500;
         const nameChunks = [];
         for (let i = 0; i < productNameArray.length; i += CHUNK_SIZE) {
             nameChunks.push(productNameArray.slice(i, i + CHUNK_SIZE));
         }
 
         await Promise.all(nameChunks.map(async (chunk) => {
-            const snapshot = await db.collection("products").where("name", "in", chunk).get();
-            snapshot.docs.forEach(doc => {
-                existingProductMap.set(doc.data().name, doc.ref);
+            const products = await prisma.product.findMany({
+                where: { name: { in: chunk } },
+                select: { id: true, name: true }
+            });
+            products.forEach(p => {
+                existingProductMap.set(p.name, p.id);
             });
         }));
 
-        // 4. Batch Writes
-        let batch = db.batch();
-        let operationCount = 0;
-        const BATCH_SIZE = 450; // Firestore limit 500
+        // 4. Operations
         let totalImported = 0;
 
-        for (const row of validRows) {
-            const Name = String(row['name']).trim();
-            const Price = row['price'];
+        // We'll process in sequential chunks to avoid connection pool exhaustion
+        const PROCESS_CHUNK = 50;
+        for (let i = 0; i < validRows.length; i += PROCESS_CHUNK) {
+            const chunk = validRows.slice(i, i + PROCESS_CHUNK);
+            const operations = chunk.map(row => {
+                const Name = String(row['name']).trim();
+                const Price = row['price'];
 
-            // Extract other fields
-            const Category = row['category'];
-            const Subcategory = row['subcategory'];
-            const OfferTitle = row['offertitle'];
-            const Description = row['description'];
-            const OriginalPrice = row['originalprice'];
-            const ImageUrl = row['imageurl'];
-            const Available = row['available'];
-            const Featured = row['featured'];
-            const Tags = row['tags'];
+                // Extract other fields
+                const Category = row['category'];
+                const Subcategory = row['subcategory'];
+                const OfferTitle = row['offertitle'];
+                const Description = row['description'];
+                const OriginalPrice = row['originalprice'];
+                const ImageUrl = row['imageurl'];
+                const Available = row['available'];
+                const Featured = row['featured'];
+                const Tags = row['tags'];
 
-            // Resolve References
-            let categoryId = "";
-            let subcategoryId = "";
+                // Resolve References
+                let categoryId = "";
+                let subcategoryId = "";
 
-            if (Category) {
-                const catKey = String(Category).trim().toLowerCase();
-                if (categoryMap.has(catKey)) categoryId = categoryMap.get(catKey)!;
-            }
-            if (Subcategory) {
-                const subKey = String(Subcategory).trim().toLowerCase();
-                if (categoryMap.has(subKey)) subcategoryId = categoryMap.get(subKey)!;
-            }
+                if (Category) {
+                    const catKey = String(Category).trim().toLowerCase();
+                    if (categoryMap.has(catKey)) categoryId = categoryMap.get(catKey)!;
+                }
+                if (Subcategory) {
+                    const subKey = String(Subcategory).trim().toLowerCase();
+                    if (categoryMap.has(subKey)) subcategoryId = categoryMap.get(subKey)!;
+                }
 
-            let offerId = "";
-            if (OfferTitle) {
-                const offerKey = String(OfferTitle).trim().toLowerCase();
-                if (offerMap.has(offerKey)) offerId = offerMap.get(offerKey)!;
-            }
+                let offerId = "";
+                if (OfferTitle) {
+                    const offerKey = String(OfferTitle).trim().toLowerCase();
+                    if (offerMap.has(offerKey)) offerId = offerMap.get(offerKey)!;
+                }
 
-            // Determine Ref (Update vs Create)
-            let productRef: admin.firestore.DocumentReference;
-            const existingRef = existingProductMap.get(Name);
-            const isUpdate = !!existingRef;
+                // Determine Ref (Update vs Create)
+                const existingId = existingProductMap.get(Name);
+                const isUpdate = !!existingId;
 
-            if (isUpdate) {
-                productRef = existingRef!;
-            } else {
-                productRef = db.collection("products").doc();
-            }
+                const productData: any = {
+                    name: Name,
+                    price: Number(Price),
+                    categoryId: categoryId || "uncategorized-orphan",
+                    available: Available === true || String(Available).toLowerCase() === "true",
+                };
 
-            const productData: Record<string, unknown> = {
-                name: Name,
-                price: Number(Price),
-                categoryId: categoryId || "",
-                available: Available === true || String(Available).toLowerCase() === "true",
-                updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-            };
+                // Conditional updates for optional fields
+                if (Description || !isUpdate) productData.description = Description || "";
+                if (OriginalPrice || !isUpdate) productData.originalPrice = OriginalPrice ? Number(OriginalPrice) : null;
+                if (subcategoryId || !isUpdate) productData.subcategoryId = subcategoryId || null;
 
-            // Conditional updates for optional fields
-            if (Description || !isUpdate) productData.description = Description || "";
-            if (OriginalPrice || !isUpdate) productData.originalPrice = OriginalPrice ? Number(OriginalPrice) : null;
-            if (subcategoryId || !isUpdate) productData.subcategoryId = subcategoryId || null;
+                if (ImageUrl) {
+                    productData.imageUrl = ImageUrl;
+                    productData.images = [ImageUrl];
+                } else if (!isUpdate) {
+                    productData.imageUrl = null;
+                    productData.images = [];
+                }
 
-            if (ImageUrl) {
-                productData.imageUrl = ImageUrl;
-                productData.images = [ImageUrl];
-            } else if (!isUpdate) {
-                productData.imageUrl = "";
-                productData.images = [];
-            }
+                if (Featured !== undefined || !isUpdate) productData.featured = Featured === true || String(Featured).toLowerCase() === "true";
+                if (offerId || !isUpdate) productData.offerId = offerId || null;
+                if (Tags || !isUpdate) productData.tags = Tags ? String(Tags).split(',').map((s: string) => s.trim()) : [];
 
-            if (Featured !== undefined || !isUpdate) productData.featured = Featured === true || String(Featured).toLowerCase() === "true";
-            if (offerId || !isUpdate) productData.offerId = offerId || null;
-            if (Tags || !isUpdate) productData.tags = Tags ? String(Tags).split(',').map((s: string) => s.trim()) : [];
+                if (isUpdate) {
+                    return prisma.product.update({
+                        where: { id: existingId },
+                        data: productData
+                    });
+                } else {
+                    productData.reviewCount = 0;
+                    productData.averageRating = 0;
+                    return prisma.product.create({
+                        data: productData
+                    });
+                }
+            });
 
-            if (!isUpdate) {
-                productData.createdAt = admin.firestore.FieldValue.serverTimestamp();
-                productData.reviewCount = 0;
-                productData.averageRating = 0;
-            }
-
-            if (isUpdate) {
-                batch.update(productRef, productData as Partial<admin.firestore.DocumentData>);
-            } else {
-                batch.set(productRef, productData);
-            }
-
-            operationCount++;
-            totalImported++;
-
-            if (operationCount >= BATCH_SIZE) {
-                await batch.commit();
-                batch = db.batch();
-                operationCount = 0;
-            }
-        }
-
-        if (operationCount > 0) {
-            await batch.commit();
+            await prisma.$transaction(operations);
+            totalImported += operations.length;
         }
 
         revalidatePath("/products");

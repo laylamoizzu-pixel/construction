@@ -1,4 +1,4 @@
-import { getAdminDb } from "@/lib/firebase-admin";
+import prisma from "@/lib/db";
 import { revalidatePath } from "next/cache";
 
 export const dynamic = "force-dynamic";
@@ -9,10 +9,12 @@ async function addRole(formData: FormData) {
     const role = formData.get("role") as string;
     if (!email || !role) return;
 
-    await getAdminDb().collection("staff").add({
-        email,
-        role: role.toLowerCase(),
-        createdAt: new Date(),
+    await prisma.staff.create({
+        data: {
+            email,
+            name: email.split("@")[0] || "User",
+            role: role.toLowerCase(),
+        }
     });
     revalidatePath("/debug");
 }
@@ -21,14 +23,16 @@ async function removeRole(formData: FormData) {
     "use server";
     const id = formData.get("id") as string;
     if (!id) return;
-    await getAdminDb().collection("staff").doc(id).delete();
+    await prisma.staff.delete({
+        where: { id }
+    });
     revalidatePath("/debug");
 }
 
 export default async function DebugPage() {
-    const db = getAdminDb();
-    const snapshot = await db.collection("staff").orderBy("createdAt", "desc").get();
-    const staff = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const staff = await prisma.staff.findMany({
+        orderBy: { createdAt: "desc" }
+    });
 
     return (
         <div className="p-10 max-w-4xl mx-auto">

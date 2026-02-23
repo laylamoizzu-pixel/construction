@@ -2,7 +2,7 @@
 // Force re-compile
 
 
-import { getAdminAuth, admin } from "@/lib/firebase-admin";
+import { getAdminAuth } from "@/lib/firebase-admin";
 import { getSearchCache, CacheKeys } from "@/lib/search-cache";
 import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 import prisma from "@/lib/db";
@@ -844,36 +844,37 @@ export interface Review {
 
 export async function addReview(productId: string, userId: string, userName: string, rating: number, comment: string) {
     try {
-        const db = getAdminDb();
-        const reviewRef = db.collection("reviews").doc();
-        const productRef = db.collection("products").doc(productId);
+        await prisma.$transaction(async (tx) => {
+            const product = await tx.product.findUnique({
+                where: { id: productId }
+            });
 
-        await db.runTransaction(async (t) => {
-            const productDoc = await t.get(productRef);
-            if (!productDoc.exists) {
+            if (!product) {
                 throw new Error("Product not found");
             }
 
-            const productData = productDoc.data() as Product;
-            const currentCount = productData.reviewCount || 0;
-            const currentRating = productData.averageRating || 0;
+            const currentCount = product.reviewCount || 0;
+            const currentRating = product.averageRating || 0;
 
             const newCount = currentCount + 1;
             const newAverage = ((currentRating * currentCount) + rating) / newCount;
 
-            t.set(reviewRef, {
-                productId,
-                userId,
-                userName,
-                rating,
-                comment,
-                createdAt: admin.firestore.FieldValue.serverTimestamp(),
+            await tx.review.create({
+                data: {
+                    productId,
+                    userId,
+                    userName,
+                    rating,
+                    comment
+                }
             });
 
-            t.update(productRef, {
-                reviewCount: newCount,
-                averageRating: newAverage,
-                updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+            await tx.product.update({
+                where: { id: productId },
+                data: {
+                    reviewCount: newCount,
+                    averageRating: newAverage
+                }
             });
         });
 
