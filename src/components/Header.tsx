@@ -180,14 +180,20 @@ export default function Header() {
             >
                 {/* Logo */}
                 <Link href="/" className="flex items-center gap-2 group relative z-50">
-                    <div className={`relative transition-all duration-500 ${isScrolled ? 'w-32 h-8' : 'w-40 h-10'} group-hover:scale-105`}>
-                        <Image
-                            src={config.branding.logoUrl || "/logo.png"}
-                            alt={config.branding.siteName || "Smart Avenue"}
-                            fill
-                            className="object-contain"
-                            priority
-                        />
+                    <div className={`relative transition-all duration-500 ${isScrolled ? 'w-12 h-12' : 'w-20 h-20'} group-hover:scale-110 flex items-center justify-center`}>
+                        {/* Premium Glow/Ring Effect */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-cyan-400/20 to-lime-400/20 rounded-full blur-md group-hover:from-cyan-400/40 group-hover:to-lime-400/40 transition-all duration-500" />
+                        <div className="absolute inset-0 border border-white/20 dark:border-white/10 rounded-full shadow-lg shadow-black/5" />
+
+                        <div className="relative w-full h-full p-1">
+                            <Image
+                                src={config.branding.logoUrl || "/logo.png"}
+                                alt={config.branding.siteName || "Smart Avenue"}
+                                fill
+                                className="object-contain drop-shadow-xl"
+                                priority
+                            />
+                        </div>
                     </div>
                 </Link>
 
@@ -374,12 +380,13 @@ export default function Header() {
                         >
                             <div className="flex items-center justify-between p-6 border-b border-black/5 dark:border-white/5">
                                 <Link href="/" onClick={() => setIsMenuOpen(false)}>
-                                    <div className="relative w-32 h-8">
+                                    <div className="relative w-24 h-24 flex items-center justify-center">
+                                        <div className="absolute inset-0 bg-gradient-to-r from-cyan-400/20 to-lime-400/20 rounded-full blur-lg" />
                                         <Image
                                             src={config.branding.logoUrl || "/logo.png"}
                                             alt={config.branding.siteName || "Smart Avenue"}
                                             fill
-                                            className="object-contain"
+                                            className="object-contain drop-shadow-2xl"
                                         />
                                     </div>
                                 </Link>
