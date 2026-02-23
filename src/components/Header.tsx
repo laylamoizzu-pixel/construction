@@ -163,21 +163,25 @@ export default function Header() {
     }, []);
 
     return (
+    return (
         <header
-            className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 border-b ${config.theme.navbarOpaque ? 'shadow-md' : 'shadow-sm'}`}
-            style={{
-                backgroundColor: config.theme.navbarOpaque
-                    ? (config.theme.navbarColor || config.theme.backgroundColor || "#ffffff")
-                    : (isScrolled ? (config.theme.navbarColor || config.theme.backgroundColor || "#ffffff") : "transparent"),
-                color: config.theme.navbarTextColor || config.theme.textColor || "#0f172a",
-                borderColor: isScrolled || config.theme.navbarOpaque ? "rgba(229, 231, 235, 0.5)" : "transparent",
-                backdropFilter: config.theme.navbarOpaque ? "none" : (isScrolled ? "blur(8px)" : "none")
-            }}
+            className={`fixed left-0 right-0 z-50 transition-all duration-500 ease-in-out ${isScrolled
+                    ? "top-4 flex justify-center px-4"
+                    : "top-0 w-full"
+                }`}
         >
-            <div className="container mx-auto px-4 md:px-6 flex items-center justify-between">
+            <div
+                className={`flex items-center justify-between transition-all duration-500 ease-in-out ${isScrolled
+                        ? "container max-w-5xl bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-full border border-white/20 shadow-2xl px-6 py-2"
+                        : "w-full bg-white/80 dark:bg-slate-950/80 backdrop-blur-md border-b border-slate-200/50 dark:border-slate-800/50 px-4 md:px-8 py-4"
+                    }`}
+                style={{
+                    color: config.theme.navbarTextColor || config.theme.textColor || "#0f172a",
+                }}
+            >
                 {/* Logo */}
                 <Link href="/" className="flex items-center gap-2 group relative z-50">
-                    <div className="relative w-40 h-10 transition-transform duration-300 group-hover:scale-105">
+                    <div className={`relative transition-all duration-500 ${isScrolled ? 'w-32 h-8' : 'w-40 h-10'} group-hover:scale-105`}>
                         <Image
                             src={config.branding.logoUrl || "/logo.png"}
                             alt={config.branding.siteName || "Smart Avenue"}
@@ -189,25 +193,33 @@ export default function Header() {
                 </Link>
 
                 {/* Desktop Navigation */}
-                <nav className="hidden md:flex items-center gap-1 bg-white/5 backdrop-blur-sm px-2 py-1.5 rounded-full border border-white/10 shadow-sm">
+                <nav className="hidden lg:flex items-center gap-1">
                     {NAV_LINKS.map((link) => {
                         const isActive = pathname === link.href;
+                        const isSpecial = link.label === "Special Offers" || link.label === "Offers";
                         return (
                             <Link
                                 key={link.href}
                                 href={link.href}
-                                className={`relative px-5 py-2 text-sm font-medium rounded-full transition-all duration-300 opacity-90 hover:opacity-100`}
-                                style={{ color: isActive ? undefined : (config.theme.navbarTextColor || config.theme.textColor) }}
+                                className={`relative px-4 py-2 text-sm font-medium rounded-full transition-all duration-300 ${isActive ? "text-white" : "hover:text-cyan-500 dark:hover:text-cyan-400"
+                                    }`}
+                                style={{ color: isActive ? "#ffffff" : isSpecial ? "#06b6d4" : (config.theme.navbarTextColor || config.theme.textColor) }}
                             >
                                 {isActive && (
                                     <motion.div
                                         layoutId="nav-pill"
-                                        className="absolute inset-0 bg-gradient-to-r from-brand-blue to-accent rounded-full shadow-lg shadow-brand-blue/20"
+                                        className="absolute inset-0 bg-gradient-to-r from-cyan-400 to-lime-400 rounded-full shadow-lg shadow-cyan-500/20"
                                         initial={false}
-                                        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                                        transition={{ type: "spring", stiffness: 350, damping: 30 }}
                                     />
                                 )}
                                 <span className="relative z-10">{link.label}</span>
+                                {isSpecial && !isActive && (
+                                    <span className="absolute -top-1 -right-1 flex h-2 w-2">
+                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
+                                        <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span>
+                                    </span>
+                                )}
                             </Link>
                         );
                     })}
@@ -233,8 +245,8 @@ export default function Header() {
                                             value={searchQuery}
                                             onChange={(e) => setSearchQuery(e.target.value)}
                                             disabled={isAnalyzing}
-                                            placeholder={isAnalyzing ? "Analyzing image..." : (config.labels?.placeholders?.search || config.branding.searchPlaceholder || "Search collection...")}
-                                            className="w-full bg-slate-100/50 border border-slate-200 text-slate-800 text-sm rounded-full pl-4 pr-20 py-2 focus:outline-none focus:ring-2 focus:ring-brand-blue/50 disabled:bg-slate-50 disabled:text-slate-500"
+                                            placeholder={isAnalyzing ? "Analyzing..." : "Search collections..."}
+                                            className="w-full bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 text-sm rounded-full pl-4 pr-20 py-2 focus:outline-none focus:ring-2 focus:ring-cyan-500/30 transition-all"
                                             onBlur={() => !searchQuery && !isAnalyzing && setIsSearchOpen(false)}
                                         />
 
