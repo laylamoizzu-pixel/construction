@@ -30,7 +30,7 @@ export default function CloudinaryWidget({ cloudName, apiKey }: CloudinaryWidget
                 try {
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     (widgetRef.current as any).destroy?.();
-                } catch (_) { /* ignore */ }
+                } catch { /* ignore */ }
             }
 
             try {

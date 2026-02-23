@@ -53,7 +53,7 @@ const GEMINI_MODEL = "gemini-2.0-flash";
 export interface LLMCallOptions {
     temperature?: number;
     maxTokens?: number;
-    provider?: LLMProvider;
+    provider?: LLMProvider | "auto";
     model?: string;
 }
 
@@ -437,7 +437,7 @@ async function callLLM(prompt: string, provider: LLMProvider | "auto" = "auto", 
  * LLM call with dynamic config from admin settings.
  * Loads temperature, maxTokens, and provider priority from Firestore.
  */
-async function callLLMWithConfig(prompt: string, overrideProvider?: LLMProvider, overrideModel?: string): Promise<string> {
+async function callLLMWithConfig(prompt: string, overrideProvider?: LLMProvider | "auto", overrideModel?: string): Promise<string> {
     const config = await getAIConfig();
 
     const options: LLMCallOptions = {
@@ -502,7 +502,7 @@ function parseJSONFromResponse<T>(response: string): T {
 /**
  * Call LLM expecting JSON output. Retries once with a stricter prompt on parse failure.
  */
-async function callLLMForJSON<T>(prompt: string, provider?: LLMProvider, model?: string): Promise<T> {
+async function callLLMForJSON<T>(prompt: string, provider?: LLMProvider | "auto", model?: string): Promise<T> {
     // First attempt
     try {
         const response = await callLLMWithConfig(prompt, provider, model);
@@ -528,7 +528,7 @@ export async function analyzeIntent(
     query: string,
     categories: Category[],
     messages: Array<{ role: string; content: string }> = [],
-    provider: LLMProvider = "auto"
+    provider: LLMProvider | "auto" = "auto"
 ): Promise<LLMIntentResponse> {
     const categoryList = categories.map(c => `- ${c.name} (ID: ${c.id})`).join("\n");
     const validCategoryIds = new Set(categories.map(c => c.id));
@@ -558,7 +558,7 @@ export async function rankProducts(
     query: string,
     products: Product[],
     intent: LLMIntentResponse,
-    provider: LLMProvider = "google"
+    provider: LLMProvider | "auto" = "google"
 ): Promise<Array<{ productId: string; matchScore: number; highlights: string[]; whyRecommended: string }>> {
     if (products.length === 0) {
         return [];
@@ -621,7 +621,7 @@ export async function generateSummary(
     query: string,
     recommendationCount: number,
     topProductName: string | null,
-    provider: LLMProvider = "google"
+    provider: LLMProvider | "auto" = "google"
 ): Promise<string> {
     if (recommendationCount === 0) {
         return "I couldn't find specific products matching your requirements. Could you provide more details about what you're looking for?";
@@ -649,7 +649,7 @@ Write a brief, friendly 1-2 sentence summary to introduce the recommendations. B
 export async function generateNoProductFoundResponse(
     query: string,
     intent: LLMIntentResponse,
-    provider: LLMProvider = "google"
+    provider: LLMProvider | "auto" = "google"
 ): Promise<string> {
     const config = await getAIConfig();
     const persona = config.personaName;
@@ -689,7 +689,7 @@ export async function handleMissingProduct(
     query: string,
     intent: LLMIntentResponse,
     messages: Array<{ role: string; content: string }> = [],
-    provider: LLMProvider = "google"
+    provider: LLMProvider | "auto" = "google"
 ): Promise<{
     action: "request" | "ask_details";
     response: string;
