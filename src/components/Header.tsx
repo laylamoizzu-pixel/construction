@@ -163,17 +163,16 @@ export default function Header() {
     }, []);
 
     return (
-    return (
         <header
             className={`fixed left-0 right-0 z-50 transition-all duration-500 ease-in-out ${isScrolled
-                    ? "top-4 flex justify-center px-4"
-                    : "top-0 w-full"
+                ? "top-4 flex justify-center px-4"
+                : "top-0 w-full"
                 }`}
         >
             <div
                 className={`flex items-center justify-between transition-all duration-500 ease-in-out ${isScrolled
-                        ? "container max-w-5xl bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-full border border-white/20 shadow-2xl px-6 py-2"
-                        : "w-full bg-white/80 dark:bg-slate-950/80 backdrop-blur-md border-b border-slate-200/50 dark:border-slate-800/50 px-4 md:px-8 py-4"
+                    ? "container max-w-5xl bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-full border border-white/20 shadow-2xl px-6 py-2"
+                    : "w-full bg-white/80 dark:bg-slate-950/80 backdrop-blur-md border-b border-slate-200/50 dark:border-slate-800/50 px-4 md:px-8 py-4"
                     }`}
                 style={{
                     color: config.theme.navbarTextColor || config.theme.textColor || "#0f172a",
@@ -226,7 +225,7 @@ export default function Header() {
                 </nav>
 
                 {/* Right Actions */}
-                <div className="hidden md:flex items-center gap-3">
+                <div className="hidden lg:flex items-center gap-3">
                     {/* Search Bar */}
                     <div className={`relative flex items-center transition-all duration-300 ${isSearchOpen ? "w-72" : "w-10"}`}>
                         <AnimatePresence>
@@ -304,28 +303,28 @@ export default function Header() {
                 </div>
 
                 {/* Header Actions (Mobile) */}
-                <div className="flex items-center gap-2 md:hidden">
+                <div className="flex lg:hidden items-center gap-2">
                     <button
                         onClick={() => {
                             setIsSearchOpen(!isSearchOpen);
-                            setIsMenuOpen(false); // Close menu if search is opened
+                            setIsMenuOpen(false);
                         }}
-                        className="p-2 rounded-lg transition-colors"
-                        style={{ color: config.theme.navbarTextColor || config.theme.textColor }}
+                        className={`p-2 rounded-full transition-all duration-300 ${isScrolled ? 'bg-cyan-500/10 text-cyan-500' : ''}`}
+                        style={{ color: isScrolled ? undefined : (config.theme.navbarTextColor || config.theme.textColor) }}
                         aria-label={isSearchOpen ? "Close search" : "Open search"}
                     >
-                        <Search className="w-6 h-6" />
+                        <Search className="w-5 h-5" />
                     </button>
                     <button
                         onClick={() => {
                             setIsMenuOpen(!isMenuOpen);
-                            setIsSearchOpen(false); // Close search if menu is opened
+                            setIsSearchOpen(false);
                         }}
-                        className="p-2 rounded-lg transition-colors"
-                        style={{ color: config.theme.navbarTextColor || config.theme.textColor }}
+                        className={`p-2 rounded-full transition-all duration-300 ${isScrolled ? 'bg-cyan-500/10 text-cyan-500' : ''}`}
+                        style={{ color: isScrolled ? undefined : (config.theme.navbarTextColor || config.theme.textColor) }}
                         aria-label={isMenuOpen ? "Close menu" : "Open menu"}
                     >
-                        {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                        {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
                     </button>
                 </div>
             </div>
@@ -337,7 +336,7 @@ export default function Header() {
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
-                        className="absolute inset-0 bg-white z-50 flex items-center px-4 md:hidden"
+                        className="absolute inset-0 bg-white dark:bg-slate-900 z-50 flex items-center px-4 lg:hidden"
                     >
                         <form onSubmit={handleSearch} className="w-full relative flex items-center gap-2">
                             <Search className="w-5 h-5 text-slate-400 absolute left-3" />
@@ -377,21 +376,31 @@ export default function Header() {
                             initial={{ x: '100%' }}
                             animate={{ x: 0 }}
                             exit={{ x: '100%' }}
-                            transition={{ type: "spring", damping: 25, stiffness: 200 }}
-                            className="fixed inset-y-0 right-0 w-[80%] max-w-sm bg-white/80 backdrop-blur-xl shadow-2xl z-[60] md:hidden flex flex-col pt-24 border-l border-white/20"
+                            transition={{ type: "spring", damping: 28, stiffness: 220 }}
+                            className="fixed inset-y-0 right-0 w-[85%] max-w-sm bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl shadow-2xl z-[60] lg:hidden flex flex-col pt-24 border-l border-white/10"
                         >
-                            <div className="px-6 space-y-2">
-                                {NAV_LINKS.map((link) => (
-                                    <Link
-                                        key={link.href}
-                                        href={link.href}
-                                        onClick={() => setIsMenuOpen(false)}
-                                        className={`block py-4 text-xl font-medium border-b border-black/5 ${pathname === link.href ? "text-brand-blue" : "text-slate-800"
-                                            }`}
-                                    >
-                                        {link.label}
-                                    </Link>
-                                ))}
+                            <div className="px-8 space-y-4">
+                                {NAV_LINKS.map((link, idx) => {
+                                    const isActive = pathname === link.href;
+                                    return (
+                                        <motion.div
+                                            key={link.href}
+                                            initial={{ opacity: 0, x: 20 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            transition={{ delay: 0.1 + idx * 0.05 }}
+                                        >
+                                            <Link
+                                                href={link.href}
+                                                onClick={() => setIsMenuOpen(false)}
+                                                className={`group flex items-center justify-between py-3 text-lg font-semibold transition-colors ${isActive ? "text-cyan-500" : "text-slate-800 dark:text-slate-200"
+                                                    }`}
+                                            >
+                                                <span>{link.label}</span>
+                                                <div className={`h-1.5 w-1.5 rounded-full bg-cyan-500 transition-all duration-300 ${isActive ? 'opacity-100 scale-100' : 'opacity-0 scale-0 group-hover:opacity-50 group-hover:scale-100'}`} />
+                                            </Link>
+                                        </motion.div>
+                                    );
+                                })}
                             </div>
                         </motion.div>
                     </>
