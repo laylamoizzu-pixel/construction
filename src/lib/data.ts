@@ -1,7 +1,7 @@
 import "server-only";
 import { unstable_cache } from "next/cache";
 import prisma from "@/lib/db";
-import { getEdgeConfigValue, hasEdgeConfigKey } from "@/lib/edge-config";
+import { getBlobJson } from "@/app/actions/blob-json";
 
 // ==================== OFFERS ====================
 
@@ -107,21 +107,20 @@ export interface HighlightsContent {
 // Get site content by section - cached per section 
 async function _fetchSiteContent<T>(section: string): Promise<T | null> {
     try {
-        // ALWAYS serve from Edge Config for ultra-low latency.
-        // Firebase fallback removed as part of white-label migration.
-        const edgeConfigKey = `siteContent_${section}`;
-        const hasKey = await hasEdgeConfigKey(edgeConfigKey);
+        // Read directly from Vercel Blob to stay in sync with Admin Panel
+        const filename = `site_content_${section}.json`;
 
-        if (hasKey) {
-            const edgeData = await getEdgeConfigValue<T>(edgeConfigKey);
-            if (edgeData) {
-                return edgeData;
-            }
+        // We pass null as defaultData to know if it actually exists or failed
+        const blobData = await getBlobJson<T | null>(filename, null);
+
+        if (blobData) {
+            return blobData;
         }
-        console.warn(`[Content] Warning: Site content section '${section}' not found in Edge Config.`);
+
+        console.warn(`[Content] Warning: Site content section '${section}' not found in Vercel Blob.`);
         return null;
     } catch (error) {
-        console.error(`Error fetching ${section} content from Edge Config:`, error);
+        console.error(`Error fetching ${section} content from Vercel Blob:`, error);
         return null;
     }
 }
