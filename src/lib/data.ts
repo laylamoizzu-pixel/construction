@@ -1,6 +1,7 @@
 import "server-only";
-import { getAdminDb, admin } from "@/lib/firebase-admin";
 import { unstable_cache } from "next/cache";
+import prisma from "@/lib/db";
+import { getEdgeConfigValue, hasEdgeConfigKey } from "@/lib/edge-config";
 
 // ==================== OFFERS ====================
 
@@ -14,14 +15,12 @@ export interface Offer {
 
 async function _fetchOffers(): Promise<Offer[]> {
     try {
-        const snapshot = await getAdminDb().collection("offers").orderBy("createdAt", "desc").get();
-        return snapshot.docs.map((doc: admin.firestore.QueryDocumentSnapshot) => ({
-            id: doc.id,
-            ...doc.data(),
-            createdAt: (doc.data().createdAt as admin.firestore.Timestamp)?.toDate() || new Date(),
-        })) as Offer[];
+        const offers = await prisma.offer.findMany({
+            orderBy: { createdAt: "desc" },
+        });
+        return offers as unknown as Offer[];
     } catch (error) {
-        console.error("Error fetching offers:", error);
+        console.error("Error fetching offers from Postgres:", error);
         return [];
     }
 }
@@ -35,25 +34,24 @@ export const getOffers = unstable_cache(_fetchOffers, ["offers"], {
 
 export async function testFirebaseConnection() {
     try {
-        const snapshot = await getAdminDb().listCollections();
-        console.log("Successfully connected to Firebase!");
+        await prisma.$queryRaw`SELECT 1`;
+        console.log("Successfully connected to Postgres!");
         return {
             success: true,
-            message: "Connected to Firebase!",
-            collections: snapshot.map((col: admin.firestore.CollectionReference) => col.id)
+            message: "Connected to Neon Postgres!",
         };
     } catch (error: unknown) {
         const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
-        console.error("Firebase Connection Error:", errorMessage);
+        console.error("Postgres Connection Error:", errorMessage);
         return {
             success: false,
-            message: "Failed to connect to Firebase. Check your .env.local file.",
+            message: "Failed to connect to Neon. Check your DATABASE_URL in .env.local.",
             error: errorMessage
         };
     }
 }
 
-// ==================== SITE CONTENT ====================
+// ==================== SITE CONTENT (Vercel Blob / Edge Config) ====================
 
 export interface HeroContent {
     title: string;
@@ -106,37 +104,24 @@ export interface HighlightsContent {
     description: string;
 }
 
-import { getEdgeConfigValue, hasEdgeConfigKey } from "@/lib/edge-config";
-
-// Get site content by section - cached per section (with Edge Config fallback)
+// Get site content by section - cached per section 
 async function _fetchSiteContent<T>(section: string): Promise<T | null> {
     try {
-        // 1. Try fetching from Edge Config first for ultra-low latency
+        // ALWAYS serve from Edge Config for ultra-low latency.
+        // Firebase fallback removed as part of white-label migration.
         const edgeConfigKey = `siteContent_${section}`;
         const hasKey = await hasEdgeConfigKey(edgeConfigKey);
 
         if (hasKey) {
-            console.log(`[Edge Config] Serving ${section} from edge`);
             const edgeData = await getEdgeConfigValue<T>(edgeConfigKey);
             if (edgeData) {
                 return edgeData;
             }
         }
-
-        // 2. Fallback to Firestore
-        console.log(`[Firestore] Serving ${section} from database`);
-        const doc = await getAdminDb().collection("siteContent").doc(section).get();
-        if (doc.exists) {
-            const data = doc.data();
-            return {
-                ...data,
-                createdAt: (data?.createdAt as admin.firestore.Timestamp)?.toDate()?.toISOString() || undefined,
-                updatedAt: (data?.updatedAt as admin.firestore.Timestamp)?.toDate()?.toISOString() || undefined,
-            } as T;
-        }
+        console.warn(`[Content] Warning: Site content section '${section}' not found in Edge Config.`);
         return null;
     } catch (error) {
-        console.error(`Error fetching ${section} content:`, error);
+        console.error(`Error fetching ${section} content from Edge Config:`, error);
         return null;
     }
 }
@@ -153,11 +138,8 @@ export async function getSiteContent<T>(section: string): Promise<T | null> {
 // Get all departments
 async function _fetchDepartments(): Promise<DepartmentContent[]> {
     try {
-        const doc = await getAdminDb().collection("siteContent").doc("departments").get();
-        if (doc.exists) {
-            return doc.data()?.items || [];
-        }
-        return [];
+        const data = await getSiteContent<{ items: DepartmentContent[] }>("departments");
+        return data?.items || [];
     } catch (error) {
         console.error("Error fetching departments:", error);
         return [];
@@ -181,17 +163,8 @@ export interface StaffMember {
 }
 
 async function _fetchStaffMembers(): Promise<StaffMember[]> {
-    try {
-        const snapshot = await getAdminDb().collection("staff").orderBy("createdAt", "desc").get();
-        return snapshot.docs.map((doc: admin.firestore.QueryDocumentSnapshot) => ({
-            id: doc.id,
-            ...doc.data(),
-            createdAt: (doc.data().createdAt as admin.firestore.Timestamp)?.toDate() || new Date(),
-        })) as StaffMember[];
-    } catch (error) {
-        console.error("Error fetching staff:", error);
-        return [];
-    }
+    console.warn("getStaffMembers called, but Staff hasn't been migrated to Postgres/Clerk yet.");
+    return [];
 }
 
 export const getStaffMembers = unstable_cache(_fetchStaffMembers, ["staff-members"], {
@@ -199,23 +172,10 @@ export const getStaffMembers = unstable_cache(_fetchStaffMembers, ["staff-member
     tags: ["staff"],
 });
 
-// Get staff role by email - not cached (auth-sensitive, fast single lookup)
 export async function getStaffRole(email: string): Promise<string | null> {
-    try {
-        // Hardcoded super admin
-        if (email === "admin@smartavenue99.com") return "Admin";
-
-        const snapshot = await getAdminDb().collection("staff").where("email", "==", email).limit(1).get();
-        if (!snapshot.empty) {
-            const data = snapshot.docs[0].data();
-            // Capitalize first letter for consistency (admin -> Admin)
-            return data.role ? data.role.charAt(0).toUpperCase() + data.role.slice(1) : "Staff";
-        }
-        return null;
-    } catch (error) {
-        console.error("Error fetching staff role:", error);
-        return null;
-    }
+    if (email === "admin@smartavenue99.com") return "Admin";
+    console.warn("getStaffRole called, but Staff hasn't been migrated to Clerk yet.");
+    return null;
 }
 
 // ==================== CATEGORIES ====================
@@ -231,14 +191,12 @@ export interface Category {
 
 async function _fetchCategories(): Promise<Category[]> {
     try {
-        const snapshot = await getAdminDb().collection("categories").orderBy("order", "asc").get();
-        return snapshot.docs.map((doc: admin.firestore.QueryDocumentSnapshot) => ({
-            id: doc.id,
-            ...doc.data(),
-            createdAt: (doc.data().createdAt as admin.firestore.Timestamp)?.toDate() || new Date(),
-        })) as Category[];
+        const categories = await prisma.category.findMany({
+            orderBy: { order: "asc" },
+        });
+        return categories as Category[];
     } catch (error) {
-        console.error("Error fetching categories:", error);
+        console.error("Error fetching categories from Postgres:", error);
         return [];
     }
 }
@@ -268,7 +226,6 @@ export interface Product {
     reviewCount?: number;
     createdAt: Date;
     updatedAt?: Date;
-    // Allow extra fields from Firestore
     [key: string]: unknown;
 }
 
@@ -280,34 +237,33 @@ async function _fetchProducts(
     subcategoryId?: string
 ): Promise<Product[]> {
     try {
-        let query: admin.firestore.Query = getAdminDb().collection("products");
+        // Build Prisma query
+        const where: any = {};
+        if (categoryId) where.categoryId = categoryId;
+        if (subcategoryId) where.subcategoryId = subcategoryId;
+        if (available !== undefined) where.available = available;
 
-        if (categoryId) {
-            query = query.where("categoryId", "==", categoryId);
-        }
-
-        if (available !== undefined) {
-            query = query.where("available", "==", available);
-        }
-
-        query = query.orderBy("createdAt", "desc");
+        let cursorDetails = {};
+        let skipAmount = 0;
 
         if (startAfterId) {
-            const startAfterDoc = await getAdminDb().collection("products").doc(startAfterId).get();
-            if (startAfterDoc.exists) {
-                query = query.startAfter(startAfterDoc);
-            }
+            // Prisma pagination using cursor
+            cursorDetails = { cursor: { id: startAfterId } };
+            skipAmount = 1; // Skip the cursor itself
         }
 
-        const snapshot = await query.limit(limitCount).get();
-        return snapshot.docs.map((doc: admin.firestore.QueryDocumentSnapshot) => ({
-            id: doc.id,
-            ...doc.data(),
-            createdAt: (doc.data().createdAt as admin.firestore.Timestamp)?.toDate() || new Date(),
-            updatedAt: (doc.data().updatedAt as admin.firestore.Timestamp)?.toDate() || undefined,
-        })) as Product[];
+        const products = await prisma.product.findMany({
+            where,
+            orderBy: { createdAt: "desc" },
+            take: limitCount,
+            ...cursorDetails,
+            skip: skipAmount
+        });
+
+        // Prisma returns Decimal/Date which maps cleanly to our interface
+        return products as unknown as Product[];
     } catch (error) {
-        console.error("Error fetching products:", error);
+        console.error("Error fetching products from Postgres:", error);
         return [];
     }
 }
@@ -324,7 +280,7 @@ export async function getProducts(
         return _fetchProducts(categoryId, available, limitCount, startAfterId, subcategoryId);
     }
 
-    // Build a stable cache key from the arguments
+    // Build a stable cache key
     const cacheKey = `products-${categoryId || "all"}-${available ?? "any"}-${limitCount}-${subcategoryId || "none"}`;
 
     const cachedFetch = unstable_cache(
@@ -341,53 +297,42 @@ export async function searchProducts(
     categoryId?: string,
     subcategoryId?: string
 ): Promise<Product[]> {
-    // Get all products (uses cache) and filter available ones in-memory
-    const allProducts = await getProducts();
+    try {
+        const searchLower = searchQuery.toLowerCase().trim();
+        const where: any = { available: true };
 
-    const searchLower = searchQuery.toLowerCase().trim();
+        if (categoryId) where.categoryId = categoryId;
+        if (subcategoryId) where.subcategoryId = subcategoryId;
 
-    // Filter to available products first
-    let filtered = allProducts.filter(p => p.available);
+        // Use Prisma's explicit OR for text search
+        if (searchLower) {
+            where.OR = [
+                { name: { contains: searchLower, mode: 'insensitive' } },
+                { description: { contains: searchLower, mode: 'insensitive' } },
+                { tags: { has: searchLower } }
+            ];
+        }
 
-    // Text search filter
-    if (searchLower) {
-        filtered = filtered.filter(p =>
-            p.name.toLowerCase().includes(searchLower) ||
-            (p.description && p.description.toLowerCase().includes(searchLower)) ||
-            (p.tags && p.tags.some(tag => tag.toLowerCase().includes(searchLower)))
-        );
+        const products = await prisma.product.findMany({
+            where,
+            take: 100 // Cap search results
+        });
+
+        return products as unknown as Product[];
+    } catch (error) {
+        console.error("Error searching products in Postgres:", error);
+        return [];
     }
-
-    // Category filter
-    if (categoryId) {
-        filtered = filtered.filter(p =>
-            p.categoryId === categoryId || p.subcategoryId === categoryId
-        );
-    }
-
-    // Subcategory filter
-    if (subcategoryId) {
-        filtered = filtered.filter(p => p.subcategoryId === subcategoryId);
-    }
-
-    return filtered;
 }
 
 async function _fetchProduct(id: string): Promise<Product | null> {
     try {
-        const doc = await getAdminDb().collection("products").doc(id).get();
-        if (doc.exists) {
-            const data = doc.data();
-            return {
-                id: doc.id,
-                ...data,
-                createdAt: (data?.createdAt as admin.firestore.Timestamp)?.toDate() || new Date(),
-                updatedAt: (data?.updatedAt as admin.firestore.Timestamp)?.toDate() || undefined,
-            } as Product;
-        }
-        return null;
+        const product = await prisma.product.findUnique({
+            where: { id }
+        });
+        return product as unknown as Product | null;
     } catch (error) {
-        console.error("Error fetching product:", error);
+        console.error("Error fetching product from Postgres:", error);
         return null;
     }
 }
@@ -415,19 +360,13 @@ export interface Review {
 
 async function _fetchReviews(productId: string): Promise<Review[]> {
     try {
-        const snapshot = await getAdminDb()
-            .collection("reviews")
-            .where("productId", "==", productId)
-            .orderBy("createdAt", "desc")
-            .get();
-
-        return snapshot.docs.map((doc: admin.firestore.QueryDocumentSnapshot) => ({
-            id: doc.id,
-            ...doc.data(),
-            createdAt: (doc.data().createdAt as admin.firestore.Timestamp)?.toDate() || new Date(),
-        })) as Review[];
+        const reviews = await prisma.review.findMany({
+            where: { productId },
+            orderBy: { createdAt: "desc" },
+        });
+        return reviews as unknown as Review[];
     } catch (error) {
-        console.error("Error fetching reviews:", error);
+        console.error("Error fetching reviews from Postgres:", error);
         return [];
     }
 }
@@ -443,15 +382,18 @@ export async function getReviews(productId: string): Promise<Review[]> {
 
 async function _fetchAllReviews(): Promise<(Review & { productName?: string })[]> {
     try {
-        const snapshot = await getAdminDb().collection("reviews").orderBy("createdAt", "desc").limit(50).get();
+        const reviews = await prisma.review.findMany({
+            orderBy: { createdAt: "desc" },
+            take: 50,
+            include: { product: { select: { name: true } } }
+        });
 
-        return snapshot.docs.map((doc: admin.firestore.QueryDocumentSnapshot) => ({
-            id: doc.id,
-            ...doc.data(),
-            createdAt: (doc.data().createdAt as admin.firestore.Timestamp)?.toDate() || new Date(),
-        })) as Review[];
+        return reviews.map(r => ({
+            ...r,
+            productName: r.product?.name
+        })) as unknown as (Review & { productName?: string })[];
     } catch (error) {
-        console.error("Error fetching all reviews:", error);
+        console.error("Error fetching all reviews from Postgres:", error);
         return [];
     }
 }
