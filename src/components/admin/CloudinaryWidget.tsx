@@ -58,8 +58,7 @@ export default function CloudinaryWidget({ cloudName, apiKey }: CloudinaryWidget
                         insertHandler: (data: unknown) => {
                             console.log("Cloudinary asset selected:", data);
                         },
-                    },
-                    "#cloudinary-media-library-container"
+                    }
                 );
 
                 // For inline widgets, we still need to call show() to actually render/activate it 

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/auth-context";
-import { getCategories, createCategory, deleteCategory, Category } from "@/app/actions";
+import { getCategories, createCategory, deleteCategory, updateCategory, Category } from "@/app/actions";
 import {
     Loader2,
     ArrowLeft,
@@ -11,7 +11,9 @@ import {
     Trash2,
     Folder,
     FolderOpen,
-    ChevronRight
+    ChevronRight,
+    Pencil,
+    Save
 } from "lucide-react";
 import Link from "next/link";
 
@@ -24,6 +26,7 @@ export default function CategoriesManager() {
     const [newName, setNewName] = useState("");
     const [parentId, setParentId] = useState<string | null>(null);
     const [showForm, setShowForm] = useState(false);
+    const [editingId, setEditingId] = useState<string | null>(null);
 
     useEffect(() => {
         if (!authLoading && !user) {
@@ -44,19 +47,47 @@ export default function CategoriesManager() {
         setLoading(false);
     };
 
-    const handleCreate = async (e: React.FormEvent) => {
+    const handleSave = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!newName.trim()) return;
 
         setSaving(true);
-        const result = await createCategory(newName, parentId);
+
+        let result;
+        if (editingId) {
+            const slug = newName.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+            result = await updateCategory(editingId, {
+                name: newName,
+                slug,
+                parentId,
+            });
+        } else {
+            result = await createCategory(newName, parentId);
+        }
+
         if (result.success) {
             setNewName("");
             setParentId(null);
             setShowForm(false);
+            setEditingId(null);
             await loadCategories();
         }
         setSaving(false);
+    };
+
+    const handleEditClick = (category: Category) => {
+        setNewName(category.name);
+        setParentId(category.parentId);
+        setEditingId(category.id);
+        setShowForm(true);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    };
+
+    const handleCancel = () => {
+        setShowForm(false);
+        setEditingId(null);
+        setNewName("");
+        setParentId(null);
     };
 
     const handleDelete = async (id: string) => {
@@ -95,7 +126,14 @@ export default function CategoriesManager() {
                         <p className="text-gray-500">Manage product sections and subsections</p>
                     </div>
                     <button
-                        onClick={() => setShowForm(!showForm)}
+                        onClick={() => {
+                            if (showForm && !editingId) {
+                                handleCancel();
+                            } else {
+                                handleCancel();
+                                setShowForm(true);
+                            }
+                        }}
                         className="flex items-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg transition-colors"
                     >
                         <Plus className="w-5 h-5" />
@@ -103,11 +141,13 @@ export default function CategoriesManager() {
                     </button>
                 </div>
 
-                {/* Create form */}
+                {/* Create/Edit form */}
                 {showForm && (
-                    <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-6">
-                        <h3 className="font-semibold text-gray-800 mb-4">Add New Category</h3>
-                        <form onSubmit={handleCreate} className="space-y-4">
+                    <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-6 transition-all animate-in fade-in slide-in-from-top-4">
+                        <h3 className="font-semibold text-gray-800 mb-4">
+                            {editingId ? "Edit Category" : "Add New Category"}
+                        </h3>
+                        <form onSubmit={handleSave} className="space-y-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Category Name</label>
                                 <input
@@ -127,7 +167,7 @@ export default function CategoriesManager() {
                                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                                 >
                                     <option value="">None (Main Category)</option>
-                                    {mainCategories.map(cat => (
+                                    {mainCategories.filter(cat => cat.id !== editingId).map(cat => (
                                         <option key={cat.id} value={cat.id}>{cat.name}</option>
                                     ))}
                                 </select>
@@ -135,18 +175,18 @@ export default function CategoriesManager() {
                             <div className="flex justify-end gap-3">
                                 <button
                                     type="button"
-                                    onClick={() => setShowForm(false)}
-                                    className="px-4 py-2 text-gray-600 hover:text-gray-800"
+                                    onClick={handleCancel}
+                                    className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     type="submit"
                                     disabled={saving}
-                                    className="flex items-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg disabled:opacity-50"
+                                    className="flex items-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg disabled:opacity-50 transition-colors"
                                 >
-                                    {saving && <Loader2 className="w-4 h-4 animate-spin" />}
-                                    Save Category
+                                    {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                                    {editingId ? "Save Changes" : "Save Category"}
                                 </button>
                             </div>
                         </form>
@@ -188,12 +228,22 @@ export default function CategoriesManager() {
                                                     {subs.length} subcategories
                                                 </p>
                                             </div>
-                                            <button
-                                                onClick={() => handleDelete(category.id)}
-                                                className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
-                                            >
-                                                <Trash2 className="w-5 h-5" />
-                                            </button>
+                                            <div className="flex gap-2">
+                                                <button
+                                                    onClick={() => handleEditClick(category)}
+                                                    className="p-2 text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"
+                                                    title="Edit category"
+                                                >
+                                                    <Pencil className="w-5 h-5" />
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDelete(category.id)}
+                                                    className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                                    title="Delete category"
+                                                >
+                                                    <Trash2 className="w-5 h-5" />
+                                                </button>
+                                            </div>
                                         </div>
                                         {subs.map(sub => (
                                             <div key={sub.id} className="p-4 pl-14 flex items-center gap-4 bg-gray-50/50 border-l-4 border-amber-200">
@@ -201,12 +251,22 @@ export default function CategoriesManager() {
                                                 <div className="flex-1">
                                                     <h4 className="text-gray-700">{sub.name}</h4>
                                                 </div>
-                                                <button
-                                                    onClick={() => handleDelete(sub.id)}
-                                                    className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
-                                                >
-                                                    <Trash2 className="w-4 h-4" />
-                                                </button>
+                                                <div className="flex gap-2">
+                                                    <button
+                                                        onClick={() => handleEditClick(sub)}
+                                                        className="p-2 text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"
+                                                        title="Edit subcategory"
+                                                    >
+                                                        <Pencil className="w-4 h-4" />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleDelete(sub.id)}
+                                                        className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                                        title="Delete subcategory"
+                                                    >
+                                                        <Trash2 className="w-4 h-4" />
+                                                    </button>
+                                                </div>
                                             </div>
                                         ))}
                                     </div>

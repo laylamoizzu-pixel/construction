@@ -72,7 +72,9 @@ export default function StaffManagement() {
     const loadStaff = async () => {
         setLoading(true);
         const data = await getStaffMembers();
-        setStaff(data);
+        // Filter out admin users to prevent accidental deletion
+        const nonAdminStaff = data.filter(member => member.role !== "admin");
+        setStaff(nonAdminStaff);
         setLoading(false);
     };
 

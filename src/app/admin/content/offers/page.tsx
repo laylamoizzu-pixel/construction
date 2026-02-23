@@ -3,14 +3,15 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/auth-context";
-import { createOffer, getOffers, deleteOffer, Offer } from "@/app/actions";
+import { createOffer, getOffers, deleteOffer, updateOffer, Offer } from "@/app/actions";
 import {
     Loader2,
     ArrowLeft,
     Plus,
     Trash2,
     Tag,
-    Save
+    Save,
+    Pencil
 } from "lucide-react";
 import Link from "next/link";
 
@@ -22,6 +23,7 @@ export default function OffersEditor() {
     const [saving, setSaving] = useState(false);
     const [newOffer, setNewOffer] = useState({ title: "", discount: "", description: "" });
     const [showForm, setShowForm] = useState(false);
+    const [editingId, setEditingId] = useState<string | null>(null);
 
     useEffect(() => {
         if (!authLoading && !user) {
@@ -42,16 +44,45 @@ export default function OffersEditor() {
         setLoading(false);
     };
 
-    const handleCreateOffer = async (e: React.FormEvent) => {
+    const handleSaveOffer = async (e: React.FormEvent) => {
         e.preventDefault();
         setSaving(true);
-        const result = await createOffer(newOffer.title, newOffer.discount, newOffer.description);
+
+        let result;
+        if (editingId) {
+            result = await updateOffer(editingId, {
+                title: newOffer.title,
+                discount: newOffer.discount,
+                description: newOffer.description,
+            });
+        } else {
+            result = await createOffer(newOffer.title, newOffer.discount, newOffer.description);
+        }
+
         if (result.success) {
             setNewOffer({ title: "", discount: "", description: "" });
             setShowForm(false);
+            setEditingId(null);
             await loadOffers();
         }
         setSaving(false);
+    };
+
+    const handleEditClick = (offer: Offer) => {
+        setNewOffer({
+            title: offer.title,
+            discount: offer.discount,
+            description: offer.description,
+        });
+        setEditingId(offer.id);
+        setShowForm(true);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    };
+
+    const handleCancel = () => {
+        setShowForm(false);
+        setEditingId(null);
+        setNewOffer({ title: "", discount: "", description: "" });
     };
 
     const handleDeleteOffer = async (id: string) => {
@@ -82,7 +113,14 @@ export default function OffersEditor() {
                         <p className="text-gray-500">Create and manage promotional offers</p>
                     </div>
                     <button
-                        onClick={() => setShowForm(!showForm)}
+                        onClick={() => {
+                            if (showForm && !editingId) {
+                                handleCancel();
+                            } else {
+                                handleCancel();
+                                setShowForm(true);
+                            }
+                        }}
                         className="flex items-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg transition-colors"
                     >
                         <Plus className="w-5 h-5" />
@@ -90,11 +128,13 @@ export default function OffersEditor() {
                     </button>
                 </div>
 
-                {/* Create form */}
+                {/* Create/Edit form */}
                 {showForm && (
-                    <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-6">
-                        <h3 className="font-semibold text-gray-800 mb-4">Create New Offer</h3>
-                        <form onSubmit={handleCreateOffer} className="space-y-4">
+                    <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-6 transition-all animate-in fade-in slide-in-from-top-4">
+                        <h3 className="font-semibold text-gray-800 mb-4">
+                            {editingId ? "Edit Offer" : "Create New Offer"}
+                        </h3>
+                        <form onSubmit={handleSaveOffer} className="space-y-4">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
@@ -133,7 +173,7 @@ export default function OffersEditor() {
                             <div className="flex justify-end gap-3">
                                 <button
                                     type="button"
-                                    onClick={() => setShowForm(false)}
+                                    onClick={handleCancel}
                                     className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
                                 >
                                     Cancel
@@ -144,7 +184,7 @@ export default function OffersEditor() {
                                     className="flex items-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg transition-colors disabled:opacity-50"
                                 >
                                     {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                                    Save Offer
+                                    {editingId ? "Save Changes" : "Save Offer"}
                                 </button>
                             </div>
                         </form>
@@ -177,12 +217,22 @@ export default function OffersEditor() {
                                         <h4 className="font-semibold text-gray-800">{offer.title}</h4>
                                         <p className="text-sm text-gray-500 truncate">{offer.description}</p>
                                     </div>
-                                    <button
-                                        onClick={() => handleDeleteOffer(offer.id)}
-                                        className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                                    >
-                                        <Trash2 className="w-5 h-5" />
-                                    </button>
+                                    <div className="flex gap-2">
+                                        <button
+                                            onClick={() => handleEditClick(offer)}
+                                            className="p-2 text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"
+                                            title="Edit offer"
+                                        >
+                                            <Pencil className="w-5 h-5" />
+                                        </button>
+                                        <button
+                                            onClick={() => handleDeleteOffer(offer.id)}
+                                            className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                            title="Delete offer"
+                                        >
+                                            <Trash2 className="w-5 h-5" />
+                                        </button>
+                                    </div>
                                 </div>
                             ))}
                         </div>

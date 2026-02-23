@@ -71,6 +71,26 @@ export async function deleteOffer(id: string) {
     }
 }
 
+export async function updateOffer(id: string, data: Partial<Omit<Offer, 'id' | 'createdAt'>>) {
+    try {
+        await prisma.offer.update({
+            where: { id },
+            data: {
+                ...data,
+            }
+        });
+
+        revalidatePath("/offers");
+        revalidatePath("/admin/content/offers");
+        revalidatePath("/admin");
+        revalidateTag("offers");
+
+        return { success: true };
+    } catch (error: unknown) {
+        return { success: false, error: error instanceof Error ? error.message : "Unknown error" };
+    }
+}
+
 // ==================== DASHBOARD STATS ====================
 
 export async function getDashboardStats() {
