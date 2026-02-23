@@ -44,7 +44,7 @@ const GROQ_MODEL_WHISPER = "whisper-large-v3-turbo";
 
 const GEMINI_API_BASE = "https://generativelanguage.googleapis.com/v1beta/models";
 const GROQ_AUDIO_BASE = "https://api.groq.com/openai/v1/audio/transcriptions";
-const GEMINI_MODEL = "gemini-flash-latest";
+const GEMINI_MODEL = "gemini-2.0-flash";
 
 /**
  * Options for LLM calls — allows overriding default temperature and maxTokens.
