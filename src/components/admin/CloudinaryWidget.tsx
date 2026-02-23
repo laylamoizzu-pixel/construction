@@ -22,36 +22,59 @@ export default function CloudinaryWidget({ cloudName, apiKey }: CloudinaryWidget
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        if (!scriptLoaded || !containerRef.current) return;
+        const initWidget = async () => {
+            if (!scriptLoaded || !containerRef.current) return;
 
-        // Destroy previous instance if it exists
-        if (widgetRef.current) {
+            // Destroy previous instance if it exists
+            if (widgetRef.current) {
+                try {
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    (widgetRef.current as any).destroy?.();
+                } catch (_) { /* ignore */ }
+            }
+
             try {
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                (widgetRef.current as any).destroy?.();
-            } catch (_) { /* ignore */ }
-        }
+                // Import the server action inside useEffect to avoid issues with SSR/Client transition if any
+                const { getMediaLibrarySignature } = await import("@/app/cloudinary-actions");
+                const sigResult = await getMediaLibrarySignature();
 
-        try {
-            widgetRef.current = window.cloudinary.createMediaLibrary(
-                {
-                    cloud_name: cloudName,
-                    api_key: apiKey,
-                    remove_header: false,
-                    max_files: "1",
-                    insert_caption: "Insert",
-                    inline_container: "#cloudinary-media-library-container",
-                },
-                {
-                    insertHandler: (data: unknown) => {
-                        console.log("Cloudinary asset selected:", data);
+                if (!sigResult.success) {
+                    throw new Error(sigResult.error || "Failed to get signature");
+                }
+
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                (window as any).cloudinary.createMediaLibrary(
+                    {
+                        cloud_name: cloudName,
+                        api_key: apiKey,
+                        signature: sigResult.signature,
+                        timestamp: sigResult.timestamp,
+                        remove_header: false,
+                        max_files: "1",
+                        insert_caption: "Insert",
+                        inline_container: "#cloudinary-media-library-container",
                     },
-                },
-                "#cloudinary-media-library-container"
-            );
-        } catch (err) {
-            console.error("Failed to initialize Cloudinary Media Library:", err);
-            setError("Failed to initialize Cloudinary Media Library. Please check your credentials.");
+                    {
+                        insertHandler: (data: unknown) => {
+                            console.log("Cloudinary asset selected:", data);
+                        },
+                    },
+                    "#cloudinary-media-library-container"
+                );
+
+                // Note: The widget might need to be shown/rendered explicitly in some cases 
+                // but createMediaLibrary with inline_container usually handles it.
+                // However, we reference it for cleanup.
+                widgetRef.current = true; // Just mark as initialized
+
+            } catch (err) {
+                console.error("Failed to initialize Cloudinary Media Library:", err);
+                setError("Failed to initialize Cloudinary Media Library. Please check your credentials.");
+            }
+        };
+
+        if (scriptLoaded) {
+            initWidget();
         }
     }, [scriptLoaded, cloudName, apiKey]);
 
