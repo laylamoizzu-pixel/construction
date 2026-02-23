@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { Download, MessageSquare, Clock, Tag, Zap, ArrowRight } from "lucide-react";
 import { useSiteConfig } from "@/context/SiteConfigContext";
 import { Offer } from "@/app/actions";
+import Link from "next/link";
 
 export default function OffersList({ offers, catalogueUrl, catalogueTitle, catalogueSubtitle }: { offers: Offer[], catalogueUrl?: string, catalogueTitle?: string, catalogueSubtitle?: string }) {
     const { config } = useSiteConfig();
@@ -99,9 +100,12 @@ export default function OffersList({ offers, catalogueUrl, catalogueTitle, catal
                                         <span>{new Date(offer.createdAt).toLocaleDateString()}</span>
                                     </div>
 
-                                    <button className="text-brand-dark font-bold text-sm flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                                    <Link
+                                        href={`/offers/${offer.id}`}
+                                        className="text-brand-dark font-bold text-sm flex items-center gap-1 group-hover:translate-x-1 transition-transform"
+                                    >
                                         Details <ArrowRight className="w-4 h-4" />
-                                    </button>
+                                    </Link>
                                 </div>
                             </div>
                         </motion.div>

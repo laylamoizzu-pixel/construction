@@ -54,6 +54,27 @@ export const getOffers = unstable_cache(_fetchOffers, ["offers"], {
     tags: ["offers"],
 });
 
+async function _fetchOffer(id: string): Promise<Offer | null> {
+    try {
+        const offer = await prisma.offer.findUnique({
+            where: { id }
+        });
+        return offer as unknown as Offer;
+    } catch (error) {
+        console.error("Error fetching offer:", error);
+        return null;
+    }
+}
+
+export const getOffer = (id: string) => {
+    const cachedFetch = unstable_cache(
+        () => _fetchOffer(id),
+        [`offer-${id}`],
+        { revalidate: 300, tags: ["offers", `offer-${id}`] }
+    );
+    return cachedFetch();
+}
+
 export async function deleteOffer(id: string) {
     try {
         await prisma.offer.delete({
