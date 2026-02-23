@@ -38,6 +38,7 @@ export async function getAIConfig(): Promise<AISettings> {
         // Return defaults if Firestore fails
         const defaults: AISettings = {
             enabled: true,
+            showVibeSelector: true,
             personaName: "Genie",
             greeting: "Hi, I'm Genie, your personal Shopping Master! 🧞‍♂️ How can I help you today?",
             systemPrompt: "You are Genie, a charming and helpful AI Shopping Master at Smart Avenue. You help customers find products, give styling advice, and provide excellent shopping assistance. Be friendly, knowledgeable, and persuasive. Support English, Hindi, and Hinglish.",
