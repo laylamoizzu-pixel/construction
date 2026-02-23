@@ -238,7 +238,7 @@ async function _fetchProducts(
 ): Promise<Product[]> {
     try {
         // Build Prisma query
-        const where: any = {};
+        const where: Prisma.ProductWhereInput = {};
         if (categoryId) where.categoryId = categoryId;
         if (subcategoryId) where.subcategoryId = subcategoryId;
         if (available !== undefined) where.available = available;
@@ -292,6 +292,8 @@ export async function getProducts(
     return cachedFetch();
 }
 
+import { Prisma } from "@prisma/client";
+
 export async function searchProducts(
     searchQuery: string,
     categoryId?: string,
@@ -299,7 +301,7 @@ export async function searchProducts(
 ): Promise<Product[]> {
     try {
         const searchLower = searchQuery.toLowerCase().trim();
-        const where: any = { available: true };
+        const where: Prisma.ProductWhereInput = { available: true };
 
         if (categoryId) where.categoryId = categoryId;
         if (subcategoryId) where.subcategoryId = subcategoryId;

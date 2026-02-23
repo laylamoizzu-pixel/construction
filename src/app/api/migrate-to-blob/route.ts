@@ -12,8 +12,10 @@ async function retryRead<T>(fn: () => Promise<T>, maxRetries = 3): Promise<T> {
     for (let i = 0; i < maxRetries; i++) {
         try {
             return await fn();
-        } catch (err: any) {
-            if (err?.code === 8 && i < maxRetries - 1) {
+        } catch (err: unknown) {
+            // Check if error is a Firestore quota error
+            const typedErr = err as { code?: number };
+            if (typedErr?.code === 8 && i < maxRetries - 1) {
                 // RESOURCE_EXHAUSTED — wait and retry
                 console.log(`Quota exceeded, retrying in ${(i + 1) * 5}s...`);
                 await delay((i + 1) * 5000);
@@ -41,10 +43,11 @@ export async function GET(req: Request) {
     const db = getAdminDb();
 
     // Helper to clean Firestore Timestamps from data
-    function cleanTimestamps(data: any): any {
-        return JSON.parse(JSON.stringify(data, (_key, value) => {
-            if (value && typeof value === 'object' && value._seconds !== undefined) {
-                return new Date(value._seconds * 1000).toISOString();
+    function cleanTimestamps(data: unknown): unknown {
+        return JSON.parse(JSON.stringify(data, (_key: string, value: unknown) => {
+            if (value && typeof value === 'object' && '_seconds' in value) {
+                const ts = value as { _seconds: number };
+                return new Date(ts._seconds * 1000).toISOString();
             }
             return value;
         }));
@@ -79,7 +82,7 @@ export async function GET(req: Request) {
         console.log("Migrating AI prompts...");
         const promptsSnapshot = await retryRead(() => db.collection("ai_prompts").get());
         if (!promptsSnapshot.empty) {
-            const prompts: Record<string, any> = {};
+            const prompts: Record<string, unknown> = {};
             promptsSnapshot.forEach((doc: admin.firestore.QueryDocumentSnapshot) => {
                 prompts[doc.id] = cleanTimestamps({ ...doc.data(), id: doc.id });
             });
