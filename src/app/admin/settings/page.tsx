@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/auth-context";
-import { getAdminProfile, updateAdminProfile, updateAdminEmail, AdminProfile } from "@/app/actions";
+import { getAdminProfile, updateAdminProfile, AdminProfile } from "@/app/actions";
 import {
     Loader2,
     ArrowLeft,
@@ -49,10 +49,6 @@ export default function AdminSettingsPage() {
     const [showNewPassword, setShowNewPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-    // Email state
-    const [emailForm, setEmailForm] = useState({ newEmail: "", confirmPassword: "" });
-    const [emailSaving, setEmailSaving] = useState(false);
-    const [showEmailPassword, setShowEmailPassword] = useState(false);
 
     // Toast state
     const [toast, setToast] = useState<Toast | null>(null);
@@ -140,35 +136,6 @@ export default function AdminSettingsPage() {
         setPasswordSaving(false);
     };
 
-    const handleEmailChange = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!user?.email) return;
-        if (!emailForm.newEmail || !emailForm.confirmPassword) {
-            showToast("Please fill in all fields", "error");
-            return;
-        }
-        // Re-authenticate first
-        setEmailSaving(true);
-        const reAuthResult = await changePassword(emailForm.confirmPassword, emailForm.confirmPassword);
-        // If re-auth failed because of wrong password, show error
-        // changePassword re-auths but also changes password. We just need re-auth.
-        // Actually, let's use a separate approach: re-auth then call server action
-        // For security, we'll verify the password by re-authing, then proceed
-        if (!reAuthResult.success && reAuthResult.error === "Current password is incorrect") {
-            showToast("Password is incorrect", "error");
-            setEmailSaving(false);
-            return;
-        }
-
-        const result = await updateAdminEmail(user.email, emailForm.newEmail);
-        if (result.success) {
-            showToast("Email updated successfully. You may need to log in again.", "success");
-            setEmailForm({ newEmail: "", confirmPassword: "" });
-        } else {
-            showToast(result.error || "Failed to update email", "error");
-        }
-        setEmailSaving(false);
-    };
 
     const passwordStrength = getPasswordStrength(passwordForm.newPassword);
 
@@ -187,8 +154,8 @@ export default function AdminSettingsPage() {
                 {toast && (
                     <div
                         className={`fixed top-6 right-6 z-[100] flex items-center gap-3 px-5 py-3.5 rounded-xl shadow-2xl text-white text-sm font-medium transition-all duration-300 animate-in slide-in-from-top-2 ${toast.type === "success"
-                                ? "bg-gradient-to-r from-green-600 to-emerald-600"
-                                : "bg-gradient-to-r from-red-600 to-rose-600"
+                            ? "bg-gradient-to-r from-green-600 to-emerald-600"
+                            : "bg-gradient-to-r from-red-600 to-rose-600"
                             }`}
                     >
                         {toast.type === "success" ? (
@@ -288,9 +255,6 @@ export default function AdminSettingsPage() {
                                             className="w-full pl-10 pr-4 py-2.5 border border-gray-100 rounded-xl text-sm bg-gray-100 text-gray-500 cursor-not-allowed"
                                         />
                                     </div>
-                                    <p className="text-xs text-gray-400 mt-1">
-                                        To change your email, use the Login Credentials section below.
-                                    </p>
                                 </div>
 
                                 <div className="flex justify-end pt-2">
@@ -373,16 +337,16 @@ export default function AdminSettingsPage() {
                                                 <div
                                                     key={level}
                                                     className={`h-1 flex-1 rounded-full transition-colors duration-300 ${level <= passwordStrength.score
-                                                            ? passwordStrength.color
-                                                            : "bg-gray-200"
+                                                        ? passwordStrength.color
+                                                        : "bg-gray-200"
                                                         }`}
                                                 />
                                             ))}
                                         </div>
                                         <p className={`text-xs font-medium ${passwordStrength.score <= 1 ? "text-red-500" :
-                                                passwordStrength.score <= 2 ? "text-orange-500" :
-                                                    passwordStrength.score <= 3 ? "text-yellow-600" :
-                                                        "text-green-600"
+                                            passwordStrength.score <= 2 ? "text-orange-500" :
+                                                passwordStrength.score <= 3 ? "text-yellow-600" :
+                                                    "text-green-600"
                                             }`}>
                                             {passwordStrength.label}
                                         </p>
@@ -401,8 +365,8 @@ export default function AdminSettingsPage() {
                                         onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
                                         placeholder="Confirm new password"
                                         className={`w-full pl-10 pr-12 py-2.5 border rounded-xl focus:ring-2 focus:ring-brand-gold/30 focus:border-brand-gold transition-all text-sm bg-gray-50 focus:bg-white ${passwordForm.confirmPassword && passwordForm.confirmPassword !== passwordForm.newPassword
-                                                ? "border-red-300"
-                                                : "border-gray-200"
+                                            ? "border-red-300"
+                                            : "border-gray-200"
                                             }`}
                                         required
                                         minLength={6}
@@ -446,78 +410,6 @@ export default function AdminSettingsPage() {
                     </form>
                 </div>
 
-                {/* Email / Login Credentials Card */}
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 mb-6 overflow-hidden">
-                    <form onSubmit={handleEmailChange} className="p-6 space-y-5">
-                        <h3 className="font-semibold text-gray-800 flex items-center gap-2 text-base">
-                            <Mail className="w-4.5 h-4.5 text-brand-green" />
-                            Login Credentials
-                        </h3>
-
-                        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3">
-                            <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
-                            <div>
-                                <p className="text-sm text-amber-900 font-medium">Caution</p>
-                                <p className="text-xs text-amber-700 mt-0.5">
-                                    Changing your email will update your login credentials. You&apos;ll need to use the new email address to sign in.
-                                </p>
-                            </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
-                                    New Email Address
-                                </label>
-                                <div className="relative">
-                                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                                    <input
-                                        type="email"
-                                        value={emailForm.newEmail}
-                                        onChange={(e) => setEmailForm({ ...emailForm, newEmail: e.target.value })}
-                                        placeholder="new@email.com"
-                                        className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-gold/30 focus:border-brand-gold transition-all text-sm bg-gray-50 focus:bg-white"
-                                        required
-                                    />
-                                </div>
-                            </div>
-                            <div>
-                                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
-                                    Confirm Password
-                                </label>
-                                <div className="relative">
-                                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                                    <input
-                                        type={showEmailPassword ? "text" : "password"}
-                                        value={emailForm.confirmPassword}
-                                        onChange={(e) => setEmailForm({ ...emailForm, confirmPassword: e.target.value })}
-                                        placeholder="Enter your password"
-                                        className="w-full pl-10 pr-12 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-gold/30 focus:border-brand-gold transition-all text-sm bg-gray-50 focus:bg-white"
-                                        required
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowEmailPassword(!showEmailPassword)}
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                                    >
-                                        {showEmailPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="flex justify-end pt-2">
-                            <button
-                                type="submit"
-                                disabled={emailSaving || !emailForm.newEmail || !emailForm.confirmPassword}
-                                className="flex items-center gap-2 px-5 py-2.5 bg-brand-green hover:bg-brand-green/90 text-white rounded-xl transition-all text-sm font-medium shadow-sm hover:shadow-md disabled:opacity-60 disabled:cursor-not-allowed"
-                            >
-                                {emailSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Mail className="w-4 h-4" />}
-                                Update Email
-                            </button>
-                        </div>
-                    </form>
-                </div>
 
                 {/* Security Tips */}
                 <div className="bg-brand-green/5 border border-brand-green/10 rounded-2xl p-5">
