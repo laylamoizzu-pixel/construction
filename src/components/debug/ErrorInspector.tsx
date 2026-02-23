@@ -101,7 +101,7 @@ export function ErrorInspector() {
                                                     </pre>
                                                 </div>
                                             )}
-                                            {err.context && (
+                                            {!!err.context && (
                                                 <div>
                                                     <div className="text-[10px] text-gray-500 uppercase font-bold mb-1">Context</div>
                                                     <pre className="text-[11px] text-gray-400 bg-black/40 p-2 rounded overflow-x-auto font-mono">
