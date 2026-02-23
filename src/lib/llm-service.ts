@@ -136,6 +136,12 @@ async function callGroqAPI(prompt: string, model: string = GROQ_MODEL, retryCoun
             const errorText = await response.text();
             console.error(`[LLMService] Groq Error Body: ${errorText}`);
 
+            // Handle terminal errors (Unauthorized or Leaked)
+            if (response.status === 401 || response.status === 403) {
+                keyManager.markKeyInvalid(apiKey);
+                throw new LLMServiceError(`Groq API key is invalid or unauthorized: ${response.status}`, response.status);
+            }
+
             keyManager.markKeyFailed(apiKey);
             if (retryCount < MAX_RETRIES) {
                 console.log(`[LLMService] Groq Request failed (${response.status}), retrying`);
@@ -335,6 +341,15 @@ async function callGeminiAPI(prompt: string, retryCount: number = 0, options?: L
         }
 
         if (!response.ok) {
+            const errorText = await response.text();
+            console.error(`[LLMService] Gemini Error: ${errorText}`);
+
+            // Handle terminal errors (Unauthorized or Leaked)
+            if (response.status === 401 || response.status === 403) {
+                keyManager.markKeyInvalid(apiKey);
+                throw new LLMServiceError(`Gemini API key is invalid or leaked: ${response.status}`, response.status);
+            }
+
             keyManager.markKeyFailed(apiKey);
             if (retryCount < MAX_RETRIES) return callGeminiAPI(prompt, retryCount + 1);
             throw new LLMServiceError(`Gemini API request failed: ${response.statusText}`, response.status);
@@ -365,31 +380,56 @@ async function callGeminiAPI(prompt: string, retryCount: number = 0, options?: L
 
 /**
  * Main LLM call function that routes to available providers
- * Prioritizes Groq > Gemini
+ * Prioritizes Groq > Gemini if in "auto" mode.
  */
-async function callLLM(prompt: string, provider: LLMProvider = "google", model?: string, options?: LLMCallOptions): Promise<string> {
+async function callLLM(prompt: string, provider: LLMProvider | "auto" = "auto", model?: string, options?: LLMCallOptions): Promise<string> {
     const keyManager = getAPIKeyManager();
 
-    // Respect specific provider request
+    // 1. Handle explicit provider requests with fallback if they fail
     if (provider === "groq") {
-        return await callGroqAPI(prompt, model, 0, options);
-    }
-
-    if (provider === "google") {
-        return await callGeminiAPI(prompt, 0, options);
-    }
-
-    // Default auto-routing logic (start with Groq if available)
-    if (keyManager.hasKeys("groq")) {
         try {
             return await callGroqAPI(prompt, model, 0, options);
         } catch (error) {
-            console.warn("[LLMService] Groq failed, falling back to Gemini:", error);
+            console.warn("[LLMService] Groq requested but failed, falling back to Gemini:", error);
             // Fallthrough to Gemini
         }
     }
 
-    // Fallback to Gemini
+    if (provider === "google") {
+        try {
+            return await callGeminiAPI(prompt, 0, options);
+        } catch (error) {
+            console.warn("[LLMService] Gemini requested but failed, falling back to Groq:", error);
+            if (keyManager.hasKeys("groq")) {
+                return await callGroqAPI(prompt, model, 0, options);
+            }
+            throw error; // Re-throw if no fallback available
+        }
+    }
+
+    // 2. Default "auto" routing logic
+    // Try Google first as it's often more capable (Gemini 2.0 Flash)
+    if (keyManager.hasKeys("google")) {
+        try {
+            return await callGeminiAPI(prompt, 0, options);
+        } catch (error) {
+            console.warn("[LLMService] Gemini failed in auto mode, falling back to Groq:", error);
+            // Fallthrough to Groq
+        }
+    }
+
+    // Try Groq
+    if (keyManager.hasKeys("groq")) {
+        try {
+            return await callGroqAPI(prompt, model, 0, options);
+        } catch (error) {
+            console.warn("[LLMService] Groq failed in auto mode, falling back to Gemini (retry):", error);
+            // Last ditch effort back to Gemini if it hasn't been tried yet or to get final error
+            return await callGeminiAPI(prompt, 0, options);
+        }
+    }
+
+    // Fallback to Gemini if nothing else
     return await callGeminiAPI(prompt, 0, options);
 }
 
@@ -406,7 +446,7 @@ async function callLLMWithConfig(prompt: string, overrideProvider?: LLMProvider,
     };
 
     // Determine provider: override > admin config > default
-    let provider: LLMProvider;
+    let provider: LLMProvider | "auto";
     if (overrideProvider) {
         provider = overrideProvider;
     } else if (config.providerPriority === "groq") {
@@ -414,8 +454,7 @@ async function callLLMWithConfig(prompt: string, overrideProvider?: LLMProvider,
     } else if (config.providerPriority === "google") {
         provider = "google";
     } else {
-        // "auto" mode — use the existing auto-routing
-        return await callLLM(prompt, "google", overrideModel, options);
+        provider = "auto";
     }
 
     return await callLLM(prompt, provider, overrideModel, options);

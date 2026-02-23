@@ -277,6 +277,7 @@ class APIKeyManager {
     private isKeyHealthy(key: APIKeyConfig, now: Date): boolean {
         if (key.cooldownUntil && key.cooldownUntil > now) return false;
         if (key.rateLimited) return false;
+        if (key.errorCount > 10 && key.consecutiveErrors > 5) return false; // Soft disable bugged keys
         return true;
     }
 
@@ -309,6 +310,17 @@ class APIKeyManager {
             console.warn(`[APIKeyManager] Key ${keyConfig.index} (${keyConfig.provider}) rate-limited, entering cooldown`);
             keyConfig.rateLimited = true;
             keyConfig.cooldownUntil = new Date(Date.now() + RATE_LIMIT_COOLDOWN_MS);
+            keyConfig.lastUsed = new Date();
+        }
+    }
+
+    public markKeyInvalid(key: string): void {
+        const keyConfig = this.keys.find(k => k.key === key);
+        if (keyConfig) {
+            console.error(`[APIKeyManager] Key ${keyConfig.index} (${keyConfig.provider}) marked as INVALID/LEAKED`);
+            keyConfig.errorCount = 999;
+            keyConfig.consecutiveErrors = 999;
+            keyConfig.cooldownUntil = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000); // 1 year cooldown
             keyConfig.lastUsed = new Date();
         }
     }

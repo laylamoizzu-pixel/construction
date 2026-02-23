@@ -1,77 +1,80 @@
 
-import 'dotenv/config';
-import type { Product } from '../src/app/actions';
+import dotenv from 'dotenv';
+import path from 'path';
 
-async function main() {
-    /* eslint-disable @typescript-eslint/no-explicit-any */
-    const { analyzeIntent, rankAndSummarize } = await import('../src/lib/llm-service');
+// Load .env.local
+dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
 
-    console.log("Starting LLM Test...");
+async function testGroq(key: string, name: string) {
+    if (!key) return;
+    console.log(`Testing ${name} with key: ${key.substring(0, 10)}...`);
+    try {
+        const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${key}`,
+            },
+            body: JSON.stringify({
+                model: "llama-3.3-70b-versatile",
+                messages: [{ role: "user", content: "Hi" }],
+                max_tokens: 5,
+            }),
+        });
 
-    // Mock categorization data
-    const categories: any[] = [
-        { id: "cat_shoes", name: "Shoes", description: "Footwear", image: "", parentId: null, slug: "shoes", order: 0, createdAt: new Date() },
-        { id: "cat_electronics", name: "Electronics", description: "Gadgets", image: "", parentId: null, slug: "electronics", order: 1, createdAt: new Date() }
-    ];
-
-    // Mock products
-    const products: Product[] = [
-        {
-            id: "p1", name: "SpeedRunner 3000", description: "High performance running shoe",
-            price: 4500, categoryId: "cat_shoes", images: [], tags: ["running", "sports"],
-            available: true, featured: false, createdAt: new Date(), updatedAt: new Date(),
-            imageUrl: "placeholder.jpg",
-            subcategoryId: null, offerId: null
-        },
-        {
-            id: "p2", name: "ComfyWalker", description: "Casual walking shoe",
-            price: 2000, categoryId: "cat_shoes", images: [], tags: ["walking", "casual"],
-            available: true, featured: false, createdAt: new Date(), updatedAt: new Date(),
-            imageUrl: "placeholder.jpg",
-            subcategoryId: null, offerId: null
-        },
-        {
-            id: "p3", name: "ProLaptop X", description: "Gaming laptop",
-            price: 80000, categoryId: "cat_electronics", images: [], tags: ["gaming", "computer"],
-            available: true, featured: false, createdAt: new Date(), updatedAt: new Date(),
-            imageUrl: "placeholder.jpg",
-            subcategoryId: null, offerId: null
+        if (response.ok) {
+            const data = await response.json();
+            console.log(`✅ ${name} Success:`, data.choices[0].message.content);
+            return true;
+        } else {
+            console.log(`❌ ${name} Failed:`, response.status, await response.text());
+            return false;
         }
-    ];
-
-    // 1. Test Intent Analysis
-    console.log("\n--- Testing Intent Analysis (Groq) ---");
-    const query = "I am looking for a running shoe under 5000";
-
-    try {
-        const intent = await analyzeIntent(query, categories);
-        console.log("Intent Result:", JSON.stringify(intent, null, 2));
-    } catch (error) {
-        console.error("Intent Analysis Failed:", error);
-    }
-
-    // 2. Test Rank & Summarize
-    console.log("\n--- Testing Rank & Summarize (Groq) ---");
-
-    try {
-        // We'll mock the intent for this second call
-        /* eslint-disable @typescript-eslint/no-explicit-any */
-        const mockIntent: any = {
-            category: "cat_shoes",
-            subcategory: null,
-            requirements: ["running", "under 5000"],
-            budgetMin: null,
-            budgetMax: 5000,
-            preferences: [],
-            useCase: "running",
-            confidence: 0.9
-        };
-
-        const result = await rankAndSummarize(query, products, mockIntent);
-        console.log("Rank & Summary Result:", JSON.stringify(result, null, 2));
-    } catch (error) {
-        console.error("Rank & Summarize Failed:", error);
+    } catch (e) {
+        console.log(`❌ ${name} Exception:`, e);
+        return false;
     }
 }
 
-main().catch(console.error);
+async function testGemini(key: string, name: string) {
+    if (!key) return;
+    console.log(`Testing ${name} with key: ${key.substring(0, 10)}...`);
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`;
+    try {
+        const response = await fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                contents: [{ parts: [{ text: "Hi" }] }],
+                generationConfig: { maxOutputTokens: 5 },
+            }),
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            console.log(`✅ ${name} Success:`, data.candidates[0].content.parts[0].text);
+            return true;
+        } else {
+            console.log(`❌ ${name} Failed:`, response.status, await response.text());
+            return false;
+        }
+    } catch (e) {
+        console.log(`❌ ${name} Exception:`, e);
+        return false;
+    }
+}
+
+async function run() {
+    console.log('--- Starting Comprehensive LLM Connectivity Tests ---');
+
+    await testGemini(process.env.GEMINI_API_KEY_1 || '', 'GEMINI_API_KEY_1');
+
+    await testGroq(process.env.GROQ_API_KEY_1 || '', 'GROQ_API_KEY_1');
+    await testGroq(process.env.GROQ_API_KEY_2 || '', 'GROQ_API_KEY_2');
+    await testGroq(process.env.GROQ_API_KEY_3 || '', 'GROQ_API_KEY_3');
+    await testGroq(process.env.GROQ_API_KEY_4 || '', 'GROQ_API_KEY_4');
+
+    console.log('--- Tests Finished ---');
+}
+
+run();
