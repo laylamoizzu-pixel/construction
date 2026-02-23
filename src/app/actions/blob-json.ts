@@ -8,21 +8,29 @@ import { revalidateTag } from "next/cache";
  * from Vercel Blob, enabling edge-optimized global reads.
  */
 
+const blobUrlCache: Record<string, string> = {};
+
 export async function getBlobJson<T>(filename: string, defaultData: T): Promise<T> {
     try {
-        // Use the Vercel Blob API to find the file dynamically rather than guessing the URL
-        const { blobs } = await list({
-            prefix: filename,
-            limit: 1,
-            token: process.env.BLOB_READ_WRITE_TOKEN
-        });
+        let url = blobUrlCache[filename];
 
-        if (blobs.length === 0) {
-            return defaultData;
+        if (!url) {
+            // Use the Vercel Blob API to find the file dynamically rather than guessing the URL
+            const { blobs } = await list({
+                prefix: filename,
+                limit: 1,
+                token: process.env.BLOB_READ_WRITE_TOKEN
+            });
+
+            if (blobs.length === 0) {
+                return defaultData;
+            }
+
+            const blob = blobs[0];
+            url = `${blob.url}?v=${new Date(blob.uploadedAt).getTime()}`;
+            blobUrlCache[filename] = url;
+            console.log(`[Blob JSON] Resolved and cached URL for ${filename}`);
         }
-
-        const blob = blobs[0];
-        const url = `${blob.url}?v=${new Date(blob.uploadedAt).getTime()}`;
 
         // Fetch data from the actual public URL with a versioned parameter to bust CDN caches
         const response = await fetch(url, {
@@ -54,6 +62,7 @@ export async function updateBlobJson<T>(filename: string, data: T): Promise<{ su
 
         // CRITICAL: Invalidate the underlying fetch cache for this specific blob
         revalidateTag(`blob-${filename}`);
+        delete blobUrlCache[filename];
 
         return { success: true, url: blob.url };
     } catch (error) {

@@ -14,38 +14,60 @@ const VibeSelector = dynamic(() => import("@/components/ai/VibeSelector"));
 
 export const revalidate = 300; // Enable ISR, revalidating every 5 minutes
 
-export default async function Home() {
-  const [featuresRes, ctaRes, highlightsRes, config, aiSettings] = await Promise.all([
-    getSiteContent<FeaturesContent>("features"),
+// Section Loaders
+async function VibeSelectorSection() {
+  const aiSettings = await getAISettings();
+  if (!aiSettings.showVibeSelector) return null;
+  return <VibeSelector />;
+}
+
+async function PromotionsSection() {
+  const config = await getSiteConfig();
+  return <Promotions config={config.promotions} />;
+}
+
+async function HighlightsSection() {
+  const highlightsRes = await getSiteContent<HighlightsContent>("highlights");
+  return <Highlights content={highlightsRes || undefined} />;
+}
+
+async function FeaturesSection() {
+  const featuresRes = await getSiteContent<FeaturesContent>("features");
+  return <Features content={featuresRes || undefined} />;
+}
+
+async function CTASection() {
+  const [ctaRes, aiSettings] = await Promise.all([
     getSiteContent<CTAContent>("cta"),
-    getSiteContent<HighlightsContent>("highlights"),
-    getSiteConfig(),
     getAISettings(),
   ]);
+  return <CTA content={ctaRes || undefined} aiEnabled={aiSettings.enabled} />;
+}
 
-  const featuresContent = featuresRes || undefined;
-  const ctaContent = ctaRes || undefined;
-  const highlightsContent = highlightsRes || undefined;
-
+export default function Home() {
   return (
     <div className="flex flex-col min-h-screen bg-slate-50">
       <Hero />
 
-      {aiSettings.showVibeSelector && <VibeSelector />}
+      <Suspense fallback={null}>
+        <VibeSelectorSection />
+      </Suspense>
 
-      <Promotions config={config.promotions} />
+      <Suspense fallback={<div className="h-48 animate-pulse bg-slate-100" />}>
+        <PromotionsSection />
+      </Suspense>
 
       {/* Dynamic Sections */}
       <Suspense fallback={<div className="h-96 animate-pulse bg-slate-100" />}>
-        <Highlights content={highlightsContent} />
+        <HighlightsSection />
       </Suspense>
 
       <Suspense fallback={<div className="h-96 animate-pulse bg-slate-100" />}>
-        <Features content={featuresContent} />
+        <FeaturesSection />
       </Suspense>
 
       <Suspense fallback={<div className="h-96 animate-pulse bg-slate-100" />}>
-        <CTA content={ctaContent} aiEnabled={aiSettings.enabled} />
+        <CTASection />
       </Suspense>
     </div>
   );

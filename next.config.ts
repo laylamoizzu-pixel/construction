@@ -22,7 +22,7 @@ const withPWA = require("@ducanh2912/next-pwa").default({
             maxEntries: 16,
             maxAgeSeconds: 24 * 60 * 60, // 24 hours
           },
-          networkTimeoutSeconds: 10, // Fallback to cache if network slow
+          networkTimeoutSeconds: 3, // Fallback to cache if network slow
         },
       },
       {
@@ -36,7 +36,7 @@ const withPWA = require("@ducanh2912/next-pwa").default({
             maxEntries: 32,
             maxAgeSeconds: 24 * 60 * 60, // 24 hours
           },
-          networkTimeoutSeconds: 5,
+          networkTimeoutSeconds: 3,
         },
       },
       {
@@ -66,7 +66,7 @@ const withPWA = require("@ducanh2912/next-pwa").default({
         handler: "NetworkFirst",
         options: {
           cacheName: "static-js-assets",
-          networkTimeoutSeconds: 5,
+          networkTimeoutSeconds: 3,
           expiration: {
             maxEntries: 32,
             maxAgeSeconds: 24 * 60 * 60, // 24 hours
@@ -78,7 +78,7 @@ const withPWA = require("@ducanh2912/next-pwa").default({
         handler: "NetworkFirst",
         options: {
           cacheName: "static-style-assets",
-          networkTimeoutSeconds: 5,
+          networkTimeoutSeconds: 3,
           expiration: {
             maxEntries: 32,
             maxAgeSeconds: 24 * 60 * 60, // 24 hours

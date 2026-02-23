@@ -5,6 +5,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { PenTool, Smile, Utensils, Home as HomeIcon, Package, ArrowRight, X, LucideIcon, Cpu, Smartphone } from "lucide-react";
 import { DepartmentContent } from "@/app/actions";
 import Image from "next/image";
+import Link from "next/link";
+
 
 const iconMap: Record<string, LucideIcon> = {
     PenTool,
@@ -137,9 +139,13 @@ export default function DepartmentsGrid({ departments }: { departments: Departme
                                         <div className="mt-auto space-y-6">
 
 
-                                            <button className="w-full py-4 bg-brand-dark text-white rounded-xl font-bold hover:bg-brand-blue transition-colors flex items-center justify-center gap-2 shadow-lg shadow-brand-dark/20 hover:shadow-brand-blue/30">
+                                            <Link
+                                                href={dept.link || `/products?search=${encodeURIComponent(dept.title)}`}
+                                                className="w-full py-4 bg-brand-dark text-white rounded-xl font-bold hover:bg-brand-blue transition-colors flex items-center justify-center gap-2 shadow-lg shadow-brand-dark/20 hover:shadow-brand-blue/30"
+                                            >
                                                 Browse {dept.title} <ArrowRight className="w-5 h-5" />
-                                            </button>
+                                            </Link>
+
                                         </div>
                                     </div>
                                 </motion.div>
