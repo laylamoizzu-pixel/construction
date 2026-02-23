@@ -66,7 +66,7 @@ async function _fetchOffer(id: string): Promise<Offer | null> {
     }
 }
 
-export const getOffer = (id: string) => {
+export const getOffer = async (id: string) => {
     const cachedFetch = unstable_cache(
         () => _fetchOffer(id),
         [`offer-${id}`],
