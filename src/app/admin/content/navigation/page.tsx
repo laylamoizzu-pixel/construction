@@ -202,8 +202,8 @@ export default function NavigationEditor() {
                                     <span
                                         key={i}
                                         className={`text-sm font-medium px-3 py-1.5 rounded-full ${i === 0
-                                                ? "bg-blue-500 text-white"
-                                                : "text-white/70"
+                                            ? "bg-blue-500 text-white"
+                                            : "text-white/70"
                                             }`}
                                     >
                                         {link.label || "Untitled"}
