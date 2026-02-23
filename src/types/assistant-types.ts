@@ -102,6 +102,7 @@ export interface LLMIntentResponse {
         maxBudget?: number;
         specifications?: string[];
     } | null;
+    isGeneralChat?: boolean;
 }
 
 export interface LLMRecommendationResponse {
