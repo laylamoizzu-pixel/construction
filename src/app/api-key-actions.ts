@@ -6,7 +6,7 @@
  * Server actions for managing Gemini API keys in Firestore.
  */
 
-import { getAdminDb, admin } from "@/lib/firebase-admin";
+import prisma from "@/lib/db";
 import { getAPIKeyManager, resetAPIKeyManager } from "@/lib/api-key-manager";
 import { revalidatePath } from "next/cache";
 
@@ -37,26 +37,22 @@ export interface StoredAPIKey {
  */
 export async function getAPIKeys(): Promise<StoredAPIKey[]> {
     try {
-        const snapshot = await getAdminDb()
-            .collection("apiKeys")
-            .orderBy("createdAt", "desc")
-            .get();
-
-        return snapshot.docs.map((doc: admin.firestore.QueryDocumentSnapshot) => {
-            const data = doc.data();
-            return {
-                id: doc.id,
-                name: data.name || `Key ${doc.id.substring(0, 6)}`,
-                provider: data.provider || "google", // Default to google for existing keys
-                key: data.key,
-                maskedKey: maskKey(data.key),
-                isActive: data.isActive ?? true,
-                isValid: data.isValid ?? null,
-                lastTested: data.lastTested?.toDate() || null,
-                createdAt: data.createdAt?.toDate() || new Date(),
-                updatedAt: data.updatedAt?.toDate() || new Date(),
-            };
+        const keys = await prisma.apiKey.findMany({
+            orderBy: { createdAt: "desc" }
         });
+
+        return keys.map((data) => ({
+            id: data.id,
+            name: data.name || `Key ${data.id.substring(0, 6)}`,
+            provider: (data.provider as LLMProvider) || "google",
+            key: data.key,
+            maskedKey: maskKey(data.key),
+            isActive: data.isActive,
+            isValid: data.isValid,
+            lastTested: data.lastTested,
+            createdAt: data.createdAt,
+            updatedAt: data.updatedAt,
+        }));
     } catch (error) {
         console.error("[getAPIKeys] Error:", error);
         return [];
@@ -68,40 +64,35 @@ export async function getAPIKeys(): Promise<StoredAPIKey[]> {
  */
 export async function addAPIKey(name: string, key: string, provider: LLMProvider = "google") {
     try {
-        // Validate key format (basic check)
         if (!key || key.trim().length < 10) {
             return { success: false, error: "Invalid API key format" };
         }
 
         const trimmedKey = key.trim();
 
-        // Check for duplicates
-        const existing = await getAdminDb()
-            .collection("apiKeys")
-            .where("key", "==", trimmedKey)
-            .get();
+        const existing = await prisma.apiKey.findUnique({
+            where: { key: trimmedKey }
+        });
 
-        if (!existing.empty) {
+        if (existing) {
             return { success: false, error: "This API key already exists" };
         }
 
-        const docRef = await getAdminDb().collection("apiKeys").add({
-            name: name.trim() || `Key ${Date.now()}`,
-            provider,
-            key: trimmedKey,
-            isActive: true,
-            isValid: null,
-            lastTested: null,
-            createdAt: admin.firestore.FieldValue.serverTimestamp(),
-            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        const doc = await prisma.apiKey.create({
+            data: {
+                name: name.trim() || `Key ${Date.now()}`,
+                provider,
+                key: trimmedKey,
+                isActive: true,
+                isValid: null,
+                lastTested: null,
+            }
         });
 
-        // Invalidate API key manager cache
         resetAPIKeyManager();
-
         revalidatePath("/admin/api-keys");
 
-        return { success: true, id: docRef.id };
+        return { success: true, id: doc.id };
     } catch (error) {
         console.error("[addAPIKey] Error:", error);
         return { success: false, error: error instanceof Error ? error.message : "Unknown error" };
@@ -113,24 +104,23 @@ export async function addAPIKey(name: string, key: string, provider: LLMProvider
  */
 export async function updateAPIKey(id: string, data: { name?: string; key?: string; provider?: LLMProvider; isActive?: boolean }) {
     try {
-        const updateData: Record<string, unknown> = {
-            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-        };
+        const updateData: any = {};
 
         if (data.name !== undefined) updateData.name = data.name.trim();
         if (data.provider !== undefined) updateData.provider = data.provider;
         if (data.key !== undefined) {
             updateData.key = data.key.trim();
-            updateData.isValid = null; // Reset validation when key changes
+            updateData.isValid = null;
             updateData.lastTested = null;
         }
         if (data.isActive !== undefined) updateData.isActive = data.isActive;
 
-        await getAdminDb().collection("apiKeys").doc(id).update(updateData);
+        await prisma.apiKey.update({
+            where: { id },
+            data: updateData
+        });
 
-        // Invalidate API key manager cache
         resetAPIKeyManager();
-
         revalidatePath("/admin/api-keys");
 
         return { success: true };
@@ -145,11 +135,11 @@ export async function updateAPIKey(id: string, data: { name?: string; key?: stri
  */
 export async function deleteAPIKey(id: string) {
     try {
-        await getAdminDb().collection("apiKeys").doc(id).delete();
+        await prisma.apiKey.delete({
+            where: { id }
+        });
 
-        // Invalidate API key manager cache
         resetAPIKeyManager();
-
         revalidatePath("/admin/api-keys");
 
         return { success: true };
@@ -169,18 +159,18 @@ export async function testAPIKey(keyOrId: string, isId: boolean = false, provide
         let apiKey = keyOrId;
         let provider: LLMProvider = (providerStr as LLMProvider) || "google";
 
-        // If it's an ID, fetch the key and provider from Firestore
         if (isId) {
-            const doc = await getAdminDb().collection("apiKeys").doc(keyOrId).get();
-            if (!doc.exists) {
+            const doc = await prisma.apiKey.findUnique({
+                where: { id: keyOrId }
+            });
+            if (!doc) {
                 return { success: false, error: "API key not found", isValid: false };
             }
-            const data = doc.data();
-            apiKey = data?.key;
-            provider = (data?.provider as LLMProvider) || "google";
+            apiKey = doc.key;
+            provider = (doc.provider as LLMProvider) || "google";
         }
 
-        if (!apiKey || apiKey.trim().length < 5) { // Adjusted min length as some keys might be short?
+        if (!apiKey || apiKey.trim().length < 5) {
             return { success: false, error: "Invalid API key format", isValid: false };
         }
 
@@ -233,7 +223,7 @@ export async function testAPIKey(keyOrId: string, isId: boolean = false, provide
                     "anthropic-version": "2023-06-01"
                 },
                 body: JSON.stringify({
-                    model: "claude-3-haiku-20240307", // Use cheapest model for testing
+                    model: "claude-3-haiku-20240307",
                     messages: [{ role: "user", content: "Hi" }],
                     max_tokens: 5,
                 }),
@@ -252,7 +242,7 @@ export async function testAPIKey(keyOrId: string, isId: boolean = false, provide
                     "Authorization": `Bearer ${apiKey.trim()}`,
                 },
                 body: JSON.stringify({
-                    model: "llama3-8b-8192", // Fast model for testing
+                    model: "llama3-8b-8192",
                     messages: [{ role: "user", content: "Hi" }],
                     max_tokens: 5,
                 }),
@@ -267,18 +257,18 @@ export async function testAPIKey(keyOrId: string, isId: boolean = false, provide
             return { success: false, error: "Unknown provider", isValid: false };
         }
 
-        // Handle rate limits (429) as success for validity check
         if (statusCode === 429) {
             isValid = true;
             errorMessage = "Rate limited (Key is valid)";
         }
 
-        // If testing by ID, update the key's validation status in Firestore
         if (isId) {
-            await getAdminDb().collection("apiKeys").doc(keyOrId).update({
-                isValid: isValid,
-                lastTested: admin.firestore.FieldValue.serverTimestamp(),
-                updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+            await prisma.apiKey.update({
+                where: { id: keyOrId },
+                data: {
+                    isValid: isValid,
+                    lastTested: new Date()
+                }
             });
         }
 
@@ -291,13 +281,14 @@ export async function testAPIKey(keyOrId: string, isId: boolean = false, provide
     } catch (error) {
         console.error("[testAPIKey] Error:", error);
 
-        // Update validation status if testing by ID
         if (isId) {
             try {
-                await getAdminDb().collection("apiKeys").doc(keyOrId).update({
-                    isValid: false,
-                    lastTested: admin.firestore.FieldValue.serverTimestamp(),
-                    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+                await prisma.apiKey.update({
+                    where: { id: keyOrId },
+                    data: {
+                        isValid: false,
+                        lastTested: new Date()
+                    }
                 });
             } catch { /* ignore */ }
         }
@@ -317,22 +308,18 @@ export async function testAPIKey(keyOrId: string, isId: boolean = false, provide
  */
 export async function syncAPIKeysToManager() {
     try {
-        const snapshot = await getAdminDb()
-            .collection("apiKeys")
-            .where("isActive", "==", true)
-            .get();
+        const snapshot = await prisma.apiKey.findMany({
+            where: { isActive: true }
+        });
 
-        const keys = snapshot.docs.map((doc: admin.firestore.QueryDocumentSnapshot) => {
-            const data = doc.data();
-            return {
-                key: data.key as string,
-                provider: (data.provider || "google") as LLMProvider,
-                id: doc.id
-            };
-        }).filter(k => k.key && k.key.trim() !== "");
+        const keys = snapshot.map((data) => ({
+            key: data.key,
+            provider: (data.provider || "google") as LLMProvider,
+            id: data.id
+        })).filter(k => k.key && k.key.trim() !== "");
 
         const manager = getAPIKeyManager();
-        manager.loadFirestoreKeys(keys);
+        manager.loadFirestoreKeys(keys); // Still using the same method name as the local api key manager expects it
 
         return { success: true, keyCount: keys.length };
     } catch (error) {
