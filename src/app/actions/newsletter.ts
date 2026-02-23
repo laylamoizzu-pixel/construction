@@ -1,6 +1,6 @@
 "use server";
 
-import { getAdminDb, admin } from "@/lib/firebase-admin";
+import prisma from "@/lib/db";
 
 export interface Subscriber {
     id: string;
@@ -11,17 +11,19 @@ export interface Subscriber {
 
 export async function subscribeToNewsletter(email: string) {
     try {
-        const db = getAdminDb();
-        const existing = await db.collection("newsletter_subscribers").where("email", "==", email).get();
+        const existing = await prisma.newsletterSubscriber.findUnique({
+            where: { email }
+        });
 
-        if (!existing.empty) {
+        if (existing) {
             return { success: false, error: "Email already subscribed" };
         }
 
-        await db.collection("newsletter_subscribers").add({
-            email,
-            status: "subscribed",
-            subscribedAt: admin.firestore.FieldValue.serverTimestamp(),
+        await prisma.newsletterSubscriber.create({
+            data: {
+                email,
+                status: "subscribed",
+            }
         });
 
         return { success: true };
@@ -32,21 +34,21 @@ export async function subscribeToNewsletter(email: string) {
 
 export async function getNewsletterSubscribers(): Promise<Subscriber[]> {
     try {
-        const snapshot = await getAdminDb().collection("newsletter_subscribers").orderBy("subscribedAt", "desc").get();
-        return snapshot.docs.map((doc: admin.firestore.QueryDocumentSnapshot) => ({
-            id: doc.id,
-            ...doc.data(),
-            subscribedAt: (doc.data().subscribedAt as admin.firestore.Timestamp)?.toDate() || new Date(),
-        })) as Subscriber[];
+        const subscribers = await prisma.newsletterSubscriber.findMany({
+            orderBy: { subscribedAt: "desc" }
+        });
+        return subscribers as unknown as Subscriber[];
     } catch (error) {
-        console.error("Error fetching newsletter subscribers:", error);
+        console.error("Error fetching newsletter subscribers from Postgres:", error);
         return [];
     }
 }
 
 export async function deleteSubscriber(id: string) {
     try {
-        await getAdminDb().collection("newsletter_subscribers").doc(id).delete();
+        await prisma.newsletterSubscriber.delete({
+            where: { id }
+        });
         return { success: true };
     } catch (error: unknown) {
         return { success: false, error: error instanceof Error ? error.message : "Unknown error" };

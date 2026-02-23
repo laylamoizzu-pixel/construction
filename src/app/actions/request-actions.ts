@@ -1,6 +1,6 @@
 "use server";
 
-import { getAdminDb, admin } from "@/lib/firebase-admin";
+import prisma from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
@@ -32,17 +32,17 @@ export async function createProductRequest(data: ProductRequestInput) {
     try {
         const validated = productRequestSchema.parse(data);
 
-        const docRef = await getAdminDb().collection("productRequests").add({
-            ...validated,
-            status: "PENDING",
-            createdAt: admin.firestore.FieldValue.serverTimestamp(),
-            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        const doc = await prisma.productRequest.create({
+            data: {
+                ...validated as any,
+                status: "PENDING",
+            }
         });
 
         // Revalidate admin requests page
         revalidatePath("/admin/requests");
 
-        return { success: true, id: docRef.id };
+        return { success: true, id: doc.id };
     } catch (error) {
         console.error("Error creating product request:", error);
         return { success: false, error: error instanceof Error ? error.message : "Unknown error" };
@@ -51,45 +51,32 @@ export async function createProductRequest(data: ProductRequestInput) {
 
 export async function getProductRequests(status?: string) {
     try {
-        let query: admin.firestore.Query = getAdminDb().collection("productRequests");
+        const where = status ? { status: status as any } : {};
 
-        if (status) {
-            query = query.where("status", "==", status);
-        }
+        const requests = await prisma.productRequest.findMany({
+            where,
+            orderBy: { createdAt: "desc" }
+        });
 
-        // Order by newest first
-        query = query.orderBy("createdAt", "desc");
-
-        const snapshot = await query.get();
-
-        return snapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-            createdAt: (doc.data().createdAt as admin.firestore.Timestamp)?.toDate() || new Date(),
-            updatedAt: (doc.data().updatedAt as admin.firestore.Timestamp)?.toDate() || new Date(),
-        })) as ProductRequest[];
+        return requests as unknown as ProductRequest[];
     } catch (error) {
-        console.error("Error fetching product requests:", error);
+        console.error("Error fetching product requests from Postgres:", error);
         return [];
     }
 }
 
 export async function updateRequestStatus(id: string, status: string, notes?: string) {
     try {
-        const updateData: {
-            status: string;
-            updatedAt: admin.firestore.FieldValue;
-            notes?: string;
-        } = {
-            status,
-            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-        };
+        const updateData: { status: string; notes?: string } = { status };
 
         if (notes !== undefined) {
             updateData.notes = notes;
         }
 
-        await getAdminDb().collection("productRequests").doc(id).update(updateData);
+        await prisma.productRequest.update({
+            where: { id },
+            data: updateData as any
+        });
 
         revalidatePath("/admin/requests");
         return { success: true };
