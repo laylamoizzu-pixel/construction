@@ -62,8 +62,13 @@ async function migrateCategories() {
         firestore.collection("categories").orderBy("order", "asc").get()
     );
 
+    // Separate parents and children
+    const parents = snapshot.docs.filter(doc => !doc.data().parentId);
+    const children = snapshot.docs.filter(doc => doc.data().parentId);
+    const sortedDocs = [...parents, ...children];
+
     let count = 0;
-    for (const doc of snapshot.docs) {
+    for (const doc of sortedDocs) {
         const data = doc.data();
         await prisma.category.upsert({
             where: { id: doc.id },
