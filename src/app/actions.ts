@@ -2,9 +2,10 @@
 // Force re-compile
 
 
-import { getAdminDb, getAdminAuth, admin } from "@/lib/firebase-admin";
+import { getAdminAuth, admin } from "@/lib/firebase-admin";
 import { getSearchCache, CacheKeys } from "@/lib/search-cache";
 import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
+import prisma from "@/lib/db";
 
 // ==================== OFFERS ====================
 
@@ -18,11 +19,12 @@ export interface Offer {
 
 export async function createOffer(title: string, discount: string, description: string) {
     try {
-        const docRef = await getAdminDb().collection("offers").add({
-            title,
-            discount,
-            description,
-            createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        const doc = await prisma.offer.create({
+            data: {
+                title,
+                discount,
+                description,
+            }
         });
 
         revalidatePath("/offers");
@@ -30,7 +32,7 @@ export async function createOffer(title: string, discount: string, description: 
         revalidatePath("/admin");
         revalidateTag("offers");
 
-        return { success: true, id: docRef.id };
+        return { success: true, id: doc.id };
     } catch (error: unknown) {
         return { success: false, error: error instanceof Error ? error.message : "Unknown error" };
     }
@@ -38,12 +40,10 @@ export async function createOffer(title: string, discount: string, description: 
 
 async function _fetchOffers(): Promise<Offer[]> {
     try {
-        const snapshot = await getAdminDb().collection("offers").orderBy("createdAt", "desc").get();
-        return snapshot.docs.map((doc: admin.firestore.QueryDocumentSnapshot) => ({
-            id: doc.id,
-            ...doc.data(),
-            createdAt: (doc.data().createdAt as admin.firestore.Timestamp)?.toDate() || new Date(),
-        })) as Offer[];
+        const offers = await prisma.offer.findMany({
+            orderBy: { createdAt: "desc" }
+        });
+        return offers as unknown as Offer[];
     } catch (error) {
         console.error("Error fetching offers:", error);
         return [];
@@ -57,7 +57,9 @@ export const getOffers = unstable_cache(_fetchOffers, ["offers"], {
 
 export async function deleteOffer(id: string) {
     try {
-        await getAdminDb().collection("offers").doc(id).delete();
+        await prisma.offer.delete({
+            where: { id }
+        });
 
         revalidatePath("/offers");
         revalidatePath("/admin/content/offers");
@@ -74,16 +76,15 @@ export async function deleteOffer(id: string) {
 
 export async function getDashboardStats() {
     try {
-        const db = getAdminDb();
-        const [offersSnap, productsSnap, categoriesSnap] = await Promise.all([
-            db.collection("offers").get(),
-            db.collection("products").get(),
-            db.collection("categories").get(),
+        const [offersCount, productsCount, categoriesCount] = await Promise.all([
+            prisma.offer.count(),
+            prisma.product.count(),
+            prisma.category.count(),
         ]);
         return {
-            offersCount: offersSnap.size,
-            productsCount: productsSnap.size,
-            categoriesCount: categoriesSnap.size,
+            offersCount,
+            productsCount,
+            categoriesCount,
         };
     } catch (error) {
         console.error("Error fetching dashboard stats:", error);
@@ -94,23 +95,11 @@ export async function getDashboardStats() {
 // ==================== TEST CONNECTION ====================
 
 export async function testFirebaseConnection() {
-    try {
-        const snapshot = await getAdminDb().listCollections();
-        console.log("Successfully connected to Firebase!");
-        return {
-            success: true,
-            message: "Connected to Firebase!",
-            collections: snapshot.map((col: admin.firestore.CollectionReference) => col.id)
-        };
-    } catch (error: unknown) {
-        const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
-        console.error("Firebase Connection Error:", errorMessage);
-        return {
-            success: false,
-            message: "Failed to connect to Firebase. Check your .env.local file.",
-            error: errorMessage
-        };
-    }
+    return {
+        success: true,
+        message: "Firebase connection is deprecated. Data is mostly stored in Postgres/Blob via Prisma now.",
+        collections: []
+    };
 }
 
 // ==================== SITE CONTENT ====================
@@ -439,12 +428,10 @@ export interface Category {
 
 async function _fetchCategories(): Promise<Category[]> {
     try {
-        const snapshot = await getAdminDb().collection("categories").orderBy("order", "asc").get();
-        return snapshot.docs.map((doc: admin.firestore.QueryDocumentSnapshot) => ({
-            id: doc.id,
-            ...doc.data(),
-            createdAt: (doc.data().createdAt as admin.firestore.Timestamp)?.toDate() || new Date(),
-        })) as Category[];
+        const categories = await prisma.category.findMany({
+            orderBy: { order: "asc" }
+        });
+        return categories as Category[];
     } catch (error) {
         console.error("Error fetching categories:", error);
         return [];
@@ -459,22 +446,23 @@ export const getCategories = unstable_cache(_fetchCategories, ["categories"], {
 export async function createCategory(name: string, parentId: string | null = null) {
     try {
         const slug = name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
-        const snapshot = await getAdminDb().collection("categories").get();
-        const order = snapshot.size;
+        const count = await prisma.category.count();
+        const order = count;
 
-        const docRef = await getAdminDb().collection("categories").add({
-            name,
-            slug,
-            parentId,
-            order,
-            createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        const doc = await prisma.category.create({
+            data: {
+                name,
+                slug,
+                parentId,
+                order,
+            }
         });
 
         revalidatePath("/products");
         revalidatePath("/admin/content/categories");
         revalidateTag("categories");
 
-        return { success: true, id: docRef.id };
+        return { success: true, id: doc.id };
     } catch (error: unknown) {
         return { success: false, error: error instanceof Error ? error.message : "Unknown error" };
     } finally {
@@ -484,9 +472,12 @@ export async function createCategory(name: string, parentId: string | null = nul
 
 export async function updateCategory(id: string, data: Partial<Category>) {
     try {
-        await getAdminDb().collection("categories").doc(id).update({
-            ...data,
-            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        await prisma.category.update({
+            where: { id },
+            data: {
+                ...data,
+                // Prisma handles updatedAt automatically
+            }
         });
 
         revalidatePath("/products");
@@ -503,7 +494,9 @@ export async function updateCategory(id: string, data: Partial<Category>) {
 
 export async function deleteCategory(id: string) {
     try {
-        await getAdminDb().collection("categories").doc(id).delete();
+        await prisma.category.delete({
+            where: { id }
+        });
 
         revalidatePath("/products");
         revalidatePath("/admin/content/categories");
@@ -728,10 +721,10 @@ export async function getProduct(id: string): Promise<Product | null> {
 // Add new product
 export async function createProduct(data: Record<string, unknown>) {
     try {
-        const docRef = await getAdminDb().collection("products").add({
-            ...data,
-            createdAt: admin.firestore.FieldValue.serverTimestamp(),
-            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        const doc = await prisma.product.create({
+            data: {
+                ...data as any,
+            }
         });
 
         revalidatePath("/");
@@ -739,7 +732,7 @@ export async function createProduct(data: Record<string, unknown>) {
         revalidatePath("/admin/content/products");
         revalidateTag("products");
 
-        return { success: true, id: docRef.id };
+        return { success: true, id: doc.id };
     } catch (error: unknown) {
         return { success: false, error: error instanceof Error ? error.message : "Unknown error" };
     } finally {
@@ -751,9 +744,11 @@ export async function createProduct(data: Record<string, unknown>) {
 // Update product
 export async function updateProduct(id: string, data: Record<string, unknown>) {
     try {
-        await getAdminDb().collection("products").doc(id).update({
-            ...data,
-            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        await prisma.product.update({
+            where: { id },
+            data: {
+                ...data as any,
+            }
         });
 
         revalidatePath("/");
@@ -775,7 +770,9 @@ export async function updateProduct(id: string, data: Record<string, unknown>) {
 // Delete product
 export async function deleteProduct(id: string) {
     try {
-        await getAdminDb().collection("products").doc(id).delete();
+        await prisma.product.delete({
+            where: { id }
+        });
 
         revalidatePath("/");
         revalidatePath("/products");
@@ -794,14 +791,9 @@ export async function deleteProduct(id: string) {
 // Bulk delete products
 export async function deleteProducts(ids: string[]) {
     try {
-        const batch = getAdminDb().batch();
-        const collection = getAdminDb().collection("products");
-
-        ids.forEach(id => {
-            batch.delete(collection.doc(id));
+        await prisma.product.deleteMany({
+            where: { id: { in: ids } }
         });
-
-        await batch.commit();
 
         revalidatePath("/");
         revalidatePath("/products");
@@ -819,25 +811,12 @@ export async function deleteProducts(ids: string[]) {
 // Bulk update products (availability, featured, category, etc.)
 export async function bulkUpdateProducts(ids: string[], data: Record<string, unknown>) {
     try {
-        const db = getAdminDb();
-        const collection = db.collection("products");
-
-        // Firestore batch limit is 500; chunk if needed
-        const chunks = [];
-        for (let i = 0; i < ids.length; i += 500) {
-            chunks.push(ids.slice(i, i + 500));
-        }
-
-        for (const chunk of chunks) {
-            const batch = db.batch();
-            chunk.forEach(id => {
-                batch.update(collection.doc(id), {
-                    ...data,
-                    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-                });
-            });
-            await batch.commit();
-        }
+        await prisma.product.updateMany({
+            where: { id: { in: ids } },
+            data: {
+                ...data as any,
+            }
+        });
 
         revalidatePath("/");
         revalidatePath("/products");
@@ -855,9 +834,9 @@ export async function bulkUpdateProducts(ids: string[], data: Record<string, unk
 // Toggle product availability
 export async function toggleProductAvailability(id: string, available: boolean) {
     try {
-        await getAdminDb().collection("products").doc(id).update({
-            available,
-            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        await prisma.product.update({
+            where: { id },
+            data: { available }
         });
 
         revalidatePath("/");
