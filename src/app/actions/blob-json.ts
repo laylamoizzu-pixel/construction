@@ -21,9 +21,10 @@ export async function getBlobJson<T>(filename: string, defaultData: T): Promise<
             return defaultData;
         }
 
-        const url = blobs[0].url;
+        const blob = blobs[0];
+        const url = `${blob.url}?v=${new Date(blob.uploadedAt).getTime()}`;
 
-        // Fetch data from the actual public URL
+        // Fetch data from the actual public URL with a versioned parameter to bust CDN caches
         const response = await fetch(url, {
             next: { revalidate: 300, tags: [`blob-${filename}`] }
         });

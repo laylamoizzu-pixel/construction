@@ -89,9 +89,14 @@ export async function updateSiteConfig(newConfig: SiteConfig): Promise<{ success
             throw new Error(result.error || "Failed to save to Blob");
         }
 
+        console.log(`[Site Config] Successfully updated ${BLOB_FILENAME}. New URL: ${result.url}`);
+
         // Revalidate all pages since this affects global layout/theme
         revalidatePath("/", "layout");
         revalidateTag("site-config");
+        revalidateTag(`blob-${BLOB_FILENAME}`);
+
+        console.log(`[Site Config] Revalidation triggered for site-config and blob-${BLOB_FILENAME}`);
 
         return { success: true };
     } catch (error) {
