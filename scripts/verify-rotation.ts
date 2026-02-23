@@ -1,7 +1,9 @@
 import * as dotenv from 'dotenv';
 import path from 'path';
-import { getAPIKeyManager } from '../src/lib/api-key-manager';
-import { LLMProvider } from '../src/types/assistant-types';
+import { getAPIKeyManager } from '../src/lib/api-key-manager.js';
+import { LLMProvider } from '../src/types/assistant-types.js';
+
+
 
 
 // Load environment variables from .env.local
