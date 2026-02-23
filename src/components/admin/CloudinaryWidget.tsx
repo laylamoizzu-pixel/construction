@@ -43,7 +43,7 @@ export default function CloudinaryWidget({ cloudName, apiKey }: CloudinaryWidget
                 }
 
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                (window as any).cloudinary.createMediaLibrary(
+                const widget = (window as any).cloudinary.createMediaLibrary(
                     {
                         cloud_name: cloudName,
                         api_key: apiKey,
@@ -62,10 +62,11 @@ export default function CloudinaryWidget({ cloudName, apiKey }: CloudinaryWidget
                     "#cloudinary-media-library-container"
                 );
 
-                // Note: The widget might need to be shown/rendered explicitly in some cases 
-                // but createMediaLibrary with inline_container usually handles it.
-                // However, we reference it for cleanup.
-                widgetRef.current = true; // Just mark as initialized
+                // For inline widgets, we still need to call show() to actually render/activate it 
+                // in the specified container.
+                widget.show();
+
+                widgetRef.current = widget;
 
             } catch (err) {
                 console.error("Failed to initialize Cloudinary Media Library:", err);
