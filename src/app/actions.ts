@@ -379,7 +379,7 @@ export async function createStaffMember(email: string, name: string, role: strin
 export async function updateStaffMember(id: string, data: Partial<StaffMember>) {
     try {
         // Create a new object to avoid modifying the original 'data' and ensure type safety
-        const updateData: any = { ...data };
+        const updateData: Prisma.StaffUpdateInput = { ...data };
         delete updateData.id; // Cast to allow deletion if 'id' was explicitly in 'data'
         delete updateData.createdAt; // Cast to allow deletion if 'createdAt' was explicitly in 'data'
 
@@ -502,10 +502,13 @@ export async function createCategory(name: string, parentId: string | null = nul
 
 export async function updateCategory(id: string, data: Partial<Category>) {
     try {
-        const updateData: any = { ...data };
-        delete updateData.id;
-        delete updateData.createdAt;
-        if (updateData.parentId === undefined || updateData.parentId === "") updateData.parentId = null;
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { id: _, createdAt: __, parentId, ...rest } = data;
+        const updateData: Prisma.CategoryUpdateInput = {
+            ...rest,
+            parent: parentId === undefined ? undefined :
+                (parentId === null || parentId === "" ? { disconnect: true } : { connect: { id: parentId } })
+        };
 
         await prisma.category.update({
             where: { id },
@@ -660,7 +663,7 @@ export async function getFilteredProducts(filters: {
             // A selected ID might be a parent category OR a subcategory.
             // Match products where EITHER field matches one of the selected IDs.
             where.AND = where.AND || [];
-            (where.AND as any[]).push({
+            (where.AND as Prisma.ProductWhereInput[]).push({
                 OR: [
                     { categoryId: { in: cats } },
                     { subcategoryId: { in: cats } }
@@ -825,8 +828,7 @@ export async function createProduct(data: Record<string, unknown>) {
 
         const doc = await prisma.product.create({
             data: {
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                ...cleanedData as any,
+                ...cleanedData as Prisma.ProductUncheckedCreateInput,
             }
         });
 
@@ -859,8 +861,7 @@ export async function updateProduct(id: string, data: Record<string, unknown>) {
         await prisma.product.update({
             where: { id },
             data: {
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                ...cleanedData as any,
+                ...cleanedData as Prisma.ProductUncheckedUpdateInput,
             }
         });
 

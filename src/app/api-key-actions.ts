@@ -7,6 +7,7 @@
  */
 
 import prisma from "@/lib/db";
+import { Prisma } from "@prisma/client";
 import { getAPIKeyManager, resetAPIKeyManager } from "@/lib/api-key-manager";
 import { revalidatePath } from "next/cache";
 
@@ -104,7 +105,7 @@ export async function addAPIKey(name: string, key: string, provider: LLMProvider
  */
 export async function updateAPIKey(id: string, data: { name?: string; key?: string; provider?: LLMProvider; isActive?: boolean }) {
     try {
-        const updateData: any = {};
+        const updateData: Prisma.ApiKeyUpdateInput = {};
         if (data.name !== undefined) updateData.name = data.name.trim();
         if (data.key !== undefined) {
             updateData.key = data.key.trim();

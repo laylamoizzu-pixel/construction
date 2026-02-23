@@ -8,7 +8,7 @@ interface AppError {
     stack?: string;
     timestamp: number;
     digest?: string;
-    context?: any;
+    context?: unknown;
 }
 
 interface DebugContextType {

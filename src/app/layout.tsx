@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Outfit } from "next/font/google";
 import ClientLayout from "@/components/ClientLayout";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import { getSiteConfig } from "@/app/actions/site-config";
 import { DEFAULT_SITE_CONFIG } from "@/types/site-config";
@@ -165,6 +166,7 @@ export default async function RootLayout({
         </Suspense>
 
         <SpeedInsights />
+        <Analytics />
       </body>
     </html>
   );
