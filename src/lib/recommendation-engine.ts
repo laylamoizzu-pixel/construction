@@ -121,7 +121,18 @@ export async function getRecommendations(
         }
 
         // Step 3: Query relevant products (cached in getProducts)
-        const products = await queryProducts(intent, request.context);
+        // CHECK: If the previous message was from the assistant asking for details about a missing product,
+        // we should NOT fallback to general search if the current query is just a budget/detail.
+        const lastAssistantMessage = request.messages?.filter(m => m.role === "assistant").slice(-1)[0];
+        const isInMissingProductFlow = lastAssistantMessage?.content.includes("don't have") ||
+            lastAssistantMessage?.content.includes("request");
+
+        const products = await queryProducts(intent, {
+            ...request.context,
+            // If we are in a missing product flow and have no clear category, 
+            // we should NOT do a general search. We pass a special flag or handle it in queryProducts.
+            preventFallback: isInMissingProductFlow && !intent.category
+        });
 
         if (products.length === 0) {
             // Check if this looks like a missing product scenario that we should handle
@@ -263,6 +274,10 @@ async function queryProducts(
             products = products.filter(p => p.subcategoryId === intent.subcategory);
         }
 
+    } else if (context?.preventFallback) {
+        // We were told NOT to fallback if no category is found
+        // This is usually because we are in a missing product request flow
+        products = [];
     } else {
         // Option B: No category specified (General Search)
         // We should search by text using the user's requirements/keywords

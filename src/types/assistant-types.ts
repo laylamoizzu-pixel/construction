@@ -72,6 +72,7 @@ export interface RecommendationRequest {
         categoryId?: string;
         preferences?: string[];
         excludeProductIds?: string[];
+        preventFallback?: boolean;
     };
     messages?: Array<{ role: "user" | "assistant"; content: string }>; // Conversation history
     maxResults?: number;

@@ -31,6 +31,11 @@ Available product categories:
 
 Customer query: "{{query}}"
 
+RULES FOR CONTEXT RETENTION:
+1. If the current query is just a number (e.g., "300") or a budget (e.g., "under 500"), and the conversation history shows the user was previously looking for a specific category (e.g., Jewelry), you MUST keep that category in your response.
+2. If the user was in a "Product Request" flow (e.g., they asked for something we DON'T have), continue to treat this as a "Product Request" unless they explicitly change their mind.
+3. Prioritize information in the History to fill in missing fields (category, subcategory) if the current query is a follow-up.
+
 If the customer is asking for a product that is clearly NOT in our categories or is explicitly requesting a new item we don't stock, identify it as a "request".
 If the customer is just saying "Hi", "Hello", "Assalam walaikum", or engaging in small talk without a product query, identify it as "isGeneralChat: true".
 Otherwise, treat it as a search for existing products.
