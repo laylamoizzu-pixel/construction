@@ -1,7 +1,7 @@
 "use server";
 
 import { put, list } from "@vercel/blob";
-import { revalidateTag } from "next/cache";
+import { revalidateTag, unstable_cache } from "next/cache";
 
 /**
  * A generic utility to store and retrieve JSON configuration files
@@ -10,32 +10,47 @@ import { revalidateTag } from "next/cache";
 
 const blobUrlCache: Record<string, string> = {};
 
+async function _resolveBlobUrl(filename: string): Promise<string | null> {
+    const { blobs } = await list({
+        prefix: filename,
+        limit: 1,
+        token: process.env.BLOB_READ_WRITE_TOKEN
+    });
+
+    if (blobs.length === 0) {
+        return null;
+    }
+
+    const blob = blobs[0];
+    return `${blob.url}?v=${new Date(blob.uploadedAt).getTime()}`;
+}
+
+const getCachedBlobUrl = unstable_cache(
+    (filename: string) => _resolveBlobUrl(filename),
+    ["blob-url-resolution"],
+    { revalidate: 3600, tags: ["blob-url"] }
+);
+
 export async function getBlobJson<T>(filename: string, defaultData: T): Promise<T> {
     try {
         let url = blobUrlCache[filename];
 
         if (!url) {
-            // Use the Vercel Blob API to find the file dynamically rather than guessing the URL
-            const { blobs } = await list({
-                prefix: filename,
-                limit: 1,
-                token: process.env.BLOB_READ_WRITE_TOKEN
-            });
+            url = await getCachedBlobUrl(filename) || "";
 
-            if (blobs.length === 0) {
+            if (!url) {
                 return defaultData;
             }
-
-            const blob = blobs[0];
-            url = `${blob.url}?v=${new Date(blob.uploadedAt).getTime()}`;
             blobUrlCache[filename] = url;
             console.log(`[Blob JSON] Resolved and cached URL for ${filename}`);
         }
 
+
         // Fetch data from the actual public URL with a versioned parameter to bust CDN caches
         const response = await fetch(url, {
-            next: { revalidate: 300, tags: [`blob-${filename}`] }
+            next: { revalidate: 3600, tags: [`blob-${filename}`] }
         });
+
 
         if (!response.ok) {
             throw new Error(`Failed to fetch ${filename}: ${response.statusText}`);
@@ -62,7 +77,9 @@ export async function updateBlobJson<T>(filename: string, data: T): Promise<{ su
 
         // CRITICAL: Invalidate the underlying fetch cache for this specific blob
         revalidateTag(`blob-${filename}`);
+        revalidateTag("blob-url");
         delete blobUrlCache[filename];
+
 
         return { success: true, url: blob.url };
     } catch (error) {

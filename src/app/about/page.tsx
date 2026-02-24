@@ -5,7 +5,8 @@ import { constructMetadata } from "@/lib/seo-utils";
 import { Metadata } from "next";
 import { Suspense } from "react";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 3600;
+
 
 export async function generateMetadata(): Promise<Metadata> {
     const config = await getSiteConfig();

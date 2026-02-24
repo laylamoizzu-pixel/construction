@@ -73,8 +73,52 @@ export async function generateMetadata(): Promise<Metadata> {
 // Optimized Layout that fetches config ONCE and injects into ClientLayout + scripts
 async function ConfigLoader({ children }: { children: React.ReactNode }) {
   const config = await getSiteConfig();
+
+  const organizationSchema = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": config.seo.jsonLd.name,
+    "url": config.seo.jsonLd.url,
+    "logo": config.seo.jsonLd.logo,
+    "description": config.seo.jsonLd.description,
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "telephone": config.contact.phone,
+      "email": config.contact.email,
+      "contactType": "customer service"
+    },
+    "sameAs": [
+      config.contact.instagramUrl,
+      config.contact.facebookUrl,
+      config.contact.twitterUrl
+    ].filter(Boolean)
+  };
+
+  const websiteSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": config.seo.jsonLd.name,
+    "url": config.seo.jsonLd.url,
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": {
+        "@type": "EntryPoint",
+        "urlTemplate": `${config.seo.jsonLd.url}/products?q={search_term_string}`
+      },
+      "query-input": "required name=search_term_string"
+    }
+  };
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
+      />
       {config.system.scripts.customHeadScript && (
         <script
           dangerouslySetInnerHTML={{
@@ -106,61 +150,16 @@ async function ConfigLoader({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const siteConfig = await getSiteConfig();
-
-  const organizationSchema = {
-    "@context": "https://schema.org",
-    "@type": "Organization",
-    "name": siteConfig.seo.jsonLd.name,
-    "url": siteConfig.seo.jsonLd.url,
-    "logo": siteConfig.seo.jsonLd.logo,
-    "description": siteConfig.seo.jsonLd.description,
-    "contactPoint": {
-      "@type": "ContactPoint",
-      "telephone": siteConfig.contact.phone,
-      "email": siteConfig.contact.email,
-      "contactType": "customer service"
-    },
-    "sameAs": [
-      siteConfig.contact.instagramUrl,
-      siteConfig.contact.facebookUrl,
-      siteConfig.contact.twitterUrl
-    ].filter(Boolean)
-  };
-
-  const websiteSchema = {
-    "@context": "https://schema.org",
-    "@type": "WebSite",
-    "name": siteConfig.seo.jsonLd.name,
-    "url": siteConfig.seo.jsonLd.url,
-    "potentialAction": {
-      "@type": "SearchAction",
-      "target": {
-        "@type": "EntryPoint",
-        "urlTemplate": `${siteConfig.seo.jsonLd.url}/products?q={search_term_string}`
-      },
-      "query-input": "required name=search_term_string"
-    }
-  };
-
   return (
     <html lang="en">
       <body
         className={`${inter.variable} ${outfit.variable} antialiased bg-slate-50 text-slate-900 flex flex-col min-h-screen`}
       >
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
-        />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
-        />
         <Suspense fallback={<ClientLayout initialConfig={DEFAULT_SITE_CONFIG}>{children}</ClientLayout>}>
           <ConfigLoader>{children}</ConfigLoader>
         </Suspense>
@@ -171,3 +170,4 @@ export default async function RootLayout({
     </html>
   );
 }
+

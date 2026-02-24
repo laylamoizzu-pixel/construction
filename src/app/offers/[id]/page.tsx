@@ -1,13 +1,22 @@
-import { getOffer } from "@/app/actions";
+import { getOffer, getOffers } from "@/app/actions";
 import { getSiteConfig } from "@/app/actions/site-config";
 import { constructMetadata } from "@/lib/seo-utils";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Clock, Tag, Zap } from "lucide-react";
+import WhatsAppButton from "./WhatsAppButton";
+
+export const revalidate = 3600;
 
 
-export const dynamic = "force-dynamic";
+export async function generateStaticParams() {
+    const offers = await getOffers();
+    return offers.map((offer) => ({
+        id: offer.id,
+    }));
+}
+
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
     const { id } = await params;
@@ -26,7 +35,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 }
 
 // Client wrapper for WhatsApp button since it needs context
-import WhatsAppButton from "./WhatsAppButton";
+
 
 export default async function OfferDetailPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;

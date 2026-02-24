@@ -74,9 +74,10 @@ async function _fetchSiteConfig(): Promise<SiteConfig> {
 }
 
 export const getSiteConfig = unstable_cache(_fetchSiteConfig, ["site-config"], {
-    revalidate: 300,
+    revalidate: 3600,
     tags: ["site-config"],
 });
+
 
 /**
  * Updates the site configuration in Vercel Blob.
