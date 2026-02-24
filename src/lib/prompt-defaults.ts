@@ -21,7 +21,10 @@ export const DEFAULT_PROMPTS: Record<string, AIPrompt> = {
     name: "Intent Analyzer",
     description: "Classifies user queries into product categories and tags.",
     isActive: true,
-    systemPrompt: `Analyze the following customer query and extract their intent.
+    systemPrompt: `Analyze the following customer query and extract their intent, taking into account the conversation history if provided.
+    
+Conversation History:
+{{conversationContext}}
 
 Available product categories:
 {{categoryList}}

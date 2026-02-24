@@ -84,137 +84,6 @@ export default function FilterSidebar({ categories, settings }: FilterSidebarPro
         updateFilters({ categories: newCats });
     };
 
-    // Shared Filter Content
-    const FilterContent = () => (
-        <div className="space-y-8">
-            {/* Search */}
-            {vis.showSearch && (
-                <div>
-                    <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-3">Search</h3>
-                    <div className="relative">
-                        <input
-                            type="text"
-                            placeholder="Search products..."
-                            value={filters.search || ""}
-                            onChange={(e) => updateFilters({ search: e.target.value })}
-                            className="w-full pl-3 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-brand-blue/50 outline-none"
-                        />
-                    </div>
-                </div>
-            )}
-
-            {/* Sort */}
-            {vis.showSort && (
-                <div>
-                    <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-3">Sort By</h3>
-                    <div className="space-y-2">
-                        {SORT_OPTIONS.map(option => (
-                            <label key={option.value} className="flex items-center gap-3 cursor-pointer group">
-                                <div className={`w-5 h-5 rounded-full border flex items-center justify-center transition-colors ${filters.sort === option.value ? "border-brand-blue bg-brand-blue" : "border-slate-300 group-hover:border-brand-blue"}`}>
-                                    {filters.sort === option.value && <div className="w-2 h-2 bg-white rounded-full" />}
-                                </div>
-                                <input
-                                    type="radio"
-                                    name="sort"
-                                    className="hidden"
-                                    checked={filters.sort === option.value}
-                                    onChange={() => updateFilters({ sort: option.value })}
-                                />
-                                <span className={`text-sm ${filters.sort === option.value ? "text-slate-900 font-medium" : "text-slate-600 group-hover:text-slate-900"}`}>
-                                    {option.label}
-                                </span>
-                            </label>
-                        ))}
-                    </div>
-                </div>
-            )}
-
-            {/* Price Range */}
-            {vis.showPriceRange && (
-                <div>
-                    <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-3">Price Range</h3>
-                    <div className="flex items-center gap-4 mb-4">
-                        <div className="relative flex-1">
-                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs">₹</span>
-                            <input
-                                type="number"
-                                placeholder="Min"
-                                value={filters.minPrice || ""}
-                                onChange={(e) => updateFilters({ minPrice: e.target.value ? Number(e.target.value) : undefined })}
-                                className="w-full pl-6 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-brand-blue/50 outline-none"
-                            />
-                        </div>
-                        <span className="text-slate-400">-</span>
-                        <div className="relative flex-1">
-                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs">₹</span>
-                            <input
-                                type="number"
-                                placeholder="Max"
-                                value={filters.maxPrice || ""}
-                                onChange={(e) => updateFilters({ maxPrice: e.target.value ? Number(e.target.value) : undefined })}
-                                className="w-full pl-6 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-brand-blue/50 outline-none"
-                            />
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* Categories */}
-            {vis.showCategories && (
-                <div>
-                    <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-3">Categories</h3>
-                    <div className="space-y-2 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
-                        {categories.map(cat => (
-                            <label key={cat.id} className="flex items-center gap-3 cursor-pointer group">
-                                <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${filters.categories?.includes(cat.id) ? "border-brand-blue bg-brand-blue" : "border-slate-300 group-hover:border-brand-blue"}`}>
-                                    {filters.categories?.includes(cat.id) && <Check className="w-3.5 h-3.5 text-white" />}
-                                </div>
-                                <input
-                                    type="checkbox"
-                                    className="hidden"
-                                    checked={filters.categories?.includes(cat.id)}
-                                    onChange={() => toggleCategory(cat.id)}
-                                />
-                                <span className={`text-sm ${filters.categories?.includes(cat.id) ? "text-slate-900 font-medium" : "text-slate-600 group-hover:text-slate-900"}`}>
-                                    {cat.name}
-                                </span>
-                            </label>
-                        ))}
-                    </div>
-                </div>
-            )}
-
-            {/* Availability */}
-            {vis.showAvailability && (
-                <div>
-                    <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-3">Availability</h3>
-                    <label className="flex items-center gap-3 cursor-pointer group">
-                        <div className={`w-10 h-6 rounded-full p-1 transition-colors ${filters.available ? "bg-brand-blue" : "bg-slate-200"}`}>
-                            <div className={`w-4 h-4 bg-white rounded-full shadow-sm transform transition-transform ${filters.available ? "translate-x-4" : "translate-x-0"}`} />
-                        </div>
-                        <input
-                            type="checkbox"
-                            className="hidden"
-                            checked={filters.available || false}
-                            onChange={() => updateFilters({ available: !filters.available })}
-                        />
-                        <span className="text-sm text-slate-600 group-hover:text-slate-900">In Stock Only</span>
-                    </label>
-                </div>
-            )}
-
-            {/* Actions */}
-            <div className="pt-6 border-t border-slate-100 flex flex-col gap-3">
-                <button
-                    onClick={clearFilters}
-                    className="w-full py-3 bg-slate-100 text-slate-600 rounded-xl font-medium hover:bg-slate-200 transition-colors"
-                >
-                    Clear All Filters
-                </button>
-            </div>
-        </div>
-    );
-
     return (
         <>
             {/* Desktop Sidebar */}
@@ -224,7 +93,134 @@ export default function FilterSidebar({ categories, settings }: FilterSidebarPro
                         <Filter className="w-5 h-5" />
                         <h2 className="font-bold text-lg">Filters</h2>
                     </div>
-                    <FilterContent />
+
+                    <div className="space-y-8">
+                        {/* Search */}
+                        {vis.showSearch && (
+                            <div>
+                                <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-3">Search</h3>
+                                <div className="relative">
+                                    <input
+                                        type="text"
+                                        placeholder="Search products..."
+                                        value={filters.search || ""}
+                                        onChange={(e) => updateFilters({ search: e.target.value })}
+                                        className="w-full pl-3 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-brand-blue/50 outline-none"
+                                    />
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Sort */}
+                        {vis.showSort && (
+                            <div>
+                                <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-3">Sort By</h3>
+                                <div className="space-y-2">
+                                    {SORT_OPTIONS.map(option => (
+                                        <label key={option.value} className="flex items-center gap-3 cursor-pointer group">
+                                            <div className={`w-5 h-5 rounded-full border flex items-center justify-center transition-colors ${filters.sort === option.value ? "border-brand-blue bg-brand-blue" : "border-slate-300 group-hover:border-brand-blue"}`}>
+                                                {filters.sort === option.value && <div className="w-2 h-2 bg-white rounded-full" />}
+                                            </div>
+                                            <input
+                                                type="radio"
+                                                name="sort"
+                                                className="hidden"
+                                                checked={filters.sort === option.value}
+                                                onChange={() => updateFilters({ sort: option.value })}
+                                            />
+                                            <span className={`text-sm ${filters.sort === option.value ? "text-slate-900 font-medium" : "text-slate-600 group-hover:text-slate-900"}`}>
+                                                {option.label}
+                                            </span>
+                                        </label>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Price Range */}
+                        {vis.showPriceRange && (
+                            <div>
+                                <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-3">Price Range</h3>
+                                <div className="flex items-center gap-4 mb-4">
+                                    <div className="relative flex-1">
+                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs">₹</span>
+                                        <input
+                                            type="number"
+                                            placeholder="Min"
+                                            value={filters.minPrice || ""}
+                                            onChange={(e) => updateFilters({ minPrice: e.target.value ? Number(e.target.value) : undefined })}
+                                            className="w-full pl-6 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-brand-blue/50 outline-none"
+                                        />
+                                    </div>
+                                    <span className="text-slate-400">-</span>
+                                    <div className="relative flex-1">
+                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs">₹</span>
+                                        <input
+                                            type="number"
+                                            placeholder="Max"
+                                            value={filters.maxPrice || ""}
+                                            onChange={(e) => updateFilters({ maxPrice: e.target.value ? Number(e.target.value) : undefined })}
+                                            className="w-full pl-6 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-brand-blue/50 outline-none"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Categories */}
+                        {vis.showCategories && (
+                            <div>
+                                <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-3">Categories</h3>
+                                <div className="space-y-2 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
+                                    {categories.map(cat => (
+                                        <label key={cat.id} className="flex items-center gap-3 cursor-pointer group">
+                                            <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${filters.categories?.includes(cat.id) ? "border-brand-blue bg-brand-blue" : "border-slate-300 group-hover:border-brand-blue"}`}>
+                                                {filters.categories?.includes(cat.id) && <Check className="w-3.5 h-3.5 text-white" />}
+                                            </div>
+                                            <input
+                                                type="checkbox"
+                                                className="hidden"
+                                                checked={filters.categories?.includes(cat.id)}
+                                                onChange={() => toggleCategory(cat.id)}
+                                            />
+                                            <span className={`text-sm ${filters.categories?.includes(cat.id) ? "text-slate-900 font-medium" : "text-slate-600 group-hover:text-slate-900"}`}>
+                                                {cat.name}
+                                            </span>
+                                        </label>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Availability */}
+                        {vis.showAvailability && (
+                            <div>
+                                <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-3">Availability</h3>
+                                <label className="flex items-center gap-3 cursor-pointer group">
+                                    <div className={`w-10 h-6 rounded-full p-1 transition-colors ${filters.available ? "bg-brand-blue" : "bg-slate-200"}`}>
+                                        <div className={`w-4 h-4 bg-white rounded-full shadow-sm transform transition-transform ${filters.available ? "translate-x-4" : "translate-x-0"}`} />
+                                    </div>
+                                    <input
+                                        type="checkbox"
+                                        className="hidden"
+                                        checked={filters.available || false}
+                                        onChange={() => updateFilters({ available: !filters.available })}
+                                    />
+                                    <span className="text-sm text-slate-600 group-hover:text-slate-900">In Stock Only</span>
+                                </label>
+                            </div>
+                        )}
+
+                        {/* Actions */}
+                        <div className="pt-6 border-t border-slate-100 flex flex-col gap-3">
+                            <button
+                                onClick={clearFilters}
+                                className="w-full py-3 bg-slate-100 text-slate-600 rounded-xl font-medium hover:bg-slate-200 transition-colors"
+                            >
+                                Clear All Filters
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -266,7 +262,134 @@ export default function FilterSidebar({ categories, settings }: FilterSidebarPro
                                     <X className="w-5 h-5 text-slate-600" />
                                 </button>
                             </div>
-                            <FilterContent />
+
+                            <div className="space-y-8">
+                                {/* Search */}
+                                {vis.showSearch && (
+                                    <div>
+                                        <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-3">Search</h3>
+                                        <div className="relative">
+                                            <input
+                                                type="text"
+                                                placeholder="Search products..."
+                                                value={filters.search || ""}
+                                                onChange={(e) => updateFilters({ search: e.target.value })}
+                                                className="w-full pl-3 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-brand-blue/50 outline-none"
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Sort */}
+                                {vis.showSort && (
+                                    <div>
+                                        <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-3">Sort By</h3>
+                                        <div className="space-y-2">
+                                            {SORT_OPTIONS.map(option => (
+                                                <label key={option.value} className="flex items-center gap-3 cursor-pointer group">
+                                                    <div className={`w-5 h-5 rounded-full border flex items-center justify-center transition-colors ${filters.sort === option.value ? "border-brand-blue bg-brand-blue" : "border-slate-300 group-hover:border-brand-blue"}`}>
+                                                        {filters.sort === option.value && <div className="w-2 h-2 bg-white rounded-full" />}
+                                                    </div>
+                                                    <input
+                                                        type="radio"
+                                                        name="sort"
+                                                        className="hidden"
+                                                        checked={filters.sort === option.value}
+                                                        onChange={() => updateFilters({ sort: option.value })}
+                                                    />
+                                                    <span className={`text-sm ${filters.sort === option.value ? "text-slate-900 font-medium" : "text-slate-600 group-hover:text-slate-900"}`}>
+                                                        {option.label}
+                                                    </span>
+                                                </label>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Price Range */}
+                                {vis.showPriceRange && (
+                                    <div>
+                                        <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-3">Price Range</h3>
+                                        <div className="flex items-center gap-4 mb-4">
+                                            <div className="relative flex-1">
+                                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs">₹</span>
+                                                <input
+                                                    type="number"
+                                                    placeholder="Min"
+                                                    value={filters.minPrice || ""}
+                                                    onChange={(e) => updateFilters({ minPrice: e.target.value ? Number(e.target.value) : undefined })}
+                                                    className="w-full pl-6 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-brand-blue/50 outline-none"
+                                                />
+                                            </div>
+                                            <span className="text-slate-400">-</span>
+                                            <div className="relative flex-1">
+                                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs">₹</span>
+                                                <input
+                                                    type="number"
+                                                    placeholder="Max"
+                                                    value={filters.maxPrice || ""}
+                                                    onChange={(e) => updateFilters({ maxPrice: e.target.value ? Number(e.target.value) : undefined })}
+                                                    className="w-full pl-6 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-brand-blue/50 outline-none"
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Categories */}
+                                {vis.showCategories && (
+                                    <div>
+                                        <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-3">Categories</h3>
+                                        <div className="space-y-2 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
+                                            {categories.map(cat => (
+                                                <label key={cat.id} className="flex items-center gap-3 cursor-pointer group">
+                                                    <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${filters.categories?.includes(cat.id) ? "border-brand-blue bg-brand-blue" : "border-slate-300 group-hover:border-brand-blue"}`}>
+                                                        {filters.categories?.includes(cat.id) && <Check className="w-3.5 h-3.5 text-white" />}
+                                                    </div>
+                                                    <input
+                                                        type="checkbox"
+                                                        className="hidden"
+                                                        checked={filters.categories?.includes(cat.id)}
+                                                        onChange={() => toggleCategory(cat.id)}
+                                                    />
+                                                    <span className={`text-sm ${filters.categories?.includes(cat.id) ? "text-slate-900 font-medium" : "text-slate-600 group-hover:text-slate-900"}`}>
+                                                        {cat.name}
+                                                    </span>
+                                                </label>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Availability */}
+                                {vis.showAvailability && (
+                                    <div>
+                                        <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-3">Availability</h3>
+                                        <label className="flex items-center gap-3 cursor-pointer group">
+                                            <div className={`w-10 h-6 rounded-full p-1 transition-colors ${filters.available ? "bg-brand-blue" : "bg-slate-200"}`}>
+                                                <div className={`w-4 h-4 bg-white rounded-full shadow-sm transform transition-transform ${filters.available ? "translate-x-4" : "translate-x-0"}`} />
+                                            </div>
+                                            <input
+                                                type="checkbox"
+                                                className="hidden"
+                                                checked={filters.available || false}
+                                                onChange={() => updateFilters({ available: !filters.available })}
+                                            />
+                                            <span className="text-sm text-slate-600 group-hover:text-slate-900">In Stock Only</span>
+                                        </label>
+                                    </div>
+                                )}
+
+                                {/* Actions */}
+                                <div className="pt-6 border-t border-slate-100 flex flex-col gap-3">
+                                    <button
+                                        onClick={clearFilters}
+                                        className="w-full py-3 bg-slate-100 text-slate-600 rounded-xl font-medium hover:bg-slate-200 transition-colors"
+                                    >
+                                        Clear All Filters
+                                    </button>
+                                </div>
+                            </div>
                         </motion.div>
                     </>
                 )}

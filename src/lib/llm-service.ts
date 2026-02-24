@@ -533,13 +533,14 @@ export async function analyzeIntent(
     const categoryList = categories.map(c => `- ${c.name} (ID: ${c.id})`).join("\n");
     const validCategoryIds = new Set(categories.map(c => c.id));
 
-    if (messages && messages.length > 0) {
-        // use it purely to acknowledge it if passed, or optionally feed it to prompt if Prompt Library supports it
-    }
+    const conversationContext = messages.length > 0
+        ? messages.map(m => `${m.role.toUpperCase()}: ${m.content}`).join("\n")
+        : "No previous history.";
 
     const prompt = await getPrompt("intent-analyze", {
         categoryList,
-        query
+        query,
+        conversationContext
     });
 
     const result = await callLLMForJSON<GenericIntentResponse>(prompt, provider);
