@@ -4,7 +4,7 @@ import React from "react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
-interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface ButtonProps extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'onDrag' | 'onDragStart' | 'onDragEnd' | 'onPointerDown'> {
     variant?: "primary" | "secondary" | "outline" | "glass" | "ghost";
     size?: "sm" | "md" | "lg" | "xl";
     className?: string;
@@ -18,17 +18,6 @@ export const Button = ({
     children,
     ...props
 }: ButtonProps) => {
-    // Filter out motion-specific props that conflict with HTML button props
-    const {
-        onDrag: _onDrag,
-        onDragStart: _onDragStart,
-        onDragEnd: _onDragEnd,
-        onPointerDown: _onPointerDown,
-        whileHover: _whileHover,
-        whileTap: _whileTap,
-        ...buttonProps
-    } = props as Record<string, unknown>;
-
     const variants = {
         primary: "bg-brand-charcoal text-brand-white hover:bg-opacity-90",
         secondary: "bg-brand-gold text-brand-white hover:bg-opacity-90",
@@ -54,7 +43,7 @@ export const Button = ({
                 sizes[size],
                 className
             )}
-            {...buttonProps}
+            {...props}
         >
             <span className="relative z-10">{children}</span>
             <motion.div
