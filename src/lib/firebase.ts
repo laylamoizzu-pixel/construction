@@ -16,25 +16,30 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase for SSR compatibility
-let app: any;
-let auth: any;
-let analytics: any;
-let perf: any;
+let app: any = null;
+let auth: any = null;
+let analytics: any = null;
+let perf: any = null;
 
-try {
-    app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
-    auth = getAuth(app);
-    // Initialize Analytics only in the browser
-    analytics = typeof window !== "undefined" ? isSupported().then((yes: boolean) => yes ? getAnalytics(app) : null) : null;
-    // Initialize Performance only in the browser
-    perf = typeof window !== "undefined" ? getPerformance(app) : null;
-} catch (error) {
-    console.error("Firebase initialization failed:", error);
-    // Provide dummy objects to prevent import crashes, but functional calls will fail
-    app = null;
-    auth = {} as any;
-    analytics = Promise.resolve(null);
-    perf = {} as any;
+const isConfigValid = firebaseConfig.apiKey && firebaseConfig.projectId && firebaseConfig.appId;
+
+if (typeof window !== "undefined") {
+    try {
+        if (isConfigValid) {
+            app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            
+            // Initialize Analytics and Performance only in the browser
+            isSupported().then((yes: boolean) => {
+                if (yes) analytics = getAnalytics(app);
+            });
+            perf = getPerformance(app);
+        } else {
+            console.warn("Firebase configuration is missing or incomplete. Auth and other services will be disabled.");
+        }
+    } catch (error) {
+        console.error("Firebase initialization failed:", error);
+    }
 }
 
 export { app, auth, analytics, perf };

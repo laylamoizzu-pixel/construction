@@ -72,6 +72,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, []);
 
     useEffect(() => {
+        if (!auth) {
+            setLoading(false);
+            setInitializing(false);
+            return;
+        }
+
         const unsubscribe = onAuthStateChanged(auth, (user) => {
             setUser(user);
             setLoading(false);
@@ -120,12 +126,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, []);
 
     const login = async (email: string, password: string) => {
+        if (!auth) throw new Error("Authentication service is not initialized. Check your environment variables.");
         await signInWithEmailAndPassword(auth, email, password);
     };
 
     const logout = async () => {
         setPersistedAuth(false);
-        await signOut(auth);
+        if (auth) await signOut(auth);
     };
 
     const changePassword = async (currentPassword: string, newPassword: string): Promise<{ success: boolean; error?: string }> => {

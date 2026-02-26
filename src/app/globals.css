@@ -15,6 +15,7 @@
   --color-brand-indigo: #5856D6;
   --color-brand-dark: #000000; /* Pure Black for high contrast */
   --color-brand-surface: #F5F5F7; /* Apple Surface / Gray 6 */
+  --color-brand-sand: #FDFCFB;
   --color-brand-gold: #D4AF37;
   --color-brand-soft-gold: #C5A059;
   --color-brand-accent: #BF953F;
@@ -32,6 +33,7 @@
   --brand-dark: #000000;
   --brand-gold: #D4AF37;
   --brand-surface: #F5F5F7;
+  --brand-sand: #FDFCFB;
 
   /* Font Variables matching layout.tsx */
   --font-sans: var(--font-outfit);

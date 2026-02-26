@@ -40,8 +40,8 @@ export default function AdminLoginPage() {
             <div className="w-full max-w-md">
                 {/* Brand Header */}
                 <div className="text-center mb-10">
-                    <h1 className="text-5xl font-serif text-brand-green mb-2 tracking-tight">
-                        Smart<span className="italic text-brand-gold">Avenue</span>
+                    <h1 className="text-4xl font-serif text-brand-green mb-2 tracking-tight">
+                        Gharana<span className="italic text-brand-gold"> Realtors</span>
                     </h1>
                     <p className="text-brand-gray text-sm uppercase tracking-widest">Administration</p>
                 </div>
