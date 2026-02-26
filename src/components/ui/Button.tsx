@@ -20,10 +20,14 @@ export const Button = ({
 }: ButtonProps) => {
     // Filter out motion-specific props that conflict with HTML button props
     const {
-        onDrag, onDragStart, onDragEnd, onPointerDown,
-        whileHover, whileTap,
+        onDrag: _onDrag,
+        onDragStart: _onDragStart,
+        onDragEnd: _onDragEnd,
+        onPointerDown: _onPointerDown,
+        whileHover: _whileHover,
+        whileTap: _whileTap,
         ...buttonProps
-    } = props as any;
+    } = props as Record<string, unknown>;
 
     const variants = {
         primary: "bg-brand-charcoal text-brand-white hover:bg-opacity-90",
