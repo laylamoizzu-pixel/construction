@@ -226,7 +226,7 @@ export const DEFAULT_SITE_CONFIG: SiteConfig = {
                 subtitle: "Residential, commercial, and plot options crafted for modern living.",
                 ctaText: "View Listings",
                 ctaLink: "/products",
-                backgroundImageUrl: "https://images.unsplash.com/photo-1567401893414-76b7b1e5a7a5?q=80&w=2070&auto=format&fit=crop",
+                backgroundImageUrl: "https://images.unsplash.com/photo-1613490493576-7fde63acd811?q=80&w=2071&auto=format&fit=crop",
                 overlayOpacity: 0.6,
             }
         ]

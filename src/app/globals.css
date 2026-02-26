@@ -18,6 +18,8 @@
   --color-brand-dark: #111111;
   --color-brand-accent: #C5A059;
   --color-brand-soft-gold: #D4B67C;
+  --color-brand-sand: #F5F0E6;
+  --color-brand-green: #064e3b;
 
   --color-primary: var(--brand-charcoal);
   --color-accent: var(--brand-gold);
@@ -37,6 +39,8 @@
   --brand-white: #F8F8F8;
   --brand-gold: #C5A059;
   --brand-silver: #E5E5E5;
+  --brand-sand: #F5F0E6;
+  --brand-green: #064e3b;
 
   /* Font Variables */
   --font-sans: var(--font-outfit);
@@ -120,20 +124,57 @@ h6 {
 }
 
 @keyframes noise {
-  0% { transform: translate(0, 0); }
-  10% { transform: translate(-5%, -5%); }
-  20% { transform: translate(-10%, 5%); }
-  33% { transform: translate(5%, -10%); }
-  44% { transform: translate(-5%, 15%); }
-  55% { transform: translate(-10%, 5%); }
-  66% { transform: translate(15%, 0); }
-  77% { transform: translate(0, 10%); }
-  88% { transform: translate(-15%, 0); }
-  99% { transform: translate(10%, 5%); }
-  100% { transform: translate(5%, 0); }
+  0% {
+    transform: translate(0, 0);
+  }
+
+  10% {
+    transform: translate(-5%, -5%);
+  }
+
+  20% {
+    transform: translate(-10%, 5%);
+  }
+
+  33% {
+    transform: translate(5%, -10%);
+  }
+
+  44% {
+    transform: translate(-5%, 15%);
+  }
+
+  55% {
+    transform: translate(-10%, 5%);
+  }
+
+  66% {
+    transform: translate(15%, 0);
+  }
+
+  77% {
+    transform: translate(0, 10%);
+  }
+
+  88% {
+    transform: translate(-15%, 0);
+  }
+
+  99% {
+    transform: translate(10%, 5%);
+  }
+
+  100% {
+    transform: translate(5%, 0);
+  }
 }
 
 @keyframes shimmer {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
+  0% {
+    transform: translateX(-100%);
+  }
+
+  100% {
+    transform: translateX(100%);
+  }
 }
