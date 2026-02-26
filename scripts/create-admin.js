@@ -21,15 +21,19 @@ if (fs.existsSync(envLocalPath)) {
 function getAdminAuth() {
     if (!admin.apps.length) {
         try {
-            // Check for private key
-            const privateKey = process.env.FIREBASE_PRIVATE_KEY
-                ? process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n")
-                : undefined;
-
+            let privateKey = process.env.FIREBASE_PRIVATE_KEY;
+            
             if (!privateKey) {
                 console.error("Missing FIREBASE_PRIVATE_KEY");
                 process.exit(1);
             }
+
+            // Robust replacement of literal \n and normalization of actual newlines
+            privateKey = privateKey.replace(/\\n/g, '\n').replace(/\r\n/g, '\n').trim() + '\n';
+
+            console.log("Private key length:", privateKey.length);
+            console.log("Private key starts with:", JSON.stringify(privateKey.substring(0, 30)));
+            console.log("Private key ends with:", JSON.stringify(privateKey.substring(privateKey.length - 30)));
 
             const firebaseAdminConfig = {
                 projectId: process.env.FIREBASE_PROJECT_ID,

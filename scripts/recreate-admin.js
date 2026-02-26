@@ -14,24 +14,23 @@ if (require('fs').existsSync(envLocalPath)) {
 }
 
 async function recreateAdmin() {
-    const projectId = process.env.FIREBASE_PROJECT_ID;
-    const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
-    const privateKey = process.env.FIREBASE_PRIVATE_KEY;
-
-    if (!projectId || !clientEmail || !privateKey) {
-        console.error("Missing Firebase Admin environment variables.");
-        process.exit(1);
-    }
-
     try {
-        const formattedKey = privateKey.replace(/\\n/g, '\n');
+        let privateKey = process.env.FIREBASE_PRIVATE_KEY;
+
+        if (!privateKey) {
+            console.error("Missing Firebase Admin environment variables.");
+            process.exit(1);
+        }
+
+        // Robust replacement of literal \n and normalization of actual newlines
+        privateKey = privateKey.replace(/\\n/g, '\n').replace(/\r\n/g, '\n').trim();
 
         if (admin.apps.length === 0) {
             admin.initializeApp({
                 credential: admin.credential.cert({
-                    projectId,
-                    clientEmail,
-                    privateKey: formattedKey,
+                    projectId: process.env.FIREBASE_PROJECT_ID,
+                    clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+                    privateKey: privateKey,
                 }),
             });
         }
