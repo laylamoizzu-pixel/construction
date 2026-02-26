@@ -2,8 +2,15 @@
 import { config } from 'dotenv';
 import { resolve } from 'path';
 
-// Load .env.local
-config({ path: resolve(process.cwd(), '.env.local') });
+// Load .env files
+const envLocalPath = resolve(process.cwd(), '.env.local');
+const envPath = resolve(process.cwd(), '.env');
+
+if (require('fs').existsSync(envLocalPath)) {
+    config({ path: envLocalPath });
+} else if (require('fs').existsSync(envPath)) {
+    config({ path: envPath });
+}
 
 // Use require for robust compat with ts-node/register execution
 const admin = require('firebase-admin');

@@ -3,8 +3,15 @@ const { config } = require('dotenv');
 const { resolve } = require('path');
 const admin = require('firebase-admin');
 
-// Load .env.local
-config({ path: resolve(process.cwd(), '.env.local') });
+// Load .env files
+const envLocalPath = resolve(process.cwd(), '.env.local');
+const envPath = resolve(process.cwd(), '.env');
+
+if (require('fs').existsSync(envLocalPath)) {
+    config({ path: envLocalPath });
+} else if (require('fs').existsSync(envPath)) {
+    config({ path: envPath });
+}
 
 async function recreateAdmin() {
     const projectId = process.env.FIREBASE_PROJECT_ID;

@@ -4,11 +4,17 @@ const dotenv = require('dotenv');
 const fs = require('fs');
 
 // Load env vars
-const envPath = path.resolve(process.cwd(), '.env.local');
-if (fs.existsSync(envPath)) {
+const envLocalPath = path.resolve(process.cwd(), '.env.local');
+const envPath = path.resolve(process.cwd(), '.env');
+
+if (fs.existsSync(envLocalPath)) {
+    dotenv.config({ path: envLocalPath });
+    console.log("Loaded .env.local");
+} else if (fs.existsSync(envPath)) {
     dotenv.config({ path: envPath });
+    console.log("Loaded .env");
 } else {
-    console.error("No .env.local found");
+    console.error("No .env.local or .env found");
     process.exit(1);
 }
 
