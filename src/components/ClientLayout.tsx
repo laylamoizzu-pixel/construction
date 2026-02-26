@@ -8,6 +8,7 @@ import Footer from "./Footer";
 import { ErrorBoundary } from "./ErrorBoundary";
 import { DebugProvider, useDebug } from "@/context/DebugContext";
 import { ErrorInspector } from "./debug/ErrorInspector";
+import PageTransition from "./PageTransition";
 
 import { SiteConfig } from "@/types/site-config";
 
@@ -47,7 +48,9 @@ export default function ClientLayout({
                 <AuthProvider>
                     <SiteConfigProvider initialConfig={initialConfig}>
                         <Header />
-                        {children}
+                        <PageTransition>
+                            {children}
+                        </PageTransition>
                         <AssistantChat />
                         <PwaInstallPrompt />
                         <SwUpdateBanner />

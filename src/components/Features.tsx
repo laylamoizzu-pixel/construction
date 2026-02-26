@@ -51,22 +51,29 @@ export default function Features({ content }: { content?: FeaturesContent }) {
                         const Icon = iconMap[item.icon] || Package;
 
                         return (
-                            <Card
+                            <motion.div
                                 key={idx}
-                                className="p-2 bg-white/50 border-brand-silver/30"
+                                initial={{ opacity: 0, y: 30 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ duration: 0.8, delay: idx * 0.1, ease: [0.22, 1, 0.36, 1] }}
                             >
-                                <CardContent className="p-10">
-                                    <div className="w-14 h-14 rounded-xl bg-brand-charcoal flex items-center justify-center mb-8 text-brand-gold shadow-premium">
-                                        <Icon className="w-7 h-7" />
-                                    </div>
-                                    <h3 className="text-2xl font-bold text-brand-charcoal mb-4 tracking-tight">
-                                        {item.title}
-                                    </h3>
-                                    <p className="text-brand-charcoal/60 leading-relaxed font-normal">
-                                        {item.desc}
-                                    </p>
-                                </CardContent>
-                            </Card>
+                                <Card
+                                    className="p-2 bg-white/50 border-brand-silver/30 h-full group hover:border-brand-gold/30 transition-all duration-700 hover:shadow-2xl"
+                                >
+                                    <CardContent className="p-10">
+                                        <div className="w-14 h-14 rounded-xl bg-brand-charcoal flex items-center justify-center mb-8 text-brand-gold shadow-premium group-hover:bg-brand-gold group-hover:text-white transition-all duration-500">
+                                            <Icon className="w-7 h-7" />
+                                        </div>
+                                        <h3 className="text-2xl font-bold text-brand-charcoal mb-4 tracking-tight">
+                                            {item.title}
+                                        </h3>
+                                        <p className="text-brand-charcoal/60 leading-relaxed font-normal">
+                                            {item.desc}
+                                        </p>
+                                    </CardContent>
+                                </Card>
+                            </motion.div>
                         );
                     })}
                 </div>

@@ -2,11 +2,12 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { PenTool, Smile, Utensils, Home as HomeIcon, Package, ArrowRight, X, LucideIcon, Cpu, Smartphone } from "lucide-react";
+import { PenTool, Smile, Utensils, Home as HomeIcon, Package, ArrowRight, X, LucideIcon, Cpu, Smartphone, Building2, Trees, Landmark } from "lucide-react";
 import { DepartmentContent } from "@/app/actions";
 import Image from "next/image";
 import Link from "next/link";
-
+import { Heading } from "./ui/Typography";
+import { cn } from "@/lib/utils";
 
 const iconMap: Record<string, LucideIcon> = {
     PenTool,
@@ -15,30 +16,31 @@ const iconMap: Record<string, LucideIcon> = {
     Home: HomeIcon,
     Package,
     Cpu,
-    Smartphone
+    Smartphone,
+    Building2,
+    Trees,
+    Landmark
 };
 
 export default function DepartmentsGrid({ departments }: { departments: DepartmentContent[] }) {
     const [selectedId, setSelectedId] = useState<string | null>(null);
 
-    // If no departments exist in the database, show empty state
     if (departments.length === 0) {
         return (
-            <div className="text-center py-16">
-                <Package className="w-16 h-16 mx-auto mb-4 text-slate-300" />
-                <p className="text-slate-500 text-lg">No departments available yet.</p>
-                <p className="text-slate-400 text-sm mt-1">Departments can be added from the admin panel.</p>
+            <div className="text-center py-24 bg-white/50 rounded-[3rem] border border-brand-charcoal/5">
+                <Package className="w-16 h-16 mx-auto mb-6 text-brand-charcoal/10" />
+                <p className="text-brand-charcoal/40 text-lg font-light">No property tiers defined yet.</p>
             </div>
         );
     }
 
     return (
         <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-[400px]">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 auto-rows-[450px]">
                 {departments.map((dept, i) => {
                     const Icon = iconMap[dept.icon] || Package;
-                    // Make some items span 2 columns/rows for masonry effect
-                    const isLarge = i === 0 || i === 3;
+                    // Alternating masonry-style layout
+                    const isLarge = i === 0 || i === 3 || i === 4;
                     const className = isLarge ? "md:col-span-2" : "";
 
                     return (
@@ -46,7 +48,13 @@ export default function DepartmentsGrid({ departments }: { departments: Departme
                             key={dept.id || `dept-${i}`}
                             layoutId={dept.id || `dept-${i}`}
                             onClick={() => setSelectedId(dept.id || `dept-${i}`)}
-                            className={`group relative cursor-pointer rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 bg-white ${className}`}
+                            initial={{ opacity: 0, y: 30 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.8, delay: i * 0.1, ease: [0.22, 1, 0.36, 1] }}
+                            className={cn(
+                                "group relative cursor-pointer rounded-[2.5rem] overflow-hidden shadow-premium hover:shadow-2xl transition-all duration-700 bg-brand-charcoal",
+                                className
+                            )}
                         >
                             {/* Image Background */}
                             <div className="absolute inset-0 h-full w-full">
@@ -54,26 +62,29 @@ export default function DepartmentsGrid({ departments }: { departments: Departme
                                     src={dept.image}
                                     alt={dept.title}
                                     fill
-                                    className="object-cover transition-transform duration-700 group-hover:scale-105"
+                                    className="object-cover transition-transform duration-1000 group-hover:scale-110 opacity-60 group-hover:opacity-80"
                                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                                 />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-80 group-hover:opacity-70 transition-opacity" />
+                                <div className="absolute inset-0 bg-gradient-to-t from-brand-charcoal via-brand-charcoal/20 to-transparent" />
                             </div>
 
-                            {/* Content */}
-                            <div className="absolute bottom-0 left-0 p-8 w-full z-10">
-                                <div className="flex items-end justify-between">
-                                    <div className="max-w-[80%]">
-                                        <div className="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center mb-4 text-brand-lime border border-white/10">
-                                            <Icon className="w-6 h-6" />
+                            {/* Content Overaly */}
+                            <div className="absolute inset-0 p-10 flex flex-col justify-end z-10">
+                                <div className="space-y-6">
+                                    <div className="flex items-center justify-between">
+                                        <div className="w-16 h-16 rounded-2xl bg-white/10 backdrop-blur-xl flex items-center justify-center text-brand-gold border border-white/20 group-hover:bg-brand-gold group-hover:text-white transition-all duration-500">
+                                            <Icon className="w-8 h-8" />
                                         </div>
-                                        <h2 className="text-3xl font-bold text-white mb-2 tracking-tight">{dept.title}</h2>
-                                        <p className="text-slate-300 line-clamp-2 md:line-clamp-none opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform translate-y-4 group-hover:translate-y-0 text-sm md:text-base font-light">
+                                        <div className="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center text-white group-hover:bg-white group-hover:text-brand-charcoal transition-all duration-500">
+                                            <ArrowRight className="w-6 h-6 -rotate-45 group-hover:rotate-0 transition-transform" />
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <h2 className="text-4xl font-bold text-white tracking-tighter">{dept.title}</h2>
+                                        <p className="text-white/40 font-light leading-relaxed line-clamp-2 transform translate-y-4 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-500">
                                             {dept.description}
                                         </p>
-                                    </div>
-                                    <div className="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center text-white group-hover:bg-brand-lime group-hover:text-brand-dark group-hover:border-brand-lime transition-all duration-300 opacity-0 group-hover:opacity-100">
-                                        <ArrowRight className="w-5 h-5 -rotate-45 group-hover:rotate-0 transition-transform" />
                                     </div>
                                 </div>
                             </div>
@@ -82,16 +93,16 @@ export default function DepartmentsGrid({ departments }: { departments: Departme
                 })}
             </div>
 
-            {/* Expanded View Modal */}
+            {/* Expanded View Modal (Refined Glassmorphism) */}
             <AnimatePresence>
                 {selectedId && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center px-4 p-4 md:p-8">
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-12">
                         <motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
                             onClick={() => setSelectedId(null)}
-                            className="absolute inset-0 bg-black/80 backdrop-blur-md"
+                            className="absolute inset-0 bg-brand-charcoal/80 backdrop-blur-xl"
                         />
 
                         {departments.map((dept, i) => {
@@ -103,49 +114,62 @@ export default function DepartmentsGrid({ departments }: { departments: Departme
                                 <motion.div
                                     key={id}
                                     layoutId={id}
-                                    className="bg-white w-full max-w-5xl max-h-[90vh] rounded-[2rem] overflow-hidden relative z-10 shadow-2xl flex flex-col md:flex-row"
+                                    className="bg-brand-white w-full max-w-6xl max-h-[90vh] rounded-[3rem] overflow-hidden relative z-10 shadow-2xl flex flex-col md:flex-row border border-brand-charcoal/5"
                                 >
                                     <button
                                         onClick={(e) => { e.stopPropagation(); setSelectedId(null); }}
-                                        className="absolute top-6 right-6 z-20 p-2 bg-black/40 hover:bg-black/60 text-white rounded-full transition-colors backdrop-blur-md"
+                                        className="absolute top-8 right-8 z-20 w-12 h-12 bg-white/50 hover:bg-white text-brand-charcoal rounded-full transition-all backdrop-blur-md flex items-center justify-center border border-brand-charcoal/5"
                                     >
                                         <X className="w-6 h-6" />
                                     </button>
 
                                     {/* Image Side */}
-                                    <div className="w-full md:w-1/2 h-64 md:h-auto relative">
+                                    <div className="w-full md:w-1/2 h-[300px] md:h-auto relative">
                                         <Image
                                             src={dept.image}
                                             alt={dept.title}
                                             fill
                                             className="object-cover"
                                         />
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent md:hidden" />
+                                        <div className="absolute inset-0 bg-gradient-to-t from-brand-white via-transparent to-transparent md:hidden" />
                                     </div>
 
                                     {/* Content Side */}
-                                    <div className="w-full md:w-1/2 p-8 md:p-12 overflow-y-auto bg-white flex flex-col">
-                                        <div className="flex items-center gap-4 mb-6">
-                                            <div className="p-3 bg-brand-blue/10 rounded-xl text-brand-blue">
-                                                <Icon className="w-8 h-8" />
+                                    <div className="w-full md:w-1/2 p-10 md:p-20 overflow-y-auto bg-brand-white flex flex-col">
+                                        <div className="space-y-12">
+                                            <div className="space-y-6">
+                                                <div className="flex items-center gap-6">
+                                                    <div className="p-4 bg-brand-gold/10 rounded-2xl text-brand-gold">
+                                                        <Icon className="w-10 h-10" />
+                                                    </div>
+                                                    <span className="text-brand-gold font-bold tracking-[0.3em] uppercase text-[10px]">Architectural Tier</span>
+                                                </div>
+                                                <h2 className="text-5xl md:text-6xl font-bold text-brand-charcoal tracking-tighter leading-[0.9]">{dept.title}</h2>
                                             </div>
-                                            <h2 className="text-3xl md:text-4xl font-bold text-brand-dark tracking-tight">{dept.title}</h2>
-                                        </div>
 
-                                        <p className="text-lg text-slate-600 mb-8 leading-relaxed">
-                                            {dept.description}
-                                        </p>
+                                            <div className="space-y-8">
+                                                <p className="text-xl md:text-2xl text-brand-charcoal/60 leading-relaxed font-light">
+                                                    {dept.description}
+                                                </p>
 
-                                        <div className="mt-auto space-y-6">
-
+                                                <div className="grid grid-cols-2 gap-8 py-10 border-y border-brand-charcoal/5">
+                                                    <div>
+                                                        <h4 className="text-[10px] uppercase font-bold tracking-widest text-brand-charcoal/30 mb-2">Availability</h4>
+                                                        <p className="text-brand-charcoal font-bold">Limited Portfolio</p>
+                                                    </div>
+                                                    <div>
+                                                        <h4 className="text-[10px] uppercase font-bold tracking-widest text-brand-charcoal/30 mb-2">Yield Potential</h4>
+                                                        <p className="text-brand-charcoal font-bold">High Precision</p>
+                                                    </div>
+                                                </div>
+                                            </div>
 
                                             <Link
-                                                href={dept.link || `/products?search=${encodeURIComponent(dept.title)}`}
-                                                className="w-full py-4 bg-brand-dark text-white rounded-xl font-bold hover:bg-brand-blue transition-colors flex items-center justify-center gap-2 shadow-lg shadow-brand-dark/20 hover:shadow-brand-blue/30"
+                                                href={dept.link || `/products?category=${encodeURIComponent(dept.title)}`}
+                                                className="w-full h-16 bg-brand-charcoal text-white rounded-full font-bold hover:bg-brand-gold transition-all flex items-center justify-center gap-4 text-[10px] uppercase tracking-widest shadow-lg shadow-brand-charcoal/20"
                                             >
-                                                Browse {dept.title} <ArrowRight className="w-5 h-5" />
+                                                Explore {dept.title} <ArrowRight className="w-5 h-5" />
                                             </Link>
-
                                         </div>
                                     </div>
                                 </motion.div>

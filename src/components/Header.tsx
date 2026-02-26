@@ -13,8 +13,8 @@ import { cn } from "@/lib/utils";
 const DEFAULT_NAV_LINKS = [
     { label: "Home", href: "/" },
     { label: "Projects", href: "/products" },
+    { label: "Construction", href: "/construction" },
     { label: "Deals", href: "/offers" },
-    { label: "Advisor", href: "/stylist" },
     { label: "About", href: "/about" },
 ];
 

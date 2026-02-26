@@ -5,6 +5,8 @@ import Image from "next/image";
 import { constructMetadata } from "@/lib/seo-utils";
 import { Metadata } from "next";
 import { Suspense } from "react";
+import { Heading } from "@/components/ui/Typography";
+import { motion } from "framer-motion";
 
 export const revalidate = 3600;
 
@@ -12,7 +14,7 @@ export const revalidate = 3600;
 export async function generateMetadata(): Promise<Metadata> {
     const config = await getSiteConfig();
     return constructMetadata({
-        title: "Property Types",
+        title: "Property Tiers",
         description: "Explore our curated property types including Residential, Commercial, Plots, and Villas at Gharana Realtors.",
         urlPath: "/departments",
         config
@@ -21,42 +23,42 @@ export async function generateMetadata(): Promise<Metadata> {
 
 async function DepartmentsHeader() {
     const pageContent = await getSiteContent<DepartmentsPageContent>("departments-page");
-    const heroTitle = pageContent?.heroTitle || "Our Property Types";
-    const heroSubtitle = pageContent?.heroSubtitle || "Curated categories for modern living.";
+    const heroTitle = pageContent?.heroTitle || "Architectural Tiers";
+    const heroSubtitle = pageContent?.heroSubtitle || "Curated sectors for modern capital.";
     const heroImage = pageContent?.heroImage || "";
 
     return (
-        <div className="relative py-32 bg-brand-dark text-white overflow-hidden">
-            {/* Abstract Tech Background */}
-            <div className="absolute inset-0 bg-[#0A0A0A]" />
-            {heroImage ? (
-                <div className="absolute inset-0 opacity-40">
-                    <Image src={heroImage} alt="Hero Background" fill className="object-cover" />
-                </div>
-            ) : (
-                <>
-                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-brand-blue/20 via-transparent to-transparent" />
-                    <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-brand-lime/50 to-transparent" />
-
-                    {/* Grid Pattern */}
-                    <div className="absolute inset-0 opacity-10"
-                        style={{ backgroundImage: "linear-gradient(#333 1px, transparent 1px), linear-gradient(90deg, #333 1px, transparent 1px)", backgroundSize: "40px 40px" }}
+        <section className="relative h-[80vh] min-h-[600px] flex items-center justify-center overflow-hidden bg-brand-charcoal">
+            <div className="absolute inset-0 z-0">
+                {heroImage ? (
+                    <Image src={heroImage} alt="Hero Background" fill className="object-cover opacity-40 scale-105" />
+                ) : (
+                    <div className="absolute inset-0 opacity-20"
+                        style={{ backgroundImage: "radial-gradient(circle at center, #C5A059 1px, transparent 1px)", backgroundSize: "64px 64px" }}
                     />
-                </>
-            )}
-
-            <div className="relative z-10 container mx-auto px-4 md:px-6 text-center">
-                <span className="text-brand-lime font-bold tracking-widest uppercase text-xs mb-4 block animate-pulse">
-                    {pageContent?.heroLabel || "Explore Zones"}
-                </span>
-                <h1 className="text-5xl md:text-7xl font-bold mb-6 tracking-tight">
-                    {heroTitle}
-                </h1>
-                <p className="text-xl text-slate-400 max-w-2xl mx-auto font-light leading-relaxed">
-                    {heroSubtitle}
-                </p>
+                )}
+                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-brand-charcoal/40 to-brand-charcoal" />
             </div>
-        </div>
+
+            <div className="relative z-10 container mx-auto px-6 md:px-12 text-center">
+                <motion.div
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
+                    className="space-y-8"
+                >
+                    <span className="text-brand-gold font-bold tracking-[0.5em] uppercase text-[10px] block">
+                        {pageContent?.heroLabel || "Design Ecosystem"}
+                    </span>
+                    <h1 className="text-6xl md:text-9xl font-bold text-white tracking-tighter leading-[0.8] mb-8">
+                        {heroTitle}
+                    </h1>
+                    <p className="text-xl md:text-2xl text-white/40 max-w-2xl mx-auto font-light leading-relaxed">
+                        {heroSubtitle}
+                    </p>
+                </motion.div>
+            </div>
+        </section>
     );
 }
 
@@ -67,17 +69,16 @@ async function DepartmentsGridLoader() {
 
 export default function DepartmentsPage() {
     return (
-        <div className="min-h-screen bg-slate-50">
-            {/* Tech Editorial Header */}
-            <Suspense fallback={<div className="h-96 bg-brand-dark animate-pulse" />}>
+        <main className="min-h-screen bg-brand-white">
+            <Suspense fallback={<div className="h-[80vh] bg-brand-charcoal animate-pulse" />}>
                 <DepartmentsHeader />
             </Suspense>
 
-            <div className="container mx-auto px-4 md:px-6 py-12 -mt-10 relative z-20">
-                <Suspense fallback={<div className="h-96 bg-white animate-pulse rounded-xl" />}>
+            <div className="container mx-auto px-6 md:px-12 py-24 -mt-32 relative z-20">
+                <Suspense fallback={<div className="h-96 bg-white/50 animate-pulse rounded-[3rem]" />}>
                     <DepartmentsGridLoader />
                 </Suspense>
             </div>
-        </div>
+        </main>
     );
 }
