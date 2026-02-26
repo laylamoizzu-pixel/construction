@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { motion, useMotionValue, useSpring } from "framer-motion";
+import { motion, useMotionValue } from "framer-motion";
 
 export default function SpotlightCard({ children, className = "" }: { children: React.ReactNode; className?: string }) {
     const mouseX = useMotionValue(0);

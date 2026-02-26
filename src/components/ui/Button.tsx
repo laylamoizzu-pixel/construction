@@ -18,8 +18,13 @@ export const Button = ({
     children,
     ...props
 }: ButtonProps) => {
-    // Filter out potential motion prop conflicts
-    const { onDrag, onDragStart, onDragEnd, onPointerDown, ...safeProps } = props as any;
+    // Filter out motion-specific props that conflict with HTML button props
+    const {
+        onDrag, onDragStart, onDragEnd, onPointerDown,
+        whileHover, whileTap,
+        ...buttonProps
+    } = props as any;
+
     const variants = {
         primary: "bg-brand-charcoal text-brand-white hover:bg-opacity-90",
         secondary: "bg-brand-gold text-brand-white hover:bg-opacity-90",
@@ -45,7 +50,7 @@ export const Button = ({
                 sizes[size],
                 className
             )}
-            {...safeProps}
+            {...buttonProps}
         >
             <span className="relative z-10">{children}</span>
             <motion.div

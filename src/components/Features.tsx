@@ -5,7 +5,6 @@ import { FeaturesContent } from "@/app/actions";
 import { motion } from "framer-motion";
 import { SectionTitle } from "./ui/Typography";
 import { Card, CardContent } from "./ui/Card";
-import SpotlightCard from "./ui/SpotlightCard";
 
 const iconMap: Record<string, LucideIcon> = {
     ShieldCheck,

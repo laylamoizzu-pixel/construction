@@ -5,7 +5,6 @@ import { CheckCircle2, Globe, ShieldCheck, Users, Zap, TrendingUp, MapPin, Phone
 import Image from "next/image";
 import { AboutPageContent, ContactContent } from "@/app/actions";
 import { Heading } from "./ui/Typography";
-import SpotlightCard from "./ui/SpotlightCard";
 
 const iconMap: Record<string, React.ElementType> = {
     CheckCircle2, Globe, ShieldCheck, Users, Zap, TrendingUp, MapPin, Phone, Mail, Clock, Check, Star, Heart, Award

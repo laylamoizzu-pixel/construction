@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { getGiftRecommendations } from "@/app/actions/ai-stylist-actions"; // Note: Reusing action temporarily, would ideally rename action file too
-import { Loader2, Building, Heart, MapPin, Sparkles, ChevronRight, CheckCircle2 } from "lucide-react";
+import { Loader2, Building, Heart, MapPin, Sparkles, ChevronRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface ProjectRecommendationResult {

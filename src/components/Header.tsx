@@ -22,10 +22,8 @@ export default function Header() {
     const [isScrolled, setIsScrolled] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isSearchOpen, setIsSearchOpen] = useState(false);
-    const [searchQuery, setSearchQuery] = useState("");
     const searchInputRef = useRef<HTMLInputElement>(null);
     const pathname = usePathname();
-    const router = useRouter();
     const { config } = useSiteConfig();
 
     const NAV_LINKS = config?.headerLinks || DEFAULT_NAV_LINKS;
