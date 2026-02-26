@@ -12,12 +12,12 @@ export async function GET() {
         const entity = {
             "@context": "https://schema.org",
             "@type": "Organization",
-            "@id": "https://smartavenue99.com/#organization",
+            "@id": "https://gharanarealtors.com/#organization",
             "name": branding.siteName || "Gharana Realtors",
-            "url": "https://smartavenue99.com",
+            "url": "https://gharanarealtors.com",
             "logo": {
                 "@type": "ImageObject",
-                "url": `https://smartavenue99.com${branding.logoUrl || "/logo.png"}`,
+                "url": `https://gharanarealtors.com${branding.logoUrl || "/logo.png"}`,
             },
             "description": llm?.brandIdentityText || seo.metaDescription,
             "slogan": branding.tagline,

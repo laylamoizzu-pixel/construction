@@ -12,7 +12,7 @@ export async function generateMetadata(): Promise<Metadata> {
     const config = await getSiteConfig();
     return constructMetadata({
         title: "About Us",
-        description: "Learn about Smart Avenue 99's story, our curated collections, and our Genie AI shopping assistants.",
+        description: "Learn about Gharana Realtors' story, our curated property listings, and our Genie AI property assistants.",
         urlPath: "/about",
         config
     });
@@ -39,7 +39,7 @@ async function AboutPageContentLoader() {
         "@type": "LocalBusiness",
         "name": siteConfig.branding.siteName,
         "image": siteConfig.branding.logoUrl,
-        "url": "https://smartavenue99.com/about",
+        "url": "https://gharanarealtors.com/about",
         "telephone": siteConfig.contact.phone,
         "address": {
             "@type": "PostalAddress",

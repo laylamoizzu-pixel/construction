@@ -141,7 +141,7 @@ export default function ContactEditor() {
                                             ...config,
                                             contact: { ...config.contact, email: e.target.value }
                                         })}
-                                        placeholder="contact@smartavenue.com"
+                                        placeholder="contact@gharanarealtors.com"
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                                     />
                                 </div>

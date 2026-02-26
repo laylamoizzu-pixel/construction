@@ -210,7 +210,7 @@ export default function StaffManagement() {
                                         type="email"
                                         value={newStaff.email}
                                         onChange={(e) => setNewStaff({ ...newStaff, email: e.target.value })}
-                                        placeholder="john@smartavenue.com"
+                                        placeholder="john@gharanarealtors.com"
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                                         required
                                     />

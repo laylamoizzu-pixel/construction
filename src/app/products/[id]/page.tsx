@@ -233,7 +233,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
                         "sku": product.id,
                         "offers": {
                             "@type": "Offer",
-                            "url": `https://smartavenue99.com/products/${product.id}`,
+                            "url": `https://gharanarealtors.com/products/${product.id}`,
                             "priceCurrency": "INR",
                             "price": product.price,
                             "itemCondition": "https://schema.org/NewCondition",
