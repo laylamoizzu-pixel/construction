@@ -11,10 +11,14 @@
   /* Using Sans for Serif variable to override any legacy serif usage */
 
   /* Custom Colors - Premium Silicon Valley Palette */
-  --color-brand-blue: #007AFF; /* Apple Blue */
+  --color-brand-green: #064e3b;
+  --color-brand-blue: #007AFF;
+  /* Apple Blue */
   --color-brand-indigo: #5856D6;
-  --color-brand-dark: #000000; /* Pure Black for high contrast */
-  --color-brand-surface: #F5F5F7; /* Apple Surface / Gray 6 */
+  --color-brand-dark: #000000;
+  /* Pure Black for high contrast */
+  --color-brand-surface: #F5F5F7;
+  /* Apple Surface / Gray 6 */
   --color-brand-sand: #FDFCFB;
   --color-brand-gold: #D4AF37;
   --color-brand-soft-gold: #C5A059;
@@ -29,6 +33,7 @@
   --background: #FFFFFF;
   --foreground: #000000;
 
+  --brand-green: #064e3b;
   --brand-blue: #007AFF;
   --brand-dark: #000000;
   --brand-gold: #D4AF37;
@@ -42,7 +47,7 @@
 
 /* Modern Premium Components */
 .glass-panel {
-  @apply bg-white/70 backdrop-blur-2xl border border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.08)];
+  @apply bg-white/70 backdrop-blur-2xl border border-white/20 shadow-[0_8px_32px_0_rgba(0, 0, 0, 0.08)];
 }
 
 .glass-header {
@@ -75,7 +80,10 @@ h6 {
 
 /* Mobile Optimization: Prevent iOS input zoom */
 @media screen and (max-width: 768px) {
-  input, select, textarea {
+
+  input,
+  select,
+  textarea {
     font-size: 16px !important;
   }
 }
@@ -85,8 +93,11 @@ h6 {
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }
+
   .no-scrollbar {
-    -ms-overflow-style: none; /* IE and Edge */
-    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
   }
 }

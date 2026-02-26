@@ -244,7 +244,7 @@ export default function AdminSidebar({ mobileOpen, setMobileOpen }: { mobileOpen
                 <div className="p-6 border-b border-white/10 flex items-center justify-between">
                     <div>
                         <h1 className="text-xl font-serif tracking-tight">
-                            Smart<span className="italic text-brand-gold">Avenue</span>
+                            Gharana<span className="italic text-brand-gold"> Realtors</span>
                         </h1>
                         <p className="text-brand-gold/60 text-xs uppercase tracking-widest mt-1">{role} Portal</p>
                     </div>
