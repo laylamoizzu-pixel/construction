@@ -1178,7 +1178,7 @@ async function _fetchAdminProfile(email: string): Promise<AdminProfile | null> {
             };
         }
         // For the hardcoded super admin
-        if (email === "admin@smartavenue99.com") {
+        if (email === "admin@gharana.com") {
             return {
                 name: "Super Admin",
                 email,

@@ -172,7 +172,7 @@ export interface SiteConfig {
     promotions: PromotionsConfig;
     footer: FooterConfig;
     sections: {
-        showSmartClub: boolean;
+        showGharanaClub: boolean;
         showWeeklyOffers: boolean;
         showDepartments: boolean;
         showTestimonials: boolean;
@@ -237,7 +237,7 @@ export const DEFAULT_SITE_CONFIG: SiteConfig = {
         items: []
     },
     sections: {
-        showSmartClub: true,
+        showGharanaClub: true,
         showWeeklyOffers: true,
         showDepartments: true,
         showTestimonials: true,

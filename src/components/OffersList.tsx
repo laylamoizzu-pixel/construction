@@ -28,7 +28,7 @@ export default function OffersList({ offers, catalogueUrl, catalogueTitle, catal
                         <Zap className="w-3 h-3" /> New Edition Available
                     </div>
                     <h2 className="text-3xl md:text-4xl font-bold mb-4 tracking-tight">
-                        {catalogueTitle || <>Smart Catalog <span className="text-brand-lime">Vol. 4</span></>}
+                        {catalogueTitle || <>Gharana Catalog <span className="text-brand-lime">Vol. 4</span></>}
                     </h2>
                     <p className="text-slate-300 max-w-md mb-8 leading-relaxed">
                         {catalogueSubtitle || "Access our complete digital inventory, exclusive bundles, and member pricing."}

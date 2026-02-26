@@ -54,7 +54,7 @@ export default function DealInsight({ product }: DealInsightProps) {
                     {insight}
                 </p>
                 <div className="flex items-center gap-1 mt-1">
-                    <span className="text-[10px] uppercase font-bold text-orange-400">Smart Analysis</span>
+                    <span className="text-[10px] uppercase font-bold text-orange-400">AI Analysis</span>
                 </div>
             </div>
         </div>

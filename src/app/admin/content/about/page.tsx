@@ -28,7 +28,7 @@ const defaultContent: AboutPageContent = {
     statsSatisfactionLabel: "Satisfaction Rate",
     contactTitle: "Visit Our Store",
     contactSubtitle: "We'd love to see you in person. Here's where you can find us.",
-    valuesTitle: "The Smart Standard",
+    valuesTitle: "The Gharana Standard",
     valuesSubtitle: "Driven by innovation, grounded in integrity.",
     values: [
         {

@@ -120,7 +120,7 @@ export default function OffersPageEditor() {
                         <div className="pt-6 border-t border-gray-100">
                             <h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
                                 <FileText className="w-5 h-5 text-amber-500" />
-                                Smart Catalogue PDF
+                                Gharana Catalogue PDF
                             </h3>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">Upload Catalogue (PDF)</label>
@@ -144,7 +144,7 @@ export default function OffersPageEditor() {
                                         type="text"
                                         value={content.catalogueTitle || ""}
                                         onChange={(e) => setContent({ ...content, catalogueTitle: e.target.value })}
-                                        placeholder="Smart Catalog Vol. 4"
+                                        placeholder="Gharana Catalog Vol. 4"
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500"
                                     />
                                 </div>
