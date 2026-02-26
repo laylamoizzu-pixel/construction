@@ -15,7 +15,7 @@ import CompareInterface from "@/components/ai/CompareInterface";
 import DealInsight from "@/components/ai/DealInsight";
 import SocialProofBadge from "@/components/ai/SocialProofBadge";
 import { Suspense } from "react";
-import { motion } from "framer-motion";
+import { AnimatedContainer } from "@/components/ui/AnimatedContainer";
 
 export const dynamic = "force-dynamic";
 
@@ -168,7 +168,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
                     {/* Gallery Column */}
                     <div className="lg:col-span-7">
                         <div className="sticky top-32">
-                            <motion.div
+                            <AnimatedContainer
                                 initial={{ opacity: 0, scale: 0.95 }}
                                 animate={{ opacity: 1, scale: 1 }}
                                 transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
@@ -180,7 +180,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
                                     discount={discount}
                                     isFeatured={product.featured}
                                 />
-                            </motion.div>
+                            </AnimatedContainer>
                         </div>
                     </div>
 

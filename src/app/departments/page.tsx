@@ -5,7 +5,7 @@ import Image from "next/image";
 import { constructMetadata } from "@/lib/seo-utils";
 import { Metadata } from "next";
 import { Suspense } from "react";
-import { motion } from "framer-motion";
+import { AnimatedContainer } from "@/components/ui/AnimatedContainer";
 
 export const revalidate = 3600;
 
@@ -40,7 +40,7 @@ async function DepartmentsHeader() {
             </div>
 
             <div className="relative z-10 container mx-auto px-6 md:px-12 text-center">
-                <motion.div
+                <AnimatedContainer
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
@@ -55,7 +55,7 @@ async function DepartmentsHeader() {
                     <p className="text-xl md:text-2xl text-white/40 max-w-2xl mx-auto font-light leading-relaxed">
                         {heroSubtitle}
                     </p>
-                </motion.div>
+                </AnimatedContainer>
             </div>
         </section>
     );

@@ -5,7 +5,7 @@ import Image from "next/image";
 import FilterSidebar from "@/components/FilterSidebar";
 import InfiniteProductGrid from "@/components/InfiniteProductGrid";
 import { Suspense } from "react";
-import { motion } from "framer-motion";
+import { AnimatedContainer } from "@/components/ui/AnimatedContainer";
 
 async function ProductsHeader() {
     const pageContent = await getSiteContent<ProductsPageContent>("products-page");
@@ -25,7 +25,7 @@ async function ProductsHeader() {
             )}
 
             <div className="container mx-auto px-6 md:px-12 relative z-10 text-center">
-                <motion.div
+                <AnimatedContainer
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 1 }}
@@ -39,7 +39,7 @@ async function ProductsHeader() {
                     <p className="text-white/40 text-xl md:text-2xl max-w-2xl mx-auto font-light leading-relaxed">
                         {heroSubtitle}
                     </p>
-                </motion.div>
+                </AnimatedContainer>
             </div>
         </div>
     );
