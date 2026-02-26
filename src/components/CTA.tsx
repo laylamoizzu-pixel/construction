@@ -7,6 +7,8 @@ import { ArrowRight } from "lucide-react";
 import ChatTriggerButton from "@/components/ChatTriggerButton";
 import { CTAContent } from "@/app/actions";
 
+import { motion, AnimatePresence } from "framer-motion";
+
 export default function CTA({ content, aiEnabled = true }: { content?: CTAContent; aiEnabled?: boolean }) {
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
@@ -22,7 +24,7 @@ export default function CTA({ content, aiEnabled = true }: { content?: CTAConten
 
         const interval = setInterval(() => {
             setCurrentImageIndex((prev) => (prev + 1) % images.length);
-        }, 5000);
+        }, 6000);
 
         return () => clearInterval(interval);
     }, [images]);
@@ -32,61 +34,72 @@ export default function CTA({ content, aiEnabled = true }: { content?: CTAConten
     }
 
     return (
-        <section className="py-24 relative overflow-hidden min-h-[500px] flex items-center">
-            {/* Background Carousel */}
+        <section className="py-32 relative overflow-hidden min-h-[600px] flex items-center bg-black">
+            {/* Background Carousel with refined transitions */}
             <div className="absolute inset-0 z-0">
-                {images.length > 0 ? (
-                    images.map((img, index) => (
-                        <div
-                            key={img}
-                            className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${index === currentImageIndex ? "opacity-100" : "opacity-0"
-                                }`}
+                <AnimatePresence mode="wait">
+                    {images.length > 0 ? (
+                        <motion.div
+                            key={currentImageIndex}
+                            initial={{ opacity: 0, scale: 1.1 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 1.5, ease: [0.22, 1, 0.36, 1] }}
+                            className="absolute inset-0"
                         >
                             <Image
-                                src={img}
+                                src={images[currentImageIndex]}
                                 alt="Background"
                                 fill
-                                className="object-cover"
-                                priority={index === 0}
+                                className="object-cover brightness-[0.4]"
+                                priority
                             />
-                            {/* Overlay for readability */}
-                            <div className="absolute inset-0 bg-black/60" />
+                        </motion.div>
+                    ) : (
+                        <div className="absolute inset-0 bg-black">
+                            <div className="absolute inset-0 bg-gradient-to-br from-brand-dark via-brand-dark to-brand-gold opacity-30" />
                         </div>
-                    ))
-                ) : (
-                    <div className="absolute inset-0 bg-brand-dark">
-                        <div className="absolute inset-0 bg-gradient-to-r from-brand-blue/20 to-brand-lime/20 mix-blend-overlay" />
-                        <div className="absolute top-0 right-0 w-full h-full bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-brand-blue/30 via-transparent to-transparent opacity-50" />
-                    </div>
-                )}
+                    )}
+                </AnimatePresence>
+
+                {/* Sophisticated Vignette */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black" />
             </div>
 
-            <div className="container mx-auto px-4 relative z-10 text-center">
-                <h2 className="text-4xl md:text-6xl font-bold text-white mb-8 tracking-tight max-w-4xl mx-auto">
-                    {content.title}
-                </h2>
-                <p className="text-xl text-slate-300 mb-10 max-w-2xl mx-auto">
-                    {content.text}
-                </p>
-                <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                    <Link
-                        href={content.ctaLink || "/products"}
-                        className="px-8 py-4 bg-brand-lime hover:bg-lime-400 text-brand-dark font-bold rounded-full transition-all flex items-center justify-center gap-2 hover:shadow-[0_0_20px_rgba(132,204,22,0.4)]"
-                    >
-                        {content.ctaPrimary} <ArrowRight className="w-5 h-5" />
-                    </Link>
-                    {/* Secondary Action - dynamic check if it's "Chat with Us" or a link */}
-                    {content.ctaSecondary === "Chat with Us" && aiEnabled ? (
-                        <ChatTriggerButton />
-                    ) : (
+            <div className="container mx-auto px-6 md:px-12 relative z-10 text-center">
+                <motion.div
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                >
+                    <h2 className="text-5xl md:text-8xl font-bold text-white mb-10 tracking-[-0.04em] max-w-5xl mx-auto leading-[0.95]">
+                        {content.title}
+                    </h2>
+                    <p className="text-xl md:text-2xl text-white/70 mb-14 max-w-2xl mx-auto leading-relaxed font-medium">
+                        {content.text}
+                    </p>
+                    <div className="flex flex-col sm:flex-row gap-6 justify-center">
                         <Link
-                            href="/register"
-                            className="px-8 py-4 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-white font-bold rounded-full transition-all"
+                            href={content.ctaLink || "/products"}
+                            className="group relative px-12 py-5 bg-white text-black font-bold rounded-full transition-all hover:scale-105 active:scale-95 flex items-center justify-center gap-3 overflow-hidden shadow-2xl shadow-white/10"
                         >
-                            {content.ctaSecondary === "Chat with Us" ? "Register Now" : content.ctaSecondary}
+                            <span className="relative z-10">{content.ctaPrimary}</span>
+                            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform relative z-10" />
+                            <div className="absolute inset-0 bg-gradient-to-r from-brand-gold to-brand-accent opacity-0 group-hover:opacity-20 transition-opacity" />
                         </Link>
-                    )}
-                </div>
+
+                        {content.ctaSecondary === "Chat with Us" && aiEnabled ? (
+                            <ChatTriggerButton />
+                        ) : (
+                            <Link
+                                href="/register"
+                                className="px-12 py-5 bg-white/5 hover:bg-white/10 backdrop-blur-xl border border-white/20 text-white font-bold rounded-full transition-all hover:scale-105 active:scale-95 flex items-center justify-center"
+                            >
+                                {content.ctaSecondary === "Chat with Us" ? "Register Now" : content.ctaSecondary}
+                            </Link>
+                        )}
+                    </div>
+                </motion.div>
             </div>
         </section>
     );

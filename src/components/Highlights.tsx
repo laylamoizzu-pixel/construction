@@ -13,6 +13,8 @@ const iconMap: Record<string, LucideIcon> = {
     Cpu
 };
 
+import { motion } from "framer-motion";
+
 export default async function Highlights({ content }: { content?: HighlightsContent }) {
     const departments = await getDepartments();
 
@@ -29,74 +31,109 @@ export default async function Highlights({ content }: { content?: HighlightsCont
     const finalContent = content;
 
     return (
-        <section className="py-24 bg-slate-50 relative overflow-hidden">
-            {/* Tech Grid Background Pattern */}
-            <div className="absolute inset-0 z-0 opacity-[0.03]"
+        <section className="py-32 bg-slate-50 relative overflow-hidden">
+            {/* Minimalist Grid Pattern */}
+            <div className="absolute inset-0 z-0 opacity-[0.02]"
                 style={{
                     backgroundImage: "linear-gradient(#000 1px, transparent 1px), linear-gradient(90deg, #000 1px, transparent 1px)",
-                    backgroundSize: "40px 40px"
+                    backgroundSize: "60px 60px"
                 }}
             />
 
-            <div className="container mx-auto px-4 md:px-6 relative z-10">
-                <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
-                    <div className="max-w-xl">
-                        <span className="text-brand-blue font-bold tracking-widest uppercase text-xs mb-2 block">{finalContent.subtitle}</span>
-                        <h2 className="text-4xl md:text-5xl font-bold text-brand-dark mb-4 tracking-tight">
+            <div className="container mx-auto px-6 md:px-12 relative z-10">
+                <div className="flex flex-col md:flex-row justify-between items-end mb-24 gap-12">
+                    <div className="max-w-2xl">
+                        <motion.span
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            className="text-brand-blue font-bold tracking-[0.3em] uppercase text-[10px] mb-6 block"
+                        >
+                            {finalContent.subtitle}
+                        </motion.span>
+                        <motion.h2
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: 0.1 }}
+                            className="text-5xl md:text-7xl font-bold text-black mb-8 tracking-[-0.03em]"
+                        >
                             {finalContent.title}
-                        </h2>
-                        <p className="text-slate-500 text-lg leading-relaxed">
+                        </motion.h2>
+                        <motion.p
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: 0.2 }}
+                            className="text-slate-500 text-xl leading-relaxed font-medium"
+                        >
                             {finalContent.description}
-                        </p>
+                        </motion.p>
                     </div>
-                    <Link href="/departments" className="group flex items-center gap-2 text-brand-dark font-semibold border-b border-brand-dark/20 pb-1 hover:text-brand-blue hover:border-brand-blue transition-all">
-                        {finalContent.viewAllLabel || "View All Property Types"}
-                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                    </Link>
+                    <motion.div
+                        initial={{ opacity: 0, x: 20 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: 0.3 }}
+                    >
+                        <Link href="/departments" className="group flex items-center gap-3 text-black font-bold text-lg hover:text-brand-blue transition-all">
+                            {finalContent.viewAllLabel || "Explore Portfolio"}
+                            <div className="w-10 h-10 rounded-full border border-black/10 flex items-center justify-center group-hover:border-brand-blue group-hover:bg-brand-blue group-hover:text-white transition-all">
+                                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                            </div>
+                        </Link>
+                    </motion.div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
                     {departments.slice(0, 3).map((item, idx) => {
                         const Icon = iconMap[item.icon] || Package;
 
                         return (
-                            <Link
+                            <motion.div
                                 key={item.id || idx}
-                                href={item.link || `/departments#${item.id}`}
-                                className="group relative h-[500px] overflow-hidden rounded-[2rem] bg-white shadow-xl shadow-brand-dark/5 hover:shadow-2xl hover:shadow-brand-blue/10 transition-all duration-500"
+                                initial={{ opacity: 0, y: 40 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: idx * 0.1 }}
                             >
-                                {/* Image Container */}
-                                <div className="absolute inset-0 h-2/3 overflow-hidden">
-                                    <div className="absolute inset-0 bg-brand-dark/10 group-hover:bg-transparent transition-colors z-10" />
-                                    <Image
-                                        src={item.image}
-                                        alt={item.title}
-                                        fill
-                                        className="object-cover transition-transform duration-700 group-hover:scale-110"
-                                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                                    />
-                                </div>
+                                <Link
+                                    href={item.link || `/departments#${item.id}`}
+                                    className="group relative h-[600px] block overflow-hidden rounded-[3rem] bg-white shadow-2xl shadow-black/5 hover:shadow-black/20 transition-all duration-700"
+                                >
+                                    {/* Image Container */}
+                                    <div className="absolute inset-0 h-full overflow-hidden">
+                                        <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors duration-500 z-10" />
+                                        <Image
+                                            src={item.image}
+                                            alt={item.title}
+                                            fill
+                                            className="object-cover transition-transform duration-[1.5s] ease-out group-hover:scale-110"
+                                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                                        />
+                                    </div>
 
-                                {/* Content Container */}
-                                <div className="absolute bottom-0 inset-x-0 h-1/2 bg-gradient-to-t from-white via-white to-transparent pt-12 px-8 pb-8 flex flex-col justify-end">
-                                    <div className="relative z-10">
-                                        <div className="w-14 h-14 rounded-2xl bg-brand-blue/10 flex items-center justify-center mb-6 text-brand-blue group-hover:bg-brand-blue group-hover:text-white transition-colors duration-300">
-                                            <Icon className="w-7 h-7" />
-                                        </div>
+                                    {/* Content Container */}
+                                    <div className="absolute inset-0 p-12 flex flex-col justify-end z-20">
+                                        <div className="translate-y-8 group-hover:translate-y-0 transition-transform duration-500">
+                                            <div className="w-16 h-16 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center mb-8 text-white group-hover:bg-brand-gold group-hover:border-brand-gold transition-all duration-500">
+                                                <Icon className="w-8 h-8" />
+                                            </div>
 
-                                        <h3 className="text-2xl font-bold text-brand-dark mb-2 group-hover:text-brand-blue transition-colors">
-                                            {item.title}
-                                        </h3>
-                                        <p className="text-slate-500 mb-6 line-clamp-2">
-                                            {item.description}
-                                        </p>
+                                            <h3 className="text-3xl font-bold text-white mb-4 tracking-tight">
+                                                {item.title}
+                                            </h3>
+                                            <p className="text-white/70 mb-8 line-clamp-2 font-medium">
+                                                {item.description}
+                                            </p>
 
-                                        <div className="flex items-center text-brand-dark font-medium text-sm group-hover:translate-x-2 transition-transform duration-300">
-                                            {finalContent.exploreLabel || "Explore Category"} <ArrowRight className="w-4 h-4 ml-2" />
+                                            <div className="flex items-center text-white font-bold text-sm opacity-0 group-hover:opacity-100 transition-all duration-500">
+                                                {finalContent.exploreLabel || "Full Case Study"} <ArrowRight className="w-5 h-5 ml-3" />
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            </Link>
+                                </Link>
+                            </motion.div>
                         );
                     })}
                 </div>
