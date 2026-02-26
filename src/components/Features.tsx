@@ -1,5 +1,6 @@
 import { CheckCircle2, ShieldCheck, Zap, Globe, LucideIcon, Package, Star, Heart, TrendingUp } from "lucide-react";
 import { FeaturesContent } from "@/app/actions";
+import { motion } from "framer-motion";
 
 const iconMap: Record<string, LucideIcon> = {
     ShieldCheck,
