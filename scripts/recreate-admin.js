@@ -29,7 +29,7 @@ async function recreateAdmin() {
             });
         }
 
-        const email = 'admin@smartavenue99.com';
+        const email = 'admin@gharana.com';
         const password = 'admin123';
 
         console.log(`Checking for user ${email}...`);

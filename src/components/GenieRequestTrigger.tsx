@@ -49,7 +49,7 @@ export default function GenieRequestTrigger({ searchQuery }: GenieRequestTrigger
                             </h3>
 
                             <p className="text-slate-600 mb-10 max-w-md mx-auto leading-relaxed text-lg font-light">
-                                Let our <span className="font-medium text-transparent bg-clip-text bg-gradient-to-r from-brand-blue to-brand-purple">Genie AI</span> scour the universe to find the perfect item for you.
+                                Let our <span className="font-medium text-transparent bg-clip-text bg-gradient-to-r from-brand-blue to-brand-purple">Genie AI</span> search our network to find the perfect property for you.
                             </p>
 
                             <motion.button

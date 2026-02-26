@@ -50,7 +50,7 @@ export default async function Highlights({ content }: { content?: HighlightsCont
                         </p>
                     </div>
                     <Link href="/departments" className="group flex items-center gap-2 text-brand-dark font-semibold border-b border-brand-dark/20 pb-1 hover:text-brand-blue hover:border-brand-blue transition-all">
-                        {finalContent.viewAllLabel || "View All Departments"}
+                        {finalContent.viewAllLabel || "View All Property Types"}
                         <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                     </Link>
                 </div>
@@ -92,7 +92,7 @@ export default async function Highlights({ content }: { content?: HighlightsCont
                                         </p>
 
                                         <div className="flex items-center text-brand-dark font-medium text-sm group-hover:translate-x-2 transition-transform duration-300">
-                                            {finalContent.exploreLabel || "Explore Zone"} <ArrowRight className="w-4 h-4 ml-2" />
+                                            {finalContent.exploreLabel || "Explore Category"} <ArrowRight className="w-4 h-4 ml-2" />
                                         </div>
                                     </div>
                                 </div>
