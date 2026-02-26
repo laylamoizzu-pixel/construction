@@ -5,7 +5,6 @@ import Image from "next/image";
 import { constructMetadata } from "@/lib/seo-utils";
 import { Metadata } from "next";
 import { Suspense } from "react";
-import { Heading } from "@/components/ui/Typography";
 import { motion } from "framer-motion";
 
 export const revalidate = 3600;

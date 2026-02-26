@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { MapPin, Phone, Mail, Clock, Send, MessageSquare, Building2, User, Home } from "lucide-react";
+import { MapPin, Phone, Mail, Clock, Send, MessageSquare, Building2, User } from "lucide-react";
 import { Heading } from "./ui/Typography";
 import { Button } from "./ui/Button";
 import { useState } from "react";
@@ -45,9 +45,7 @@ export default function ContactContent({ contact }: ContactContentProps) {
                         <h1 className="text-5xl md:text-8xl font-bold text-white tracking-tighter leading-tight">
                             Your Vision, <br /> Our <span className="text-brand-gold">Foundation.</span>
                         </h1>
-                        <p className="text-white/40 text-xl font-light max-w-2xl mx-auto leading-relaxed">
-                            Whether you're seeking your dream home or a strategic construction partner, our concierge is here to guide you.
-                        </p>
+                        Whether you&apos;re seeking your dream home or a strategic construction partner, our concierge is here to guide you.
                     </motion.div>
                 </div>
             </section>

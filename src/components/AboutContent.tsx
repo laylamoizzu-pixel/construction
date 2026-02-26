@@ -4,10 +4,7 @@ import { motion } from "framer-motion";
 import { CheckCircle2, Globe, ShieldCheck, Users, Zap, TrendingUp, MapPin, Phone, Mail, Clock, Check, Star, Heart, Award } from "lucide-react";
 import Image from "next/image";
 import { AboutPageContent, ContactContent } from "@/app/actions";
-import { Heading, Subheading } from "./ui/Typography";
-import { Card, CardContent } from "./ui/Card";
-import { Button } from "./ui/Button";
-import { cn } from "@/lib/utils";
+import { Heading } from "./ui/Typography";
 
 const iconMap: Record<string, React.ElementType> = {
     CheckCircle2, Globe, ShieldCheck, Users, Zap, TrendingUp, MapPin, Phone, Mail, Clock, Check, Star, Heart, Award

@@ -1,12 +1,9 @@
-"use client";
+
 
 import { getFilteredProducts, getCategories, getOffers, getSiteContent, ProductsPageContent } from "@/app/actions";
-import { getSiteConfig } from "@/app/actions/site-config";
 import Image from "next/image";
 import FilterSidebar from "@/components/FilterSidebar";
 import InfiniteProductGrid from "@/components/InfiniteProductGrid";
-import { constructMetadata } from "@/lib/seo-utils";
-import { Metadata } from "next";
 import { Suspense } from "react";
 import { motion } from "framer-motion";
 

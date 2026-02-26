@@ -6,7 +6,6 @@ import { PenTool, Smile, Utensils, Home as HomeIcon, Package, ArrowRight, X, Luc
 import { DepartmentContent } from "@/app/actions";
 import Image from "next/image";
 import Link from "next/link";
-import { Heading } from "./ui/Typography";
 import { cn } from "@/lib/utils";
 
 const iconMap: Record<string, LucideIcon> = {

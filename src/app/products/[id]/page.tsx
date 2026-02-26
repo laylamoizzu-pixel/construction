@@ -1,19 +1,17 @@
-"use client";
+
 
 import { getProduct, getReviews, getCategories, getSiteContent, ProductDetailPageContent, Product } from "@/app/actions";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ChevronRight, MapPin, Phone, Clock, ShieldCheck, Check, Star, Share2, Heart } from "lucide-react";
+import { ChevronRight, MapPin, ShieldCheck, Star, Share2, Heart } from "lucide-react";
 import ImageGallery from "@/components/ImageGallery";
 import { Reviews as ReviewsList } from "@/components/Reviews";
 import { Button } from "@/components/ui/Button";
-import { Card, CardContent } from "@/components/ui/Card";
-import { Heading, Subheading } from "@/components/ui/Typography";
+import { Card } from "@/components/ui/Card";
+import { Heading } from "@/components/ui/Typography";
 
 import ReviewSummarizer from "@/components/ai/ReviewSummarizer";
 import CompareInterface from "@/components/ai/CompareInterface";
-import OOSPredictor from "@/components/ai/OOSPredictor";
-import RestockTracker from "@/components/ai/RestockTracker";
 import DealInsight from "@/components/ai/DealInsight";
 import SocialProofBadge from "@/components/ai/SocialProofBadge";
 import { Suspense } from "react";
@@ -141,7 +139,6 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
     }
 
     const category = categories.find(c => c.id === product.categoryId);
-    const subcategory = product.subcategoryId ? categories.find(c => c.id === product.subcategoryId) : null;
 
     const discount = product.originalPrice
         ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)

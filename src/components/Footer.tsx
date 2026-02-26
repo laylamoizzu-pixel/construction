@@ -1,10 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { Facebook, Instagram, Twitter, MapPin, Mail, Linkedin } from "lucide-react";
 import { useSiteConfig } from "@/context/SiteConfigContext";
-import { cn } from "@/lib/utils";
 
 export default function Footer() {
     const { config } = useSiteConfig();

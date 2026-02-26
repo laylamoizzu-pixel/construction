@@ -6,7 +6,7 @@ import Image from "next/image";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { PromotionsConfig } from "@/types/site-config";
 import { motion, AnimatePresence } from "framer-motion";
-import { Heading, Subheading } from "./ui/Typography";
+import { Heading } from "./ui/Typography";
 import { cn } from "@/lib/utils";
 
 export default function Promotions({ config }: { config?: PromotionsConfig }) {

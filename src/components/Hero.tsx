@@ -3,11 +3,11 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, Sparkles, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowRight, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSiteConfig } from "@/context/SiteConfigContext";
 import { HeroConfig } from "@/types/site-config";
-import { Heading, Subheading } from "./ui/Typography";
+import { Subheading } from "./ui/Typography";
 import { Button } from "./ui/Button";
 import { cn } from "@/lib/utils";
 
@@ -28,8 +28,7 @@ export default function Hero() {
 
     if (!slides || slides.length === 0) return null;
 
-    const nextSlide = () => setCurrentSlide((prev) => (prev + 1) % slides.length);
-    const prevSlide = () => setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
+
 
     const slide = slides[currentSlide];
 

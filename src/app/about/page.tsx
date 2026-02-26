@@ -31,21 +31,6 @@ async function AboutPageContentLoader() {
         storeHours: siteConfig.contact.storeHours || ""
     };
 
-    const localBusinessSchema = {
-        "@context": "https://schema.org",
-        "@type": "LocalBusiness",
-        "name": siteConfig.branding.siteName,
-        "image": siteConfig.branding.logoUrl,
-        "url": "https://gharanarealtors.com/about",
-        "telephone": siteConfig.contact.phone,
-        "address": {
-            "@type": "PostalAddress",
-            "streetAddress": siteConfig.contact.address,
-            "addressCountry": siteConfig.seo.jsonLd.addressCountry || "IN"
-        },
-        "priceRange": siteConfig.seo.jsonLd.priceRange || "₹₹"
-    };
-
     return (
         <AboutContent content={pageContent} contact={contactContent} />
     );

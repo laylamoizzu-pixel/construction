@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Hammer, Ruler, HardHat, Compass, Layers, ShieldCheck, CheckCircle2, ChevronRight, Zap, Droplets, Sun, Wind } from "lucide-react";
+import { Hammer, Ruler, HardHat, Compass, Layers, ShieldCheck, CheckCircle2, Zap, Sun } from "lucide-react";
 import { Heading } from "./ui/Typography";
 import { Button } from "./ui/Button";
 import Image from "next/image";
@@ -85,9 +85,7 @@ export default function ConstructionContent() {
                             Precision <br />
                             <span className="text-brand-gold">Redefined.</span>
                         </h1>
-                        <p className="text-white/40 text-xl md:text-2xl font-light leading-relaxed max-w-xl">
-                            We don't just build homes. We engineer benchmarks of structural integrity and architectural soul.
-                        </p>
+                            We don&apos;t just build homes. We engineer benchmarks of structural integrity and architectural soul.
                         <div className="pt-8 flex gap-6">
                             <Button className="bg-brand-gold text-white px-10 h-14 rounded-full text-[10px] uppercase tracking-widest border-none hover:bg-white hover:text-brand-charcoal transition-all">
                                 Request Audit
@@ -195,9 +193,7 @@ export default function ConstructionContent() {
                             <div className="space-y-6">
                                 <span className="text-brand-gold font-bold tracking-[0.3em] uppercase text-[10px] block">Standard Excellence</span>
                                 <Heading>The Gharana <br /> Structural Covenant.</Heading>
-                                <p className="text-brand-charcoal/40 text-xl font-light leading-relaxed">
-                                    We use the highest grade of materials and advanced modular construction techniques to ensure that our projects aren't just homes—they're generational assets.
-                                </p>
+                                    We use the highest grade of materials and advanced modular construction techniques to ensure that our projects aren&apos;t just homes—they&apos;re generational assets.
                             </div>
 
                             <div className="space-y-6">

@@ -9,7 +9,6 @@ import { CTAContent } from "@/app/actions";
 import { motion, AnimatePresence } from "framer-motion";
 import { Heading, Subheading } from "./ui/Typography";
 import { Button } from "./ui/Button";
-import { cn } from "@/lib/utils";
 
 export default function CTA({ content, aiEnabled = true }: { content?: CTAContent; aiEnabled?: boolean }) {
     const [currentImageIndex, setCurrentImageIndex] = useState(0);

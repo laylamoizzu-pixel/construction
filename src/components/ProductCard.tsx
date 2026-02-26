@@ -2,12 +2,10 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { Zap, Tag, Star, ChevronRight, MapPin } from "lucide-react";
-import { motion } from "framer-motion";
+import { Zap, Tag, Star, ChevronRight } from "lucide-react";
 import { Product, Offer } from "@/app/actions";
 import { Card, CardContent } from "./ui/Card";
 import SocialProofBadge from "@/components/ai/SocialProofBadge";
-import { cn } from "@/lib/utils";
 
 interface ProductCardProps {
     product: Product;

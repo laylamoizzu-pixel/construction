@@ -3,9 +3,8 @@
 import { CheckCircle2, ShieldCheck, Zap, Globe, LucideIcon, Package, Star, Heart, TrendingUp } from "lucide-react";
 import { FeaturesContent } from "@/app/actions";
 import { motion } from "framer-motion";
-import { Heading, Subheading, SectionTitle } from "./ui/Typography";
+import { SectionTitle } from "./ui/Typography";
 import { Card, CardContent } from "./ui/Card";
-import { cn } from "@/lib/utils";
 
 const iconMap: Record<string, LucideIcon> = {
     ShieldCheck,

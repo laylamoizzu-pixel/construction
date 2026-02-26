@@ -30,15 +30,7 @@ export default function Header() {
 
     const NAV_LINKS = config?.headerLinks || DEFAULT_NAV_LINKS;
 
-    const handleSearch = (e: React.FormEvent) => {
-        e.preventDefault();
-        if (searchQuery.trim()) {
-            router.push(`/products?search=${encodeURIComponent(searchQuery.trim())}`);
-            setSearchQuery("");
-            setIsSearchOpen(false);
-            setIsMenuOpen(false);
-        }
-    };
+
 
     const toggleSearch = () => {
         setIsSearchOpen(!isSearchOpen);
