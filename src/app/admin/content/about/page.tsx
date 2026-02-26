@@ -13,13 +13,13 @@ import Link from "next/link";
 import CloudinaryUpload from "@/components/CloudinaryUpload";
 
 const defaultContent: AboutPageContent = {
-    heroTitle: "Smart Avenue",
+    heroTitle: "Gharana Realtors",
     heroSubtitle: "Building the future of retail, right here in your city.",
     heroImage: "",
     heroLabel: "Our Story",
     visionTitle: "Redefining Retail in Patna",
     visionLabel: "Our Vision",
-    visionText1: "We are not just a store; we are a logistics ecosystem designed for modern living. Smart Avenue bridges the gap between premium global brands and optimal local convenience.",
+    visionText1: "We are not just a company; we are a real estate ecosystem designed for modern living. Gharana Realtors bridges the gap between premium properties and optimal client convenience.",
     visionText2: "Our platform leverages cutting-edge technology to ensure that quality, affordability, and speed are not mutually exclusive, but the standard for every interaction.",
     visionImage: "https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=2301&auto=format&fit=crop",
     statsCustomers: "10k+",

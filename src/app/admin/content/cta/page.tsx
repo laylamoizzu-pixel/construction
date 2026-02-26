@@ -14,7 +14,7 @@ import ImageUpload, { UploadedFile } from "@/components/ImageUpload";
 
 const defaultCTA: CTAContent = {
     title: "Ready to experience the new standard?",
-    text: "Join thousands of smart shoppers transforming their lifestyle with Smart Avenue.",
+    text: "Join thousands of clients discovering their dream properties with Gharana Realtors.",
     ctaPrimary: "Start Shopping",
     ctaLink: "/products",
     ctaSecondary: "Chat with Us",
