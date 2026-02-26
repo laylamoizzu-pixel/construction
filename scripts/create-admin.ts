@@ -38,7 +38,7 @@ function getAdminAuth() {
 }
 
 async function createAdmin() {
-    const email = "admin@smartavenue99.com";
+    const email = "admin@gharana.com";
     const password = "password123";
 
     console.log(`Creating/Updating admin user: ${email}`);

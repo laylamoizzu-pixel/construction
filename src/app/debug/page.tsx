@@ -96,7 +96,7 @@ export default async function DebugPage() {
             </div>
 
             <div className="mt-8 p-4 bg-yellow-50 border border-yellow-200 rounded-lg text-sm text-yellow-800">
-                <strong>Note:</strong> <code>admin@smartavenue99.com</code> is a hardcoded Super Admin and may not appear here, but always has full access.
+                <strong>Note:</strong> <code>admin@gharana.com</code> is a hardcoded Super Admin and may not appear here, but always has full access.
             </div>
         </div>
     );

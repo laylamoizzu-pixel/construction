@@ -444,7 +444,7 @@ export async function deleteStaffMember(id: string) {
 export async function getStaffData(email: string) {
     try {
         // Hardcoded super admin
-        if (email === "admin@smartavenue99.com") {
+        if (email === "admin@gharana.com") {
             return {
                 role: "Admin",
                 permissions: ["*"] // All permissions

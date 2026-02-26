@@ -172,7 +172,7 @@ export const getStaffMembers = unstable_cache(_fetchStaffMembers, ["staff-member
 });
 
 export async function getStaffRole(email: string): Promise<string | null> {
-    if (email === "admin@smartavenue99.com") return "Admin";
+    if (email === "admin@gharana.com") return "Admin";
     console.warn("getStaffRole called, but Staff hasn't been migrated to Clerk yet.");
     return null;
 }
