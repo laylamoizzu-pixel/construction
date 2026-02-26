@@ -10,61 +10,49 @@
   --font-serif: var(--font-outfit);
   /* Using Sans for Serif variable to override any legacy serif usage */
 
-  /* Custom Colors - Modern Tech Retail Palette */
-  --color-brand-blue: #0284c7;
-  /* Sky 600 */
-  --color-brand-lime: #84cc16;
-  /* Lime 500 */
-  --color-brand-green: #064e3b;
-  /* Emerald 900 - Deep Premium Green */
-  --color-brand-gold: #d4af37;
-  /* Classic Gold */
-  --color-brand-sand: #fefae0;
-  /* Soft Sand/Beige */
-  --color-brand-dark: #0f172a;
-  /* Slate 900 */
-  --color-brand-light: #f8fafc;
-  /* Slate 50 */
-  --color-brand-gray: #64748b;
-  /* Slate 500 */
+  /* Custom Colors - Premium Silicon Valley Palette */
+  --color-brand-blue: #007AFF; /* Apple Blue */
+  --color-brand-indigo: #5856D6;
+  --color-brand-dark: #000000; /* Pure Black for high contrast */
+  --color-brand-surface: #F5F5F7; /* Apple Surface / Gray 6 */
+  --color-brand-gold: #D4AF37;
+  --color-brand-soft-gold: #C5A059;
+  --color-brand-accent: #BF953F;
 }
 
 :root {
-  /* Logo-aligned Palette */
-  --primary: #0284c7;
-  /* Sky 600 - Main Brand Blue */
-  --secondary: #84cc16;
-  /* Lime 500 - Accent/Action */
-  --accent: #06b6d4;
-  /* Cyan 500 */
-  --background: #ffffff;
-  --foreground: #0f172a;
+  /* Premium Palette */
+  --primary: #000000;
+  --secondary: #007AFF;
+  --accent: #D4AF37;
+  --background: #FFFFFF;
+  --foreground: #000000;
 
-  --brand-blue: #0284c7;
-  --brand-lime: #84cc16;
-  --brand-green: #064e3b;
-  --brand-gold: #d4af37;
-  --brand-dark: #020617;
-  /* Slate 950 */
-  --brand-sand: #fefae0;
-  /* Soft Sand/Beige */
+  --brand-blue: #007AFF;
+  --brand-dark: #000000;
+  --brand-gold: #D4AF37;
+  --brand-surface: #F5F5F7;
 
   /* Font Variables matching layout.tsx */
   --font-sans: var(--font-outfit);
   --font-serif: var(--font-outfit);
 }
 
-/* Modern Glassmorphism (Frosted) */
+/* Modern Premium Components */
 .glass-panel {
-  @apply bg-white/80 backdrop-blur-xl border border-white/50 shadow-2xl;
+  @apply bg-white/70 backdrop-blur-2xl border border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.08)];
 }
 
 .glass-header {
-  @apply bg-white/90 backdrop-blur-2xl border-b border-gray-200/50 shadow-sm supports-[backdrop-filter]:bg-white/80;
+  @apply bg-white/80 backdrop-blur-xl border-b border-gray-200/30 sticky top-0 z-50;
 }
 
 .text-gradient {
-  @apply bg-clip-text text-transparent bg-gradient-to-r from-brand-blue to-brand-lime;
+  @apply bg-clip-text text-transparent bg-gradient-to-br from-brand-dark via-brand-dark to-brand-accent;
+}
+
+.text-gradient-gold {
+  @apply bg-clip-text text-transparent bg-gradient-to-br from-brand-gold via-brand-accent to-brand-soft-gold;
 }
 
 body {

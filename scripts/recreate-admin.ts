@@ -32,7 +32,7 @@ async function recreateAdmin() {
         }
 
         const email = 'admin@gharana.com';
-        const password = 'admin123';
+        const password = '123456';
 
         console.log(`Checking for user ${email}...`);
 
