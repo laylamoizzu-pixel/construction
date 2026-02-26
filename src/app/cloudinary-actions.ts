@@ -3,8 +3,8 @@
 import { v2 as cloudinary } from "cloudinary";
 
 cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
+    cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY || process.env.CLOUDINARY_API_KEY,
     api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
@@ -33,8 +33,8 @@ export async function getMediaLibrarySignature() {
             success: true,
             signature,
             timestamp,
-            cloudName: process.env.CLOUDINARY_CLOUD_NAME,
-            apiKey: process.env.CLOUDINARY_API_KEY
+            cloudName: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
+            apiKey: process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY
         };
     } catch (error) {
         console.error("Cloudinary media library signature error:", error);
@@ -68,8 +68,8 @@ export async function getCloudinarySignature(folder: string, transformation?: st
             success: true,
             signature,
             timestamp,
-            cloudName: process.env.CLOUDINARY_CLOUD_NAME,
-            apiKey: process.env.CLOUDINARY_API_KEY
+            cloudName: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
+            apiKey: process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY
         };
     } catch (error) {
         console.error("Cloudinary signature error:", error);
