@@ -172,45 +172,49 @@ export default function InfiniteProductGrid({
                                     {product.name}
                                 </h3>
 
-                                <p className="text-slate-500 text-sm line-clamp-2 mb-4 flex-1">
-                                    {product.description}
-                                </p>
+                                <p className="text-slate-500 text-sm font-medium">No properties found matching your criteria</p>
+                                {product.description}
+                            </p>
 
-                                <div className="flex items-center justify-between mt-auto">
-                                    <div className="flex flex-col">
-                                        <span className="text-xs text-slate-400">Price</span>
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-xl font-bold text-brand-blue">
-                                                ₹{product.price.toLocaleString()}
+                            <div className="flex items-center justify-between mt-auto">
+                                <div className="flex flex-col">
+                                    <span className="text-xs text-slate-400">Price</span>
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-xl font-bold text-brand-blue">
+                                            ₹{product.price.toLocaleString()}
+                                        </span>
+                                        {product.originalPrice && (
+                                            <span className="text-sm text-slate-400 line-through">
+                                                ₹{product.originalPrice.toLocaleString()}
                                             </span>
-                                            {product.originalPrice && (
-                                                <span className="text-sm text-slate-400 line-through">
-                                                    ₹{product.originalPrice.toLocaleString()}
-                                                </span>
-                                            )}
-                                        </div>
-                                    </div>
-                                    <div className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-brand-blue group-hover:bg-brand-blue group-hover:text-white transition-colors duration-300">
-                                        <ChevronRight className="w-5 h-5" />
+                                        )}
                                     </div>
                                 </div>
+                                <div className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-brand-blue group-hover:bg-brand-blue group-hover:text-white transition-colors duration-300">
+                                    <ChevronRight className="w-5 h-5" />
+                                </div>
                             </div>
+                        </div>
                         </Link>
-                    );
+            );
                 })}
-            </div>
-
-            {loading && (
-                <div className="flex justify-center py-8">
-                    <Loader2 className="w-8 h-8 text-brand-blue animate-spin" />
-                </div>
-            )}
-
-            {!hasMore && products.length > 0 && (
-                <div className="text-center py-8 text-slate-400 text-sm">
-                    You&apos;ve reached the end of our collection.
-                </div>
-            )}
         </div>
+
+            {
+        loading && (
+            <div className="flex justify-center py-8">
+                <Loader2 className="w-8 h-8 text-brand-blue animate-spin" />
+            </div>
+        )
+    }
+
+    {
+        !hasMore && products.length > 0 && (
+            <div className="text-center py-8 text-slate-400 text-sm">
+                You&apos;ve reached the end of our collection.
+            </div>
+        )
+    }
+        </div >
     );
 }

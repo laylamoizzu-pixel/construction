@@ -121,149 +121,150 @@ export default function ProductRequestModal({
                                         <div className="w-20 h-20 bg-green-100/50 text-green-600 rounded-full flex items-center justify-center mb-6 shadow-sm">
                                             <CheckCircle2 className="w-10 h-10" />
                                         </div>
-                                        <h3 className="text-2xl font-bold text-gray-900 mb-2">Request Sent!</h3>
+                                        <h2 className="text-2xl font-bold text-slate-900">Property Request</h2> Sent!</h3>
                                         <p className="text-gray-500 max-w-xs mx-auto text-base">
                                             Your wish is our command. We&apos;ll notify you as soon as we find your item.
                                         </p>
                                     </motion.div>
-                                ) : (
-                                    <motion.form
-                                        key="form"
-                                        initial={{ opacity: 0 }}
-                                        animate={{ opacity: 1 }}
-                                        exit={{ opacity: 0 }}
-                                        onSubmit={handleSubmit}
-                                        className="space-y-6"
-                                    >
-                                        {error && (
-                                            <div className="p-4 bg-red-50 text-red-600 rounded-2xl text-sm flex items-center gap-3 border border-red-100">
-                                                <AlertCircle className="w-5 h-5 shrink-0" />
-                                                <span className="font-medium">{error}</span>
-                                            </div>
-                                        )}
-
-                                        <div className="space-y-5">
-                                            {/* Product Name */}
-                                            <div className="group">
-                                                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 ml-1">Product Name</label>
-                                                <input
-                                                    type="text"
-                                                    required
-                                                    value={formData.productName}
-                                                    onChange={(e) => setFormData({ ...formData, productName: e.target.value })}
-                                                    className="w-full px-5 py-3.5 bg-slate-50/50 hover:bg-slate-50 border border-transparent focus:bg-white focus:border-brand-blue/30 focus:ring-4 focus:ring-brand-blue/10 rounded-2xl transition-all outline-none font-medium placeholder:text-slate-400 text-slate-800"
-                                                    placeholder="What are you looking for?"
-                                                />
-                                            </div>
-
-                                            {/* Details Grid */}
-                                            <div className="grid grid-cols-2 gap-5">
-                                                <div>
-                                                    <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 ml-1">Brand</label>
-                                                    <input
-                                                        type="text"
-                                                        value={formData.brand}
-                                                        onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
-                                                        className="w-full px-5 py-3.5 bg-slate-50/50 hover:bg-slate-50 border border-transparent focus:bg-white focus:border-brand-blue/30 focus:ring-4 focus:ring-brand-blue/10 rounded-2xl transition-all outline-none font-medium text-slate-800"
-                                                        placeholder="Optional"
-                                                    />
-                                                </div>
-                                                <div>
-                                                    <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 ml-1">Contact</label>
-                                                    <input
-                                                        type="text"
-                                                        required
-                                                        value={formData.contactInfo}
-                                                        onChange={(e) => setFormData({ ...formData, contactInfo: e.target.value })}
-                                                        className="w-full px-5 py-3.5 bg-slate-50/50 hover:bg-slate-50 border border-transparent focus:bg-white focus:border-brand-blue/30 focus:ring-4 focus:ring-brand-blue/10 rounded-2xl transition-all outline-none font-medium text-slate-800"
-                                                        placeholder="Email/Phone"
-                                                    />
-                                                </div>
-                                            </div>
-
-                                            {/* Price Range */}
-                                            <div className="grid grid-cols-2 gap-5">
-                                                <div>
-                                                    <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 ml-1">Min Price</label>
-                                                    <div className="relative">
-                                                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">₹</span>
-                                                        <input
-                                                            type="number"
-                                                            min="0"
-                                                            value={formData.minPrice || ""}
-                                                            onChange={(e) => setFormData({ ...formData, minPrice: e.target.value ? Number(e.target.value) : undefined })}
-                                                            className="w-full pl-8 pr-5 py-3.5 bg-slate-50/50 hover:bg-slate-50 border border-transparent focus:bg-white focus:border-brand-blue/30 focus:ring-4 focus:ring-brand-blue/10 rounded-2xl transition-all outline-none font-medium text-slate-800"
-                                                            placeholder="0"
-                                                        />
-                                                    </div>
-                                                </div>
-                                                <div>
-                                                    <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 ml-1">Max Price</label>
-                                                    <div className="relative">
-                                                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">₹</span>
-                                                        <input
-                                                            type="number"
-                                                            min="0"
-                                                            value={formData.maxPrice || ""}
-                                                            onChange={(e) => setFormData({ ...formData, maxPrice: e.target.value ? Number(e.target.value) : undefined })}
-                                                            className="w-full pl-8 pr-5 py-3.5 bg-slate-50/50 hover:bg-slate-50 border border-transparent focus:bg-white focus:border-brand-blue/30 focus:ring-4 focus:ring-brand-blue/10 rounded-2xl transition-all outline-none font-medium text-slate-800"
-                                                            placeholder="Any"
-                                                        />
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            {/* Description */}
-                                            <div>
-                                                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 ml-1">Description</label>
-                                                <textarea
-                                                    required
-                                                    rows={3}
-                                                    value={formData.description}
-                                                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                                                    className="w-full px-5 py-3.5 bg-slate-50/50 hover:bg-slate-50 border border-transparent focus:bg-white focus:border-brand-blue/30 focus:ring-4 focus:ring-brand-blue/10 rounded-2xl transition-all outline-none resize-none font-medium text-slate-800"
-                                                    placeholder="Details about color, size, material, year, etc."
-                                                />
-                                            </div>
-
-                                            {/* Image Upload */}
-                                            <div>
-                                                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 ml-1">Reference Image</label>
-                                                <div className="bg-slate-50/50 rounded-2xl p-2 border border-slate-100 hover:border-brand-blue/30 transition-colors">
-                                                    <ImageUpload
-                                                        folder="product-requests"
-                                                        onUpload={(files) => {
-                                                            if (files.length > 0) {
-                                                                setFormData({ ...formData, imageUrl: files[0].url });
-                                                            }
-                                                        }}
-                                                        currentImages={formData.imageUrl ? [formData.imageUrl] : []}
-                                                        onRemoveImage={() => setFormData({ ...formData, imageUrl: "" })}
-                                                        maxFiles={1}
-                                                        accept="image/*"
-                                                        className="[&_button]:w-full [&_button]:py-4 [&_button]:bg-white [&_button]:border-dashed [&_button]:border-2 [&_button]:border-slate-200 [&_button]:text-slate-500 [&_button]:hover:border-brand-blue/50 [&_button]:hover:text-brand-blue [&_button]:transition-all [&_button]:shadow-none"
-                                                    />
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div className="pt-4">
-                                            <button
-                                                onClick={handleSubmit}
-                                                disabled={isSubmitting}
-                                                className="w-full py-4 bg-brand-dark text-white font-bold rounded-2xl shadow-lg shadow-brand-dark/20 hover:shadow-xl hover:scale-[1.01] active:scale-[0.99] transition-all disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-base"
-                                            >
-                                                {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
-                                                <span>Submit Request</span>
-                                            </button>
-                                        </div>
-                                    </motion.form>
+                            ) : (
+                            <motion.form
+                                key="form"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                onSubmit={handleSubmit}
+                                className="space-y-6"
+                            >
+                                {error && (
+                                    <div className="p-4 bg-red-50 text-red-600 rounded-2xl text-sm flex items-center gap-3 border border-red-100">
+                                        <AlertCircle className="w-5 h-5 shrink-0" />
+                                        <span className="font-medium">{error}</span>
+                                    </div>
                                 )}
-                            </AnimatePresence>
-                        </div>
-                    </motion.div>
+
+                                <div className="space-y-5">
+                                    {/* Product Name */}
+                                    <div className="group">
+                                        <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 ml-1">Property Type</label>
+                                        <input
+                                            type="text"
+                                            required
+                                            value={formData.productName}
+                                            onChange={(e) => setFormData({ ...formData, productName: e.target.value })}
+                                            className="w-full px-5 py-3.5 bg-slate-50/50 hover:bg-slate-50 border border-transparent focus:bg-white focus:border-brand-blue/30 focus:ring-4 focus:ring-brand-blue/10 rounded-2xl transition-all outline-none font-medium placeholder:text-slate-400 text-slate-800"
+                                            placeholder="e.g. 3BHK Apartment, Commercial Plot..."
+                                        />
+                                    </div>
+
+                                    {/* Details Grid */}
+                                    <div className="grid grid-cols-2 gap-5">
+                                        <div>
+                                            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 ml-1">Developer/Builder</label>
+                                            <input
+                                                type="text"
+                                                value={formData.brand}
+                                                onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
+                                                className="w-full px-5 py-3.5 bg-slate-50/50 hover:bg-slate-50 border border-transparent focus:bg-white focus:border-brand-blue/30 focus:ring-4 focus:ring-brand-blue/10 rounded-2xl transition-all outline-none font-medium text-slate-800"
+                                                placeholder="Optional (e.g. Prestige, Sobha)"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 ml-1">Contact Info</label>
+                                            <input
+                                                type="text"
+                                                required
+                                                value={formData.contactInfo}
+                                                onChange={(e) => setFormData({ ...formData, contactInfo: e.target.value })}
+                                                className="w-full px-5 py-3.5 bg-slate-50/50 hover:bg-slate-50 border border-transparent focus:bg-white focus:border-brand-blue/30 focus:ring-4 focus:ring-brand-blue/10 rounded-2xl transition-all outline-none font-medium text-slate-800"
+                                                placeholder="Email or Phone Number"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* Price Range */}
+                                    <div className="grid grid-cols-2 gap-5">
+                                        <div>
+                                            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 ml-1">Min Price</label>
+                                            <div className="relative">
+                                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">₹</span>
+                                                <input
+                                                    type="number"
+                                                    min="0"
+                                                    value={formData.minPrice || ""}
+                                                    onChange={(e) => setFormData({ ...formData, minPrice: e.target.value ? Number(e.target.value) : undefined })}
+                                                    className="w-full pl-8 pr-5 py-3.5 bg-slate-50/50 hover:bg-slate-50 border border-transparent focus:bg-white focus:border-brand-blue/30 focus:ring-4 focus:ring-brand-blue/10 rounded-2xl transition-all outline-none font-medium text-slate-800"
+                                                    placeholder="e.g. 3000000"
+                                                />
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 ml-1">Max Price</label>
+                                            <div className="relative">
+                                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">₹</span>
+                                                <input
+                                                    type="number"
+                                                    min="0"
+                                                    value={formData.maxPrice || ""}
+                                                    onChange={(e) => setFormData({ ...formData, maxPrice: e.target.value ? Number(e.target.value) : undefined })}
+                                                    className="w-full pl-8 pr-5 py-3.5 bg-slate-50/50 hover:bg-slate-50 border border-transparent focus:bg-white focus:border-brand-blue/30 focus:ring-4 focus:ring-brand-blue/10 rounded-2xl transition-all outline-none font-medium text-slate-800"
+                                                    placeholder="Any"
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Description */}
+                                    <div>
+                                        <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 ml-1">Description</label>
+                                        <textarea
+                                            required
+                                            rows={3}
+                                            value={formData.description}
+                                            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                                            className="w-full px-5 py-3.5 bg-slate-50/50 hover:bg-slate-50 border border-transparent focus:bg-white focus:border-brand-blue/30 focus:ring-4 focus:ring-brand-blue/10 rounded-2xl transition-all outline-none resize-none font-medium text-slate-800"
+                                            placeholder="Details about color, size, material, year, etc."
+                                        />
+                                    </div>
+
+                                    {/* Image Upload */}
+                                    <div>
+                                        <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 ml-1">Reference Image</label>
+                                        <div className="bg-slate-50/50 rounded-2xl p-2 border border-slate-100 hover:border-brand-blue/30 transition-colors">
+                                            <ImageUpload
+                                                folder="product-requests"
+                                                onUpload={(files) => {
+                                                    if (files.length > 0) {
+                                                        setFormData({ ...formData, imageUrl: files[0].url });
+                                                    }
+                                                }}
+                                                currentImages={formData.imageUrl ? [formData.imageUrl] : []}
+                                                onRemoveImage={() => setFormData({ ...formData, imageUrl: "" })}
+                                                maxFiles={1}
+                                                accept="image/*"
+                                                className="[&_button]:w-full [&_button]:py-4 [&_button]:bg-white [&_button]:border-dashed [&_button]:border-2 [&_button]:border-slate-200 [&_button]:text-slate-500 [&_button]:hover:border-brand-blue/50 [&_button]:hover:text-brand-blue [&_button]:transition-all [&_button]:shadow-none"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="pt-4">
+                                    <button
+                                        onClick={handleSubmit}
+                                        disabled={isSubmitting}
+                                        className="w-full py-4 bg-brand-dark text-white font-bold rounded-2xl shadow-lg shadow-brand-dark/20 hover:shadow-xl hover:scale-[1.01] active:scale-[0.99] transition-all disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-base"
+                                    >
+                                        {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
+                                        <span>Submit Request</span>
+                                    </button>
+                                </div>
+                            </motion.form>
+                                )}
+                        </AnimatePresence>
                 </div>
-            )}
-        </AnimatePresence>
+                    </motion.div>
+                </div >
+            )
+}
+        </AnimatePresence >
     );
 }
