@@ -6,20 +6,20 @@ import Image from "next/image";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { PromotionsConfig } from "@/types/site-config";
 import { motion, AnimatePresence } from "framer-motion";
+import { Heading, Subheading } from "./ui/Typography";
+import { cn } from "@/lib/utils";
 
 export default function Promotions({ config }: { config?: PromotionsConfig }) {
     const [currentIndex, setCurrentIndex] = useState(0);
 
-    // Filter active items
     const activeItems = config?.items.filter(item => item.active) || [];
 
-    // Auto-rotate if multiple items
     useEffect(() => {
         if (activeItems.length <= 1) return;
 
         const interval = setInterval(() => {
             setCurrentIndex((prev) => (prev + 1) % activeItems.length);
-        }, 5000); // 5 seconds per slide
+        }, 6000);
 
         return () => clearInterval(interval);
     }, [activeItems.length]);
@@ -36,26 +36,27 @@ export default function Promotions({ config }: { config?: PromotionsConfig }) {
         setCurrentIndex((prev) => (prev - 1 + activeItems.length) % activeItems.length);
     };
 
-    return (
-        <section className="py-12 bg-white border-b border-gray-100">
-            <div className="container mx-auto px-4 md:px-6">
-                <div className="flex items-center justify-between mb-8">
-                    <h2 className="text-2xl md:text-3xl font-bold text-gray-800 tracking-tight">
-                        {config.title}
-                    </h2>
+    const currentItem = activeItems[currentIndex];
 
-                    {/* Controls for multiple items */}
+    return (
+        <section className="py-24 bg-brand-white border-y border-brand-silver/30">
+            <div className="container mx-auto px-6 md:px-12">
+                <div className="flex items-center justify-between mb-12">
+                    <Heading className="text-3xl md:text-5xl font-bold tracking-tight text-brand-charcoal">
+                        {config.title}
+                    </Heading>
+
                     {activeItems.length > 1 && (
-                        <div className="flex gap-2">
+                        <div className="flex gap-4">
                             <button
                                 onClick={prevSlide}
-                                className="p-2 rounded-full border border-gray-200 hover:bg-gray-50 text-gray-600 transition-colors"
+                                className="p-3 rounded-full border border-brand-silver hover:bg-brand-charcoal hover:text-white transition-all duration-300"
                             >
                                 <ArrowLeft className="w-5 h-5" />
                             </button>
                             <button
                                 onClick={nextSlide}
-                                className="p-2 rounded-full border border-gray-200 hover:bg-gray-50 text-gray-600 transition-colors"
+                                className="p-3 rounded-full border border-brand-silver hover:bg-brand-charcoal hover:text-white transition-all duration-300"
                             >
                                 <ArrowRight className="w-5 h-5" />
                             </button>
@@ -63,67 +64,60 @@ export default function Promotions({ config }: { config?: PromotionsConfig }) {
                     )}
                 </div>
 
-                <div className="relative aspect-[21/9] md:aspect-[3/1] rounded-2xl overflow-hidden shadow-lg bg-gray-100">
+                <div className="relative aspect-[21/9] md:aspect-[3/1] rounded-[2rem] overflow-hidden shadow-premium bg-brand-charcoal">
                     <AnimatePresence mode="wait">
                         <motion.div
-                            key={activeItems[currentIndex].id}
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            transition={{ duration: 0.5 }}
+                            key={currentItem.id}
+                            initial={{ opacity: 0, scale: 1.05 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
+                            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
                             className="absolute inset-0"
                         >
-                            {/* Wrap in Link if link exists, otherwise just div */}
-                            {activeItems[currentIndex].link ? (
-                                <Link href={activeItems[currentIndex].link} className="block w-full h-full relative cursor-pointer group">
-                                    <Image
-                                        src={activeItems[currentIndex].imageUrl}
-                                        alt={activeItems[currentIndex].title || "Promotion"}
-                                        fill
-                                        className="object-cover transition-transform duration-700 group-hover:scale-105"
-                                        sizes="(max-width: 768px) 100vw, 80vw"
-                                        priority={currentIndex === 0}
-                                    />
-                                    {/* Optional Overlay Title */}
-                                    {activeItems[currentIndex].title && (
-                                        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-6 md:p-10 pointer-events-none">
-                                            <h3 className="text-white text-xl md:text-3xl font-bold">
-                                                {activeItems[currentIndex].title}
-                                            </h3>
-                                        </div>
-                                    )}
-                                </Link>
-                            ) : (
-                                <div className="w-full h-full relative">
-                                    <Image
-                                        src={activeItems[currentIndex].imageUrl}
-                                        alt={activeItems[currentIndex].title || "Promotion"}
-                                        fill
-                                        className="object-cover"
-                                        sizes="(max-width: 768px) 100vw, 80vw"
-                                        priority={currentIndex === 0}
-                                    />
-                                    {activeItems[currentIndex].title && (
-                                        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-6 md:p-10 pointer-events-none">
-                                            <h3 className="text-white text-xl md:text-3xl font-bold">
-                                                {activeItems[currentIndex].title}
-                                            </h3>
-                                        </div>
-                                    )}
+                            <Link href={currentItem.link || "#"} className={cn("block w-full h-full relative group", !currentItem.link && "pointer-events-none")}>
+                                <div className="absolute inset-0 bg-gradient-to-r from-brand-charcoal via-brand-charcoal/40 to-transparent z-10" />
+                                <Image
+                                    src={currentItem.imageUrl}
+                                    alt={currentItem.title || "Promotion"}
+                                    fill
+                                    className="object-cover transition-transform duration-[2s] group-hover:scale-105"
+                                    sizes="100vw"
+                                    priority
+                                />
+
+                                <div className="absolute inset-y-0 left-0 p-10 md:p-20 flex flex-col justify-center z-20 max-w-2xl">
+                                    <motion.div
+                                        initial={{ opacity: 0, x: -20 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        transition={{ delay: 0.3 }}
+                                    >
+                                        <span className="text-brand-gold font-bold tracking-[0.3em] uppercase text-[10px] mb-6 block">
+                                            Exclusive Offer
+                                        </span>
+                                        <h3 className="text-white text-3xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-8 leading-[1.1]">
+                                            {currentItem.title}
+                                        </h3>
+                                        {currentItem.link && (
+                                            <div className="flex items-center text-brand-gold font-bold text-sm uppercase tracking-widest group-hover:translate-x-2 transition-transform duration-500">
+                                                Learn More <ArrowRight className="w-5 h-5 ml-3" />
+                                            </div>
+                                        )}
+                                    </motion.div>
                                 </div>
-                            )}
+                            </Link>
                         </motion.div>
                     </AnimatePresence>
 
-                    {/* Indicators */}
                     {activeItems.length > 1 && (
-                        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+                        <div className="absolute bottom-8 right-12 flex gap-3 z-30">
                             {activeItems.map((_, idx) => (
                                 <button
                                     key={idx}
                                     onClick={() => setCurrentIndex(idx)}
-                                    className={`w-2 h-2 rounded-full transition-all ${idx === currentIndex ? "bg-white w-6" : "bg-white/50 hover:bg-white/80"
-                                        }`}
+                                    className={cn(
+                                        "h-1 transition-all duration-500 rounded-full",
+                                        idx === currentIndex ? "bg-brand-gold w-12" : "bg-white/20 w-6 hover:bg-white/40"
+                                    )}
                                 />
                             ))}
                         </div>

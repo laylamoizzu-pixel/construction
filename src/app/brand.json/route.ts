@@ -12,12 +12,12 @@ export async function GET() {
         const entity = {
             "@context": "https://schema.org",
             "@type": "Organization",
-            "@id": "https://gharanarealtors.com/#organization",
+            "@id": `${process.env.NEXT_PUBLIC_SITE_URL || 'https://gharanarealtors.com'}/#organization`,
             "name": branding.siteName || "Gharana Realtors",
-            "url": "https://gharanarealtors.com",
+            "url": process.env.NEXT_PUBLIC_SITE_URL || "https://gharanarealtors.com",
             "logo": {
                 "@type": "ImageObject",
-                "url": `https://gharanarealtors.com${branding.logoUrl || "/logo.png"}`,
+                "url": branding.logoUrl?.startsWith('http') ? branding.logoUrl : `${process.env.NEXT_PUBLIC_SITE_URL || 'https://gharanarealtors.com'}${branding.logoUrl || "/logo.png"}`,
             },
             "description": llm?.brandIdentityText || seo.metaDescription,
             "slogan": branding.tagline,

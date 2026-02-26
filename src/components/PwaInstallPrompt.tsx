@@ -95,7 +95,7 @@ export default function PwaInstallPrompt() {
                             <div className="flex-1">
                                 <h3 className="font-semibold text-gray-900 mb-1">Install App</h3>
                                 <p className="text-sm text-gray-600 mb-3">
-                                    Install {config.branding.siteName || "Gharana Realtors"} for a faster, better experience.
+                                    Install {config.branding.siteName || "App"} for a faster, better experience.
                                 </p>
                             </div>
 

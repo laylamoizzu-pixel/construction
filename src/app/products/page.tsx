@@ -1,3 +1,5 @@
+"use client";
+
 import { getFilteredProducts, getCategories, getOffers, getSiteContent, ProductsPageContent } from "@/app/actions";
 import { getSiteConfig } from "@/app/actions/site-config";
 import Image from "next/image";
@@ -6,47 +8,41 @@ import InfiniteProductGrid from "@/components/InfiniteProductGrid";
 import { constructMetadata } from "@/lib/seo-utils";
 import { Metadata } from "next";
 import { Suspense } from "react";
-
-export const dynamic = "force-dynamic";
-
-export async function generateMetadata(): Promise<Metadata> {
-    const config = await getSiteConfig();
-    return constructMetadata({
-        title: "All Properties",
-        description: "Browse our entire catalog of premium properties across all property types at Gharana Realtors. Discover great deals and curated listings.",
-        urlPath: "/products",
-        config
-    });
-}
+import { motion } from "framer-motion";
 
 async function ProductsHeader() {
     const pageContent = await getSiteContent<ProductsPageContent>("products-page");
-    const heroTitle = pageContent?.heroTitle || "Our Listings";
-    const heroSubtitle = pageContent?.heroSubtitle || "Browse our curated collection of premium properties.";
+    const heroTitle = pageContent?.heroTitle || "Our Properties";
+    const heroSubtitle = pageContent?.heroSubtitle || "Discover fine real estate and architectural masterpieces.";
     const heroImage = pageContent?.heroImage || "";
 
     return (
-        <div className="bg-brand-dark pt-32 pb-12 relative overflow-hidden">
-            <div className="absolute inset-0 bg-[#0A0A0A]" />
-            {heroImage ? (
-                <div className="absolute inset-0 opacity-40">
+        <div className="bg-brand-charcoal pt-48 pb-24 relative overflow-hidden">
+            {/* Soft ambient glow */}
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-brand-gold/10 via-transparent to-transparent opacity-50" />
+
+            {heroImage && (
+                <div className="absolute inset-0 opacity-30">
                     <Image src={heroImage} alt="Hero Background" fill className="object-cover" />
                 </div>
-            ) : (
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-brand-blue/20 via-transparent to-transparent" />
             )}
 
-            <div className="container mx-auto px-4 relative z-10">
-                <div className="flex flex-col md:flex-row items-end justify-between gap-6">
-                    <div>
-                        <h1 className="text-4xl md:text-5xl font-bold text-white tracking-tight">
-                            {heroTitle}
-                        </h1>
-                        <p className="text-slate-400 mt-2 max-w-lg">
-                            {heroSubtitle}
-                        </p>
-                    </div>
-                </div>
+            <div className="container mx-auto px-6 md:px-12 relative z-10 text-center">
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 1 }}
+                >
+                    <span className="text-brand-gold font-bold tracking-[0.3em] uppercase text-[10px] mb-6 block">
+                        Portfolio
+                    </span>
+                    <h1 className="text-5xl md:text-8xl font-bold text-white tracking-tight mb-8">
+                        {heroTitle}
+                    </h1>
+                    <p className="text-white/40 text-xl md:text-2xl max-w-2xl mx-auto font-light leading-relaxed">
+                        {heroSubtitle}
+                    </p>
+                </motion.div>
             </div>
         </div>
     );
@@ -60,6 +56,7 @@ interface ProductFilters {
     maxPrice?: number;
     available?: boolean | "all";
     sort?: string;
+    rating?: number;
 }
 
 async function ProductsContent({ filters }: { filters: ProductFilters }) {
@@ -75,22 +72,23 @@ async function ProductsContent({ filters }: { filters: ProductFilters }) {
         contentPromise
     ]);
 
-    const maxPriceVal = Math.max(...allProducts.map(p => p.price), 10000);
+    const maxPriceVal = allProducts.length > 0 ? Math.max(...allProducts.map(p => p.price), 10000) : 1000000;
 
     return (
-        <div className="flex flex-col lg:flex-row gap-8">
+        <div className="flex flex-col lg:flex-row gap-16">
             {/* Sidebar */}
-            <FilterSidebar categories={categories} maxPriceRange={maxPriceVal} settings={pageContent || undefined} />
+            <aside className="lg:w-80 shrink-0">
+                <FilterSidebar categories={categories} maxPriceRange={maxPriceVal} settings={pageContent || undefined} />
+            </aside>
 
             {/* Main Content */}
             <div className="flex-1">
-                <div className="mb-6 flex items-center justify-between">
-                    <p className="text-slate-500 text-sm">
-                        Discovery Mode: <span className="text-brand-blue font-semibold italic">Slow & Steady Discovery</span>
+                <div className="mb-12 flex items-center justify-between border-b border-brand-silver/30 pb-6">
+                    <p className="text-brand-charcoal/40 text-[10px] font-bold uppercase tracking-[0.3em]">
+                        Showing {allProducts.length} curated results
                     </p>
                 </div>
 
-                {/* Infinite Scroll Grid */}
                 <InfiniteProductGrid
                     initialProducts={allProducts}
                     categories={categories}
@@ -121,14 +119,13 @@ export default async function ProductsPage({
     };
 
     return (
-        <div className="min-h-screen bg-slate-50">
-            {/* Tech Header */}
-            <Suspense fallback={<div className="h-64 bg-brand-dark animate-pulse" />}>
+        <div className="min-h-screen bg-brand-white">
+            <Suspense fallback={<div className="h-96 bg-brand-charcoal animate-pulse" />}>
                 <ProductsHeader />
             </Suspense>
 
-            <div className="container mx-auto px-4 py-8">
-                <Suspense fallback={<div className="h-96 bg-white animate-pulse rounded-xl" />}>
+            <div className="container mx-auto px-6 md:px-12 py-24">
+                <Suspense fallback={<div className="h-screen bg-brand-charcoal/5 animate-pulse rounded-[2.5rem]" />}>
                     <ProductsContent filters={filters} />
                 </Suspense>
             </div>

@@ -52,7 +52,7 @@ export default function AppearancePage() {
         }
     };
 
-    const handleImageUpload = async (file: File, path: string, field: "branding.logoUrl") => {
+    const handleImageUpload = async (file: File, path: string, field: "branding.logoUrl" | "branding.faviconUrl") => {
         setUploading(true);
         try {
             // Convert file to base64 for server action
@@ -72,6 +72,8 @@ export default function AppearancePage() {
                     const newConfig = { ...prev };
                     if (field === "branding.logoUrl") {
                         newConfig.branding.logoUrl = result.url;
+                    } else if (field === "branding.faviconUrl") {
+                        newConfig.branding.faviconUrl = result.url;
                     }
                     return newConfig;
                 });
@@ -143,19 +145,19 @@ export default function AppearancePage() {
                                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500"
                                 />
                             </div>
-                            <div className="md:col-span-2">
+                            <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Logo</label>
                                 <div className="flex items-center gap-4">
-                                    <div className="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center border border-gray-200 relative">
+                                    <div className="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center border border-gray-200 relative p-2">
                                         {config.branding.logoUrl ? (
                                             <Image src={config.branding.logoUrl} alt="Logo" fill className="object-contain" unoptimized />
                                         ) : (
                                             <span className="text-xs text-gray-400">No Logo</span>
                                         )}
                                     </div>
-                                    <label className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg cursor-pointer transition-colors text-sm flex items-center gap-2">
+                                    <label className="flex-1 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg cursor-pointer transition-colors text-sm flex items-center justify-center gap-2 border border-dashed border-gray-300">
                                         {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
-                                        Upload New Logo
+                                        {config.branding.logoUrl ? "Change Logo" : "Upload Logo"}
                                         <input
                                             type="file"
                                             accept="image/*"
@@ -165,6 +167,31 @@ export default function AppearancePage() {
                                         />
                                     </label>
                                 </div>
+                                <p className="mt-1 text-[10px] text-gray-500 italic">Recommended: Transparent PNG, min 200x200px</p>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Favicon (Browser Icon)</label>
+                                <div className="flex items-center gap-4">
+                                    <div className="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center border border-gray-200 relative p-4">
+                                        {config.branding.faviconUrl ? (
+                                            <Image src={config.branding.faviconUrl} alt="Favicon" fill className="object-contain p-2" unoptimized />
+                                        ) : (
+                                            <span className="text-xs text-gray-400">No Icon</span>
+                                        )}
+                                    </div>
+                                    <label className="flex-1 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg cursor-pointer transition-colors text-sm flex items-center justify-center gap-2 border border-dashed border-gray-300">
+                                        {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+                                        {config.branding.faviconUrl ? "Change Favicon" : "Upload Favicon"}
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={(e) => e.target.files?.[0] && handleImageUpload(e.target.files[0], "branding", "branding.faviconUrl")}
+                                            className="hidden"
+                                            disabled={uploading}
+                                        />
+                                    </label>
+                                </div>
+                                <p className="mt-1 text-[10px] text-gray-500 italic">Recommended: Square PNG or ICO, 32x32px or 64x64px</p>
                             </div>
                         </div>
                     </section>

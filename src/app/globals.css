@@ -10,38 +10,35 @@
   --font-serif: var(--font-outfit);
   /* Using Sans for Serif variable to override any legacy serif usage */
 
-  /* Custom Colors - Premium Silicon Valley Palette */
-  --color-brand-green: #064e3b;
-  --color-brand-blue: #007AFF;
-  /* Apple Blue */
-  --color-brand-indigo: #5856D6;
-  --color-brand-dark: #000000;
-  /* Pure Black for high contrast */
-  --color-brand-surface: #F5F5F7;
-  /* Apple Surface / Gray 6 */
-  --color-brand-sand: #FDFCFB;
-  --color-brand-gold: #D4AF37;
-  --color-brand-soft-gold: #C5A059;
-  --color-brand-accent: #BF953F;
-  --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.08);
+  /* Custom Colors - Gharana Realtors Premium Palette */
+  --color-brand-charcoal: #111111;
+  --color-brand-white: #F8F8F8;
+  --color-brand-gold: #C5A059;
+  --color-brand-silver: #E5E5E5;
+  --color-brand-dark: #111111;
+  --color-brand-accent: #C5A059;
+  --color-brand-soft-gold: #D4B67C;
+
+  --color-primary: var(--brand-charcoal);
+  --color-accent: var(--brand-gold);
+
+  --shadow-premium: 0 10px 40px -10px rgba(0, 0, 0, 0.05);
+  --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.03);
 }
 
 :root {
-  /* Premium Palette */
-  --primary: #000000;
-  --secondary: #007AFF;
-  --accent: #D4AF37;
-  --background: #FFFFFF;
-  --foreground: #000000;
+  /* Premium Palette Tokens */
+  --primary: #111111;
+  --background: #F8F8F8;
+  --foreground: #111111;
+  --accent: #C5A059;
 
-  --brand-green: #064e3b;
-  --brand-blue: #007AFF;
-  --brand-dark: #000000;
-  --brand-gold: #D4AF37;
-  --brand-surface: #F5F5F7;
-  --brand-sand: #FDFCFB;
+  --brand-charcoal: #111111;
+  --brand-white: #F8F8F8;
+  --brand-gold: #C5A059;
+  --brand-silver: #E5E5E5;
 
-  /* Font Variables matching layout.tsx */
+  /* Font Variables */
   --font-sans: var(--font-outfit);
   --font-serif: var(--font-outfit);
 }

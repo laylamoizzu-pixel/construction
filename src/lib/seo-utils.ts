@@ -13,9 +13,10 @@ interface SeoProps {
  * Generates unified metadata for pages including proper OpenGraph and Twitter cards.
  */
 export function constructMetadata({ title, description, urlPath = "", imageUrl, config }: SeoProps): Metadata {
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://gharanarealtors.com";
     const finalDescription = description || config.seo.metaDescription;
-    const finalUrl = urlPath ? `https://gharanarealtors.com${urlPath.startsWith('/') ? urlPath : `/${urlPath}`}` : "https://gharanarealtors.com";
-    const finalImage = imageUrl || config.seo.ogImageUrl || "/logo.png";
+    const finalUrl = urlPath ? `${siteUrl}${urlPath.startsWith('/') ? urlPath : `/${urlPath}`}` : siteUrl;
+    const finalImage = imageUrl || config.seo.ogImageUrl || config.branding.logoUrl || "/logo.png";
 
     return {
         title: title, // Next.js will use the titleTemplate from layout if we just pass the raw title string, but let's be explicit
