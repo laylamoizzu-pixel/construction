@@ -14,7 +14,7 @@ export async function generateMetadata(): Promise<Metadata> {
     const config = await getSiteConfig();
     return constructMetadata({
         title: "Weekly Offers & Deals",
-        description: "Discover exclusive deals, weekly offers, and smart club privileges at Smart Avenue 99.",
+        description: "Discover exclusive deals, weekly offers, and VIP client privileges at Gharana Realtors.",
         urlPath: "/offers",
         config
     });
@@ -23,7 +23,7 @@ export async function generateMetadata(): Promise<Metadata> {
 async function OffersHero() {
     const pageContent = await getSiteContent<OffersPageContent>("offers-page");
     const heroTitle = pageContent?.heroTitle || "Weekly Offers";
-    const heroSubtitle = pageContent?.heroSubtitle || "Curated deals and premium privileges for our valued members.";
+    const heroSubtitle = pageContent?.heroSubtitle || "Curated deals and premium privileges for our valued clients.";;
     const heroImage = pageContent?.heroImage || "";
 
     return (
@@ -46,7 +46,7 @@ async function OffersHero() {
 
             <div className="relative z-10 container mx-auto px-4 md:px-6 text-center">
                 <span className="text-brand-blue font-bold tracking-[0.2em] uppercase text-xs mb-4 block animate-pulse">
-                    Smart Club Exclusives
+                    VIP Client Exclusives
                 </span>
                 <h1 className="text-5xl md:text-7xl font-bold mb-6 tracking-tight">
                     {heroTitle}

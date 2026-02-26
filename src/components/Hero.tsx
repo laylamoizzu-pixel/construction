@@ -73,7 +73,7 @@ export default function Hero() {
                             >
                                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/10 text-brand-lime text-xs font-medium tracking-wide mb-6 uppercase">
                                     <Sparkles className="w-3 h-3" />
-                                    <span>Smart Avenue 99</span>
+                                    <span>Gharana Realtors</span>
                                 </div>
 
                                 <h1 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-bold text-white mb-6 leading-[1.1] tracking-tight">

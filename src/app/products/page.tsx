@@ -12,8 +12,8 @@ export const dynamic = "force-dynamic";
 export async function generateMetadata(): Promise<Metadata> {
     const config = await getSiteConfig();
     return constructMetadata({
-        title: "All Products",
-        description: "Browse our entire catalog of high-quality products across all departments at Smart Avenue 99. Discover great deals and curated selections.",
+        title: "All Properties",
+        description: "Browse our entire catalog of premium properties across all property types at Gharana Realtors. Discover great deals and curated listings.",
         urlPath: "/products",
         config
     });
@@ -21,8 +21,8 @@ export async function generateMetadata(): Promise<Metadata> {
 
 async function ProductsHeader() {
     const pageContent = await getSiteContent<ProductsPageContent>("products-page");
-    const heroTitle = pageContent?.heroTitle || "Our Box";
-    const heroSubtitle = pageContent?.heroSubtitle || "Browse our curated collection of premium products.";
+    const heroTitle = pageContent?.heroTitle || "Our Listings";
+    const heroSubtitle = pageContent?.heroSubtitle || "Browse our curated collection of premium properties.";
     const heroImage = pageContent?.heroImage || "";
 
     return (

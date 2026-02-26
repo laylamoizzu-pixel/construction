@@ -13,39 +13,39 @@ const iconMap: Record<string, React.ElementType> = {
 export default function AboutContent({ content, contact }: { content: AboutPageContent | null, contact: ContactContent | null }) {
     // Default fallback content
     const data = content || {
-        heroTitle: "Smart Avenue",
-        heroSubtitle: "Building the future of retail, right here in your city.",
+        heroTitle: "Gharana Realtors",
+        heroSubtitle: "Building the future of real estate, right here in your region.",
         heroImage: "",
-        visionTitle: "Redefining Retail in Patna",
-        visionText1: "We are not just a store; we are a logistics ecosystem designed for modern living. Smart Avenue bridges the gap between premium global brands and optimal local convenience.",
-        visionText2: "Our platform leverages cutting-edge technology to ensure that quality, affordability, and speed are not mutually exclusive, but the standard for every interaction.",
+        visionTitle: "Redefining Real Estate",
+        visionText1: "We are not just a company; we are a construction ecosystem designed for modern living. Gharana Realtors bridges the gap between premium global designs and optimal local convenience.",
+        visionText2: "Our platform leverages cutting-edge technology to ensure that quality, affordability, and timely possession are not mutually exclusive, but the standard for every interaction.",
         visionImage: "https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=2301&auto=format&fit=crop",
         heroLabel: "Our Story",
         visionLabel: "Our Vision",
         statsCustomers: "10k+",
-        statsCustomersLabel: "Happy Customers",
+        statsCustomersLabel: "Happy Clients",
         statsSatisfaction: "98%",
         statsSatisfactionLabel: "Satisfaction Rate",
-        contactTitle: "Visit Our Store",
-        contactSubtitle: "We'd love to see you in person. Here's where you can find us.",
-        valuesTitle: "The Smart Standard",
+        contactTitle: "Visit Our Office",
+        contactSubtitle: "We'd love to meet you in person. Here's where you can find us.",
+        valuesTitle: "The Gharana Standard",
         valuesSubtitle: "Driven by innovation, grounded in integrity.",
         values: [
             {
                 title: "Verified Quality",
-                desc: "Rigorous quality checks on 100% of inventory.",
+                desc: "Rigorous quality checks on 100% of our projects.",
                 icon: "ShieldCheck",
                 color: "text-brand-blue"
             },
             {
-                title: "Global Access",
-                desc: "Sourcing the best products from around the world.",
+                title: "Regional Expertise",
+                desc: "Deep knowledge of local property markets and regulations.",
                 icon: "Globe",
                 color: "text-brand-lime"
             },
             {
-                title: "Instant Service",
-                desc: "Efficient billing and personalized assistance.",
+                title: "Timely Delivery",
+                desc: "Efficient project management and on-time possession.",
                 icon: "Zap",
                 color: "text-orange-500"
             },
@@ -178,14 +178,14 @@ export default function AboutContent({ content, contact }: { content: AboutPageC
                 <div className="container mx-auto px-4 md:px-6">
                     <div className="text-center mb-16">
                         <span className="text-brand-blue font-bold tracking-widest uppercase text-sm mb-2 block">Get in Touch</span>
-                        <h2 className="text-4xl font-bold text-brand-dark mb-4 tracking-tight">{data.contactTitle || "Visit Our Store"}</h2>
-                        <p className="text-slate-500 max-w-2xl mx-auto">{data.contactSubtitle || "We'd love to see you in person. Here's where you can find us."}</p>
+                        <h2 className="text-4xl font-bold text-brand-dark mb-4 tracking-tight">{data.contactTitle || "Visit Our Office"}</h2>
+                        <p className="text-slate-500 max-w-2xl mx-auto">{data.contactSubtitle || "We'd love to meet you in person. Here's where you can find us."}</p>
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
                         {/* Contact Info */}
                         <div className="space-y-6">
-                            <h3 className="text-2xl font-bold text-brand-dark mb-6">Store Information</h3>
+                            <h3 className="text-2xl font-bold text-brand-dark mb-6">Office Information</h3>
 
                             <div className="flex items-start gap-4 p-6 bg-white rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
                                 <div className="p-3 bg-brand-blue/10 text-brand-blue rounded-full">
@@ -194,7 +194,7 @@ export default function AboutContent({ content, contact }: { content: AboutPageC
                                 <div>
                                     <h4 className="font-bold text-lg mb-1 text-brand-dark">Address</h4>
                                     <p className="text-slate-600 leading-relaxed whitespace-pre-line">
-                                        {contact?.address || "Smart Avenue Retail Complex,\nLevel 3, P&M Mall, Patliputra Colony,\nPatna, Bihar 800013"}
+                                        {contact?.address || "Gharana Realtors Corporate Office,\nLevel 3, P&M Mall, Patliputra Colony,\nPatna, Bihar 800013"}
                                     </p>
                                 </div>
                             </div>
@@ -214,7 +214,7 @@ export default function AboutContent({ content, contact }: { content: AboutPageC
                                     <Clock className="w-6 h-6" />
                                 </div>
                                 <div>
-                                    <h4 className="font-bold text-lg mb-1 text-brand-dark">Opening Hours</h4>
+                                    <h4 className="font-bold text-lg mb-1 text-brand-dark">Business Hours</h4>
                                     <p className="text-slate-600 whitespace-pre-line">{contact?.storeHours || "Monday - Sunday\n10:00 AM - 10:00 PM"}</p>
                                 </div>
                             </div>
@@ -225,7 +225,7 @@ export default function AboutContent({ content, contact }: { content: AboutPageC
                                 </div>
                                 <div>
                                     <h4 className="font-bold text-lg mb-1 text-brand-dark">Email</h4>
-                                    <p className="text-slate-600">{contact?.email || "support@smartavenue.com"}</p>
+                                    <p className="text-slate-600">{contact?.email || "info@gharanarealtors.com"}</p>
                                 </div>
                             </div>
                         </div>

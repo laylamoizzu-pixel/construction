@@ -4,7 +4,7 @@ import { getProducts, getCategories, getDepartments } from "@/app/actions";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     await getSiteConfig();
-    const baseUrl = "https://smartavenue99.com"; // In real world use environment var or config URL
+    const baseUrl = "https://gharanarealtors.com"; // In real world use environment var or config URL
 
     // 1. Static Core Routes
     const defaultPages = [

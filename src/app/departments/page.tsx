@@ -12,8 +12,8 @@ export const revalidate = 3600;
 export async function generateMetadata(): Promise<Metadata> {
     const config = await getSiteConfig();
     return constructMetadata({
-        title: "Departments",
-        description: "Explore our curated departments including Electronics, Fashion, Home Goods, and Groceries at Smart Avenue 99.",
+        title: "Property Types",
+        description: "Explore our curated property types including Residential, Commercial, Plots, and Villas at Gharana Realtors.",
         urlPath: "/departments",
         config
     });
@@ -21,8 +21,8 @@ export async function generateMetadata(): Promise<Metadata> {
 
 async function DepartmentsHeader() {
     const pageContent = await getSiteContent<DepartmentsPageContent>("departments-page");
-    const heroTitle = pageContent?.heroTitle || "Our Departments";
-    const heroSubtitle = pageContent?.heroSubtitle || "Curated collections for the modern lifestyle.";
+    const heroTitle = pageContent?.heroTitle || "Our Property Types";
+    const heroSubtitle = pageContent?.heroSubtitle || "Curated categories for modern living.";
     const heroImage = pageContent?.heroImage || "";
 
     return (

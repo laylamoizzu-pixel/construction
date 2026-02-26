@@ -10,11 +10,11 @@ import { useSiteConfig } from "@/context/SiteConfigContext";
 
 const DEFAULT_NAV_LINKS = [
     { label: "Home", href: "/" },
-    { label: "Products", href: "/products" },
-    { label: "Offers", href: "/offers" },
-    { label: "Genie Stylist", href: "/stylist" },
-    { label: "Genie Gift Finder", href: "/gift-finder" },
-    { label: "Departments", href: "/departments" },
+    { label: "Properties", href: "/products" },
+    { label: "Deals", href: "/offers" },
+    { label: "Property Advisor", href: "/stylist" },
+    { label: "Project Finder", href: "/gift-finder" },
+    { label: "Property Types", href: "/departments" },
     { label: "About Us", href: "/about" },
 ];
 
@@ -77,7 +77,7 @@ export default function Header() {
                         <div className="relative w-full h-full p-1">
                             <Image
                                 src={config.branding.logoUrl || "/logo.png"}
-                                alt={config.branding.siteName || "Smart Avenue"}
+                                alt={config.branding.siteName || "Gharana Realtors"}
                                 fill
                                 className="object-contain drop-shadow-xl"
                                 priority
@@ -131,7 +131,7 @@ export default function Header() {
                                             type="text"
                                             value={searchQuery}
                                             onChange={(e) => setSearchQuery(e.target.value)}
-                                            placeholder="Search collections..."
+                                            placeholder="Search properties..."
                                             className="w-full bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 text-sm rounded-full pl-4 pr-10 py-2 focus:outline-none focus:ring-2 focus:ring-cyan-500/30 transition-all"
                                             onBlur={() => !searchQuery && setIsSearchOpen(false)}
                                         />
@@ -236,7 +236,7 @@ export default function Header() {
                                         <div className="absolute inset-0 bg-gradient-to-r from-cyan-400/20 to-lime-400/20 rounded-full blur-lg" />
                                         <Image
                                             src={config.branding.logoUrl || "/logo.png"}
-                                            alt={config.branding.siteName || "Smart Avenue"}
+                                            alt={config.branding.siteName || "Gharana Realtors"}
                                             fill
                                             className="object-contain drop-shadow-2xl"
                                         />

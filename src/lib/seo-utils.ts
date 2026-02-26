@@ -14,7 +14,7 @@ interface SeoProps {
  */
 export function constructMetadata({ title, description, urlPath = "", imageUrl, config }: SeoProps): Metadata {
     const finalDescription = description || config.seo.metaDescription;
-    const finalUrl = urlPath ? `https://smartavenue99.com${urlPath.startsWith('/') ? urlPath : `/${urlPath}`}` : "https://smartavenue99.com";
+    const finalUrl = urlPath ? `https://gharanarealtors.com${urlPath.startsWith('/') ? urlPath : `/${urlPath}`}` : "https://gharanarealtors.com";
     const finalImage = imageUrl || config.seo.ogImageUrl || "/logo.png";
 
     return {

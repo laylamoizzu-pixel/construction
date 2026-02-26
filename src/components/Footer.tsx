@@ -40,7 +40,7 @@ export default function Footer() {
                         </p>
                     </div>
 
-                    {/* Navigation: Shop (Spans 2) */}
+                    {/* Navigation: Properties (Spans 2) */}
                     <div className="lg:col-span-2 p-8 lg:p-10">
                         <h3 className="text-white font-mono uppercase tracking-wider text-sm font-bold mb-6 text-brand-lime">
                             {footer.navigation.shop.title}
@@ -75,8 +75,8 @@ export default function Footer() {
                     {/* Newsletter & Updates (Spans 5) */}
                     <div className="lg:col-span-5 p-6 lg:p-10 bg-white/5">
                         <div className="h-full flex flex-col justify-center">
-                            <h3 className="text-2xl font-bold mb-2">{footer.newsletter?.title || "Join the Movement"}</h3>
-                            <p className="text-slate-400 mb-6 font-light">{footer.newsletter?.description || "Get the latest collections and exclusive offers sent to your inbox."}</p>
+                            <h3 className="text-2xl font-bold mb-2">{footer.newsletter?.title || "Stay Updated"}</h3>
+                            <p className="text-slate-400 mb-6 font-light">{footer.newsletter?.description || "Get the latest projects and exclusive property deals sent to your inbox."}</p>
 
                             <form className="relative max-w-md group" onSubmit={(e) => e.preventDefault()}>
                                 <input
@@ -136,7 +136,7 @@ export default function Footer() {
                     <p>
                         {config.labels?.messages?.copyright ?
                             config.labels.messages.copyright.replace("{year}", new Date().getFullYear().toString()) :
-                            `© ${new Date().getFullYear()} ${branding.siteName || "Smart Avenue 99"}. All rights reserved.`}
+                            `© ${new Date().getFullYear()} ${branding.siteName || "Gharana Realtors"}. All rights reserved.`}
                     </p>
                     <div className="flex gap-6">
                         {footer.bottomLinks.map((link, idx) => (

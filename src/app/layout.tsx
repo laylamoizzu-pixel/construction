@@ -15,7 +15,7 @@ const inter = Inter({
   display: "swap",
 });
 
-// Using Outfit as it's geometric and matches modern tech/retail logos better than Playfair
+// Using Outfit as it's geometric and matches modern tech/construction logos better than Playfair
 const outfit = Outfit({
   variable: "--font-outfit",
   subsets: ["latin"],
@@ -26,7 +26,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const config = await getSiteConfig();
 
   return {
-    metadataBase: new URL('https://smartavenue99.com'),
+    metadataBase: new URL('https://gharanarealtors.com'),
     title: {
       default: config.seo.siteTitle,
       template: config.seo.titleTemplate,
@@ -36,7 +36,7 @@ export async function generateMetadata(): Promise<Metadata> {
     openGraph: {
       title: config.seo.siteTitle,
       description: config.seo.metaDescription,
-      url: 'https://smartavenue99.com',
+      url: 'https://gharanarealtors.com',
       siteName: config.branding.siteName,
       images: [
         {
@@ -85,7 +85,7 @@ async function ConfigLoader({ children }: { children: React.ReactNode }) {
       "@type": "ContactPoint",
       "telephone": config.contact.phone,
       "email": config.contact.email,
-      "contactType": "customer service"
+      "contactType": "client service"
     },
     "sameAs": [
       config.contact.instagramUrl,
