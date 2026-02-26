@@ -11,9 +11,6 @@ const Features = dynamic(() => import("@/components/Features"));
 const CTA = dynamic(() => import("@/components/CTA"));
 const Promotions = dynamic(() => import("@/components/Promotions"));
 const ProjectFinder = dynamic(() => import("@/components/ai/ProjectFinder"));
-const Features = dynamic(() => import("@/components/Features"));
-const CTA = dynamic(() => import("@/components/CTA"));
-const Promotions = dynamic(() => import("@/components/Promotions"));
 const PropertyAdvisor = dynamic(() => import("@/components/ai/PropertyAdvisor"));
 
 export const revalidate = 300; // Enable ISR, revalidating every 5 minutes
