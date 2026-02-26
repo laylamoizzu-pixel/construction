@@ -1,10 +1,12 @@
 "use client";
 
 import React from "react";
-import { motion, HTMLMotionProps } from "framer-motion";
+import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
-interface ButtonProps extends Omit<HTMLMotionProps<"button">, 'variant'> {
+type ConflictingProps = 'onDrag' | 'onDragStart' | 'onDragEnd' | 'onPointerDown' | 'onAnimationStart' | 'onAnimationEnd' | 'onAnimationIteration';
+
+interface ButtonProps extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, ConflictingProps> {
     variant?: "primary" | "secondary" | "outline" | "glass" | "ghost";
     size?: "sm" | "md" | "lg" | "xl";
     className?: string;
