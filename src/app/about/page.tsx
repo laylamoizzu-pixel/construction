@@ -7,12 +7,11 @@ import { Suspense } from "react";
 
 export const revalidate = 3600;
 
-
 export async function generateMetadata(): Promise<Metadata> {
     const config = await getSiteConfig();
     return constructMetadata({
         title: "About Us",
-        description: "Learn about Gharana Realtors' story, our curated property listings, and our Genie AI property assistants.",
+        description: "Learn about Gharana Realtors' story, our curated property listings, and our commitment to architectural excellence.",
         urlPath: "/about",
         config
     });
@@ -24,7 +23,6 @@ async function AboutPageContentLoader() {
         getSiteConfig()
     ]);
 
-    // Adapt SiteConfig contact to match ContactContent interface expected by AboutContent
     const contactContent = {
         address: siteConfig.contact.address,
         phone: siteConfig.contact.phone,
@@ -33,7 +31,6 @@ async function AboutPageContentLoader() {
         storeHours: siteConfig.contact.storeHours || ""
     };
 
-    // Add LocalBusiness Schema for physical stores + Breadcrumbs
     const localBusinessSchema = {
         "@context": "https://schema.org",
         "@type": "LocalBusiness",
@@ -49,41 +46,17 @@ async function AboutPageContentLoader() {
         "priceRange": siteConfig.seo.jsonLd.priceRange || "₹₹"
     };
 
-    // Add FAQ Schema for AI Search / GEO
-    const faqSchema = siteConfig.llm?.faqItems?.length > 0 ? {
-        "@context": "https://schema.org",
-        "@type": "FAQPage",
-        "mainEntity": siteConfig.llm.faqItems.map(faq => ({
-            "@type": "Question",
-            "name": faq.question,
-            "acceptedAnswer": {
-                "@type": "Answer",
-                "text": faq.answer
-            }
-        }))
-    } : null;
-
     return (
-        <>
-            <script
-                type="application/ld+json"
-                dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }}
-            />
-            {faqSchema && (
-                <script
-                    type="application/ld+json"
-                    dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
-                />
-            )}
-            <AboutContent content={pageContent} contact={contactContent} />
-        </>
+        <AboutContent content={pageContent} contact={contactContent} />
     );
 }
 
 export default function AboutPage() {
     return (
-        <Suspense fallback={<div className="min-h-screen bg-slate-50 animate-pulse" />}>
-            <AboutPageContentLoader />
-        </Suspense>
+        <div className="bg-brand-white min-h-screen">
+            <Suspense fallback={<div className="min-h-screen bg-brand-charcoal animate-pulse" />}>
+                <AboutPageContentLoader />
+            </Suspense>
+        </div>
     );
 }
