@@ -107,7 +107,7 @@ export default function AdminLoginPage() {
 
                 <div className="text-center mt-8">
                     <p className="text-xs text-brand-gray">
-                        &copy; {new Date().getFullYear()} Smart Avenue Retail. Operations only.
+                        &copy; {new Date().getFullYear()} Gharana Realtors. Operations only.
                     </p>
                 </div>
             </div>

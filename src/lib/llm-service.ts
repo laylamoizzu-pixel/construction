@@ -577,7 +577,7 @@ export async function rankProducts(
         tags: p.tags,
     }));
 
-    const prompt = `Hi, I'm ${persona}, your personal Shopping Master at Smart Avenue.
+    const prompt = `Hi, I'm ${persona}, your personal Property Expert at Gharana Realtors.
 
 Customer query: "${query}"
 
@@ -587,15 +587,15 @@ Intent analysis:
 - Preferences: ${intent.preferences.join(", ") || "none specified"}
 - Budget: ${intent.budgetMin ? `₹${intent.budgetMin}` : "any"} - ${intent.budgetMax ? `₹${intent.budgetMax}` : "any"}
 
-Available products:
+Available properties:
 ${JSON.stringify(productList, null, 2)}
 
-Rank the top 3-5 most suitable products for this customer. For each product, explain why it matches their needs.
+Rank the top 3-5 most suitable properties for this client. For each property, explain why it matches their needs.
 
 CRITICAL INSTRUCTIONS:
-1. You must ONLY recommend products from the "Available products" list provided above.
-2. Do NOT mention, suggest, or hallucinate any products that are not in the list.
-3. If the list is empty, return an empty array. Do NOT invent a product.
+1. You must ONLY recommend properties from the "Available properties" list provided above.
+2. Do NOT mention, suggest, or hallucinate any properties that are not in the list.
+3. If the list is empty, return an empty array. Do NOT invent a property.
 
 Respond with a JSON array (and nothing else) in this exact format:
 [
@@ -603,11 +603,11 @@ Respond with a JSON array (and nothing else) in this exact format:
     "productId": "the product ID",
     "matchScore": 0-100 indicating how well it matches,
     "highlights": ["key features that match their needs"],
-    "whyRecommended": "A 1-2 sentence explanation of why this product is recommended"
+    "whyRecommended": "A 1-2 sentence explanation of why this property is recommended"
   }
 ]
 
-Only include products that are relevant. If no products match well, return an empty array.`;
+Only include properties that are relevant. If no properties match well, return an empty array.`;
 
     const rankings = await callLLMForJSON<Array<{ productId: string; matchScore: number; highlights: string[]; whyRecommended: string }>>(prompt, provider);
 
@@ -625,17 +625,17 @@ export async function generateSummary(
     provider: LLMProvider | "auto" = "google"
 ): Promise<string> {
     if (recommendationCount === 0) {
-        return "I couldn't find specific products matching your requirements. Could you provide more details about what you're looking for?";
+        return "I couldn't find specific properties matching your requirements. Could you provide more details about what you're looking for?";
     }
 
     const config = await getAIConfig();
     const persona = config.personaName;
 
-    const prompt = `Hi, I'm ${persona}, your personal Shopping Master at Smart Avenue.
+    const prompt = `Hi, I'm ${persona}, your personal Property Expert at Gharana Realtors.
 
 Customer asked: "${query}"
 
-You found ${recommendationCount} product recommendation(s)${topProductName ? `, with "${topProductName}" being the top match` : ""}.
+You found ${recommendationCount} property recommendation(s)${topProductName ? `, with "${topProductName}" being the top match` : ""}.
 
 Write a brief, friendly 1-2 sentence summary to introduce the recommendations. Be helpful and conversational as ${persona}. Do not use markdown formatting.`;
 
@@ -665,16 +665,16 @@ CRITICAL INSTRUCTION:
 Customer query: "${query}"
 
 Intent analysis:
-- Product wanted: ${intent.category || intent.subcategory || "unknown product"}
+- Property wanted: ${intent.category || intent.subcategory || "unknown property"}
 - Use case: ${intent.useCase}
 - Requirements: ${intent.requirements.join(", ") || "none specified"}
 
-We do NOT have this product in stock right now.
+We do NOT have this property in our listings right now.
 1. Apologize that we don't have it currently.
-2. STRICTLY DO NOT invent, hallucinate, or offer any product that you don't have context for.
-3. Offer to note down their request as their Shopping Master.
-4. Crucially, ask for their TARGET PRICE or BUDGET if they haven't provided it.
-5. Ask for any other specific details (color, size, brand) if relevant.
+2. STRICTLY DO NOT invent, hallucinate, or offer any property that you don't have context for.
+3. Offer to note down their request as their Property Advisor.
+4. Crucially, ask for their TARGET BUDGET if they haven't provided it.
+5. Ask for any other specific details (location, size, type) if relevant.
 
 Keep it concise (2-3 sentences max).`;
 
@@ -713,8 +713,8 @@ export async function handleMissingProduct(
     
 ${history}Customer Query: "${query}"
 
-Context: The customer is interested in "${productName}", but we DO NOT have this product in stock.
-As their Master, I want to take a "Product Request" to stock it for them at an affordable price.
+Context: The customer is interested in "${productName}", but we DO NOT have this property in our current listings.
+As their Advisor, I want to take a "Property Request" to source it for them at a competitive price.
 
 Decision Logic:
 1. If budget or specific details are known, or if they explicitly asked to order it, submit the request.
@@ -767,7 +767,7 @@ Output a JSON object:
         const fallbackProductName = intent.productRequestData?.name || intent.category || intent.subcategory || query;
         return {
             action: "ask_details" as const,
-            response: `Hi, I'm ${persona}. We don't currently have "${fallbackProductName}" in stock. As your Shopping Master, I'd love to help you get it! Could you share your preferred budget and details?`,
+            response: `Hi, I'm ${persona}. We don't currently have "${fallbackProductName}" in our listings. As your Property Advisor, I'd love to help you find it! Could you share your preferred budget and requirements?`,
         };
     }
 }
@@ -787,7 +787,7 @@ export async function rankAndSummarize(
     if (products.length === 0) {
         return {
             rankings: [],
-            summary: "I couldn't find specific products matching your requirements. Could you provide more details about what you're looking for?",
+            summary: "I couldn't find specific properties matching your requirements. Could you provide more details about what you're looking for?",
         };
     }
 
@@ -807,7 +807,7 @@ export async function rankAndSummarize(
 
 CRITICAL INSTRUCTION:
 - You MUST reply in the SAME language as the query (English, Hindi, Urdu, or Hinglish).
-- Be charming and speak as ${persona}, the Shopping Master.
+- Be charming and speak as ${persona}, the Property Expert.
 
 Customer query: "${query}"
 
@@ -817,7 +817,7 @@ Intent analysis:
 - Preferences: ${intent.preferences.join(", ") || "none specified"}
 - Budget: ${intent.budgetMin ? `₹${intent.budgetMin}` : "any"} - ${intent.budgetMax ? `₹${intent.budgetMax}` : "any"}
 
-Available products:
+Available properties:
 ${JSON.stringify(productList, null, 2)}
 
 Respond with a JSON object (and nothing else) in this exact format:
@@ -834,12 +834,12 @@ Respond with a JSON object (and nothing else) in this exact format:
 }
 
 CRITICAL:
-1. You must ONLY recommend products from the "Available products" list provided above.
-2. If "Available products" is empty array [], you MUST return empty rankings [].
-3. In the summary, if no products are found, say "I couldn't find exactly that in our current collection, but I can take a request for it!"
-4. Do NOT make up products.
+1. You must ONLY recommend properties from the "Available properties" list provided above.
+2. If "Available properties" is empty array [], you MUST return empty rankings [].
+3. In the summary, if no properties are found, say "I couldn't find exactly that in our current listings, but I can take a request for it!"
+4. Do NOT make up properties.
 
-Only include relevant products. If no products match well, return empty rankings.`;
+Only include relevant properties. If no properties match well, return empty rankings.`;
 
     const result = await callLLMForJSON<{
         rankings: Array<{ productId: string; matchScore: number; highlights: string[]; whyRecommended: string }>;
@@ -883,7 +883,7 @@ export async function generateDealExplanation(
     const savings = product.originalPrice ? product.originalPrice - product.price : 0;
     const savingsPercent = product.originalPrice ? Math.round((savings / product.originalPrice) * 100) : 0;
 
-    const prompt = `You are a charismatic sales associate at Smart Avenue.
+    const prompt = `You are a charismatic property advisor at Gharana Realtors.
 Explain why the current deal on "${product.name}" is amazing for the customer.
 
 Product Info:
@@ -1159,7 +1159,7 @@ export async function generateBackInStockMessage(
     productName: string,
     customerName: string
 ): Promise<{ subject: string; body: string; discountCode?: string }> {
-    const prompt = `You are a customer loyalty bot for Smart Avenue.
+    const prompt = `You are a client loyalty bot for Gharana Realtors.
     Context:
     - Customer: ${customerName}
     - Item Back in Stock: ${productName}

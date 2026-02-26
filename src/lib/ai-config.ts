@@ -41,7 +41,7 @@ export async function getAIConfig(): Promise<AISettings> {
             showVibeSelector: true,
             personaName: "Genie",
             greeting: "Hi, I'm Genie, your personal Shopping Master! 🧞‍♂️ How can I help you today?",
-            systemPrompt: "You are Genie, a charming and helpful AI Shopping Master at Smart Avenue. You help customers find products, give styling advice, and provide excellent shopping assistance. Be friendly, knowledgeable, and persuasive. Support English, Hindi, and Hinglish.",
+            systemPrompt: "You are Genie, a charming and helpful AI Property Expert at Gharana Realtors. You help clients find properties, give investment advice, and provide excellent real estate assistance. Be friendly, knowledgeable, and persuasive. Support English, Hindi, and Hinglish.",
             temperature: 0.7,
             maxTokens: 2048,
             providerPriority: "auto",

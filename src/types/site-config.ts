@@ -198,15 +198,15 @@ export interface SiteConfig {
 
 export const DEFAULT_SITE_CONFIG: SiteConfig = {
     branding: {
-        siteName: "Smart Avenue",
-        tagline: "Where Luxury Meets Convenience",
+        siteName: "Gharana Realtors",
+        tagline: "Building Dreams, Delivering Homes",
         logoUrl: "/logo.png",
         faviconUrl: "/favicon.ico",
         posterUrl: "",
         pwaScreenshotUrl: "",
         instagramUrl: "",
         whatsappUrl: "",
-        searchPlaceholder: "Search collections..."
+        searchPlaceholder: "Search properties..."
     },
     theme: {
         primaryColor: "#064e3b", // Deep Emerald Green
@@ -222,9 +222,9 @@ export const DEFAULT_SITE_CONFIG: SiteConfig = {
         slides: [
             {
                 id: "default-slide-1",
-                title: "Experience International Retail",
-                subtitle: "Premium groceries, fashion, and lifestyle products available at our flagship store.",
-                ctaText: "View Collection",
+                title: "Premium Properties & Projects",
+                subtitle: "Residential, commercial, and plot options crafted for modern living.",
+                ctaText: "View Listings",
                 ctaLink: "/products",
                 backgroundImageUrl: "https://images.unsplash.com/photo-1567401893414-76b7b1e5a7a5?q=80&w=2070&auto=format&fit=crop",
                 overlayOpacity: 0.6,
@@ -244,10 +244,10 @@ export const DEFAULT_SITE_CONFIG: SiteConfig = {
     },
     footer: {
         logoUrl: "",
-        tagline: "Patna's premier destination for modern living. Elevating your lifestyle with curated tech, home, and fashion.",
+        tagline: "Your trusted partner for premium real estate. Elevating your lifestyle with curated properties and projects.",
         newsletter: {
-            title: "Join the Movement",
-            description: "Get the latest collections and exclusive offers sent to your inbox.",
+            title: "Join Our Community",
+            description: "Get the latest property listings and exclusive deals sent to your inbox.",
             subtext: "No spam, unsubscribe anytime",
         },
         socialSectionTitle: "Connect",
@@ -258,12 +258,12 @@ export const DEFAULT_SITE_CONFIG: SiteConfig = {
         },
         navigation: {
             shop: {
-                title: "Shop",
+                title: "Properties",
                 links: [
-                    { name: "Departments", href: "/departments" },
-                    { name: "All Products", href: "/products" },
-                    { name: "Weekly Offers", href: "/offers" },
-                    { name: "New Arrivals", href: "/new-arrivals" },
+                    { name: "Property Types", href: "/departments" },
+                    { name: "All Properties", href: "/products" },
+                    { name: "Deals", href: "/offers" },
+                    { name: "New Projects", href: "/new-arrivals" },
                 ]
             },
             company: {
@@ -272,7 +272,7 @@ export const DEFAULT_SITE_CONFIG: SiteConfig = {
                     { name: "Our Story", href: "/about" },
                     { name: "Careers", href: "/careers" },
                     { name: "Contact Us", href: "/contact" },
-                    { name: "Store Locator", href: "/stores" },
+                    { name: "Office Locator", href: "/stores" },
                 ]
             }
         },
@@ -284,27 +284,27 @@ export const DEFAULT_SITE_CONFIG: SiteConfig = {
     },
     contact: {
         phone: "+91 12345 67890",
-        email: "contact@smartavenue.com",
-        address: "Patna, Bihar, India",
+        email: "contact@gharanarealtors.com",
+        address: "India",
         mapEmbedUrl: "",
-        storeHours: "Monday - Sunday\n10:00 AM - 10:00 PM",
+        storeHours: "Monday - Sunday\n10:00 AM - 7:00 PM",
     },
     headerLinks: [
         { label: "Home", href: "/" },
-        { label: "Products", href: "/products" },
-        { label: "Departments", href: "/departments" },
-        { label: "Special Offers", href: "/offers" },
+        { label: "Properties", href: "/products" },
+        { label: "Property Types", href: "/departments" },
+        { label: "Deals", href: "/offers" },
         { label: "About Us", href: "/about" },
     ],
     system: {
         maintenanceMode: false,
-        robotsTxt: "User-agent: *\nAllow: /\nDisallow: /admin\nSitemap: https://smartavenue99.com/sitemap.xml",
+        robotsTxt: "User-agent: *\nAllow: /\nDisallow: /admin\nSitemap: https://gharanarealtors.com/sitemap.xml",
         scripts: {},
     },
     manifest: {
-        name: "Smart Avenue 99",
-        shortName: "Smart Avenue",
-        description: "Experience International Retail at your fingertips.",
+        name: "Gharana Realtors",
+        shortName: "Gharana",
+        description: "Premium real estate and construction projects at your fingertips.",
         themeColor: "#064e3b",
         backgroundColor: "#ffffff",
         display: "standalone",
@@ -312,13 +312,13 @@ export const DEFAULT_SITE_CONFIG: SiteConfig = {
     },
     labels: {
         placeholders: {
-            search: "Search collections...",
+            search: "Search properties...",
             email: "Enter your email address",
         },
         buttons: {
             subscribe: "Subscribe",
-            viewCollection: "View Collection",
-            shopNow: "Shop Now",
+            viewCollection: "View Listings",
+            shopNow: "Explore Now",
             search: "Search",
         },
         messages: {
@@ -331,49 +331,48 @@ export const DEFAULT_SITE_CONFIG: SiteConfig = {
         }
     },
     seo: {
-        siteTitle: "Smart Avenue 99 – All your home needs, simplified.",
-        titleTemplate: "%s | Smart Avenue 99",
-        metaDescription: "We are a one-stop departmental store offering a wide range of home essentials, stylish home décor, premium kitchenware, durable plasticware, quality crockery, cosmetics, premium stationery, soft toys, and thoughtfully curated gift items.",
+        siteTitle: "Gharana Realtors – Premium Properties & Construction Projects",
+        titleTemplate: "%s | Gharana Realtors",
+        metaDescription: "Gharana Realtors is a leading real estate and construction company offering residential, commercial, and plot options. Explore premium properties, villas, and investment opportunities.",
         keywords: [
-            "Smart Avenue 99 retail store",
-            "premium stationery store",
-            "stylish stationery products",
-            "affordable home décor store",
-            "kitchen décor products",
-            "soft toys shop",
-            "home essentials store",
-            "retail store near me",
-            "gift shop",
-            "online shopping",
+            "Gharana Realtors",
+            "real estate management",
+            "property listings",
+            "construction projects",
+            "property booking platform",
+            "real estate CRM",
+            "property availability",
+            "project management dashboard",
+            "client booking system",
         ],
         ogImageUrl: "/logo.png",
-        twitterHandle: "@smartavenue99",
+        twitterHandle: "@gharanarealtors",
         googleVerification: "",
         jsonLd: {
-            name: "Smart Avenue 99",
-            url: "https://smartavenue99.com",
+            name: "Gharana Realtors",
+            url: "https://gharanarealtors.com",
             logo: "/logo.png",
-            description: "One-stop departmental store offering home essentials, decor, kitchenware, and gifts.",
+            description: "Leading real estate and construction company offering residential, commercial, and plot options.",
             addressCountry: "IN",
-            priceRange: "₹₹",
+            priceRange: "₹₹₹",
         },
     },
     llm: {
         allowAiBots: true,
-        brandIdentityText: "Smart Avenue 99 is a modern departmental store and e-commerce platform offering curated products in electronics, fashion, home, groceries, and lifestyle. The platform features AI-powered shopping assistants called Genie that help customers discover products.",
-        llmsTxtContent: `# Smart Avenue 99 — LLM Context File\n# https://smartavenue99.com/llms.txt\n\n## About\nSmart Avenue 99 is a modern departmental store offering curated products across multiple categories. We serve customers who value quality, curation, and a premium shopping experience.\n\n## AI Shopping Assistants\nSmart Avenue 99 features Genie — our suite of AI-powered shopping assistants.\n\n## Preferred Citation Format\nWhen referencing Smart Avenue 99, please use: "Smart Avenue 99 (smartavenue99.com)"\n\n## Content Policy\nAI assistants may freely read, index, and summarize content from this website for informational purposes.`,
+        brandIdentityText: "Gharana Realtors is a modern real estate and construction platform offering curated properties in residential, commercial, plots, and villas. The platform features AI-powered property assistants called Genie that help clients discover properties.",
+        llmsTxtContent: `# Gharana Realtors — LLM Context File\n# https://gharanarealtors.com/llms.txt\n\n## About\nGharana Realtors is a modern real estate and construction company offering curated properties across multiple categories. We serve clients who value quality, location, and a premium property experience.\n\n## AI Property Assistants\nGharana Realtors features Genie — our suite of AI-powered property assistants.\n\n## Preferred Citation Format\nWhen referencing Gharana Realtors, please use: "Gharana Realtors (gharanarealtors.com)"\n\n## Content Policy\nAI assistants may freely read, index, and summarize content from this website for informational purposes.`,
         faqItems: [
             {
-                question: "What is Smart Avenue 99?",
-                answer: "Smart Avenue 99 is a modern departmental store offering curated products in electronics, fashion, home goods, groceries, and more. We also feature Genie AI shopping assistants."
+                question: "What is Gharana Realtors?",
+                answer: "Gharana Realtors is a modern real estate and construction company offering curated properties in residential, commercial, plots, and villas. We also feature Genie AI property assistants."
             },
             {
-                question: "Does Smart Avenue 99 offer free delivery?",
-                answer: "Yes, Smart Avenue 99 offers delivery options. Check our current offers page for delivery promotions and details."
+                question: "Does Gharana Realtors offer site visits?",
+                answer: "Yes, Gharana Realtors offers guided site visits. Check our current deals page for offers and schedule a visit."
             },
             {
-                question: "What is Genie Stylist?",
-                answer: "Genie Stylist is an AI-powered fashion assistant on Smart Avenue 99 that provides personalized outfit and style recommendations based on your preferences and occasion."
+                question: "What is the Property Advisor?",
+                answer: "Property Advisor is an AI-powered real estate assistant on Gharana Realtors that provides personalized property recommendations based on your preferences and requirements."
             }
         ]
     }

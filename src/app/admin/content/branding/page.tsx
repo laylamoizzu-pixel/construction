@@ -214,7 +214,7 @@ export default function BrandingEditor() {
                                             ...config,
                                             branding: { ...config.branding, siteName: e.target.value }
                                         })}
-                                        placeholder="Smart Avenue"
+                                        placeholder="Gharana Realtors"
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500"
                                     />
                                 </div>

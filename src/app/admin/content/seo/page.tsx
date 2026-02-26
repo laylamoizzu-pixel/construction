@@ -154,7 +154,7 @@ export default function SeoEditor() {
                                         type="text"
                                         value={seo.titleTemplate}
                                         onChange={(e) => setSeo({ ...seo, titleTemplate: e.target.value })}
-                                        placeholder="%s | Smart Avenue 99"
+                                        placeholder="%s | Gharana Realtors"
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 font-mono text-sm"
                                     />
                                     <p className="text-xs text-gray-400 mt-1">Use %s as placeholder for the page name</p>

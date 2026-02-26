@@ -13,7 +13,7 @@ export async function GET() {
             "@context": "https://schema.org",
             "@type": "Organization",
             "@id": "https://smartavenue99.com/#organization",
-            "name": branding.siteName || "Smart Avenue 99",
+            "name": branding.siteName || "Gharana Realtors",
             "url": "https://smartavenue99.com",
             "logo": {
                 "@type": "ImageObject",

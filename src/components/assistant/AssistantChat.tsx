@@ -578,7 +578,7 @@ export default function AssistantChat() {
                                     </button>
                                 </div>
                                 <p className="text-[10px] text-slate-400 text-center mt-3 font-medium tracking-wide">
-                                    Powered by Next.js • Smart Avenue
+                                    Powered by Next.js • Gharana Realtors
                                 </p>
                             </form>
                         </motion.div>

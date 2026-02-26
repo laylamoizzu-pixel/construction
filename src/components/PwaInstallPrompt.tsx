@@ -89,13 +89,13 @@ export default function PwaInstallPrompt() {
                     <div className="bg-white rounded-xl shadow-2xl p-4 border border-blue-100">
                         <div className="flex items-start gap-4">
                             <div className="shrink-0 w-12 h-12 rounded-xl overflow-hidden border border-blue-100">
-                                <Image src={config.branding.logoUrl || "/logo.png"} alt={config.branding.siteName || "Smart Avenue 99"} width={48} height={48} className="w-full h-full object-contain" unoptimized />
+                                <Image src={config.branding.logoUrl || "/logo.png"} alt={config.branding.siteName || "Gharana Realtors"} width={48} height={48} className="w-full h-full object-contain" unoptimized />
                             </div>
 
                             <div className="flex-1">
                                 <h3 className="font-semibold text-gray-900 mb-1">Install App</h3>
                                 <p className="text-sm text-gray-600 mb-3">
-                                    Install {config.branding.siteName || "Smart Avenue 99"} for a faster, better experience.
+                                    Install {config.branding.siteName || "Gharana Realtors"} for a faster, better experience.
                                 </p>
                             </div>
 
