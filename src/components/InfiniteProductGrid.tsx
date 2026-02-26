@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import { Package, Loader2 } from "lucide-react";
+import { motion } from "framer-motion";
 import { Product, getProducts, Offer, Category } from "@/app/actions";
 import GenieRequestTrigger from "@/components/GenieRequestTrigger";
 import { ProductCard } from "./ProductCard";
@@ -117,14 +118,25 @@ export default function InfiniteProductGrid({
                     const isLast = index === displayProducts.length - 1;
 
                     return (
-                        <ProductCard
+                        <motion.div
                             key={product.id}
-                            product={product}
-                            categoryName={categoryName}
-                            offer={offer}
-                            isLast={isLast}
-                            lastProductElementRef={lastProductElementRef}
-                        />
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{
+                                duration: 0.8,
+                                delay: (index % 3) * 0.1,
+                                ease: [0.22, 1, 0.36, 1]
+                            }}
+                        >
+                            <ProductCard
+                                product={product}
+                                categoryName={categoryName}
+                                offer={offer}
+                                isLast={isLast}
+                                lastProductElementRef={lastProductElementRef}
+                            />
+                        </motion.div>
                     );
                 })}
             </div>
