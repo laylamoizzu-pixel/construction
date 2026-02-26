@@ -36,6 +36,8 @@ function DebugErrorBoundary({ children }: { children: React.ReactNode }) {
     );
 }
 
+import { usePathname } from "next/navigation";
+
 export default function ClientLayout({
     children,
     initialConfig,
@@ -43,21 +45,28 @@ export default function ClientLayout({
     children: React.ReactNode;
     initialConfig: SiteConfig;
 }) {
+    const pathname = usePathname();
+    const isAdmin = pathname?.startsWith("/admin");
+
     return (
         <DebugProvider>
             <DebugErrorBoundary>
                 <AuthProvider>
                     <SiteConfigProvider initialConfig={initialConfig}>
-                        <Header />
+                        {!isAdmin && <Header />}
                         <GrainOverlay />
                         <PageTransition>
                             {children}
                         </PageTransition>
-                        <AssistantChat />
-                        <PwaInstallPrompt />
-                        <SwUpdateBanner />
-                        <VersionManager />
-                        <Footer />
+                        {!isAdmin && (
+                            <>
+                                <AssistantChat />
+                                <PwaInstallPrompt />
+                                <SwUpdateBanner />
+                                <VersionManager />
+                                <Footer />
+                            </>
+                        )}
                         <ErrorInspector />
                     </SiteConfigProvider>
                 </AuthProvider>
