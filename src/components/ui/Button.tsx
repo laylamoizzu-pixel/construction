@@ -1,10 +1,10 @@
 "use client";
 
 import React from "react";
-import { motion } from "framer-motion";
+import { motion, HTMLMotionProps } from "framer-motion";
 import { cn } from "@/lib/utils";
 
-interface ButtonProps extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'onDrag' | 'onDragStart' | 'onDragEnd' | 'onPointerDown'> {
+interface ButtonProps extends Omit<HTMLMotionProps<"button">, 'variant'> {
     variant?: "primary" | "secondary" | "outline" | "glass" | "ghost";
     size?: "sm" | "md" | "lg" | "xl";
     className?: string;
