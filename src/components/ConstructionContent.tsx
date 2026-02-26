@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { Hammer, Ruler, HardHat, Compass, Layers, ShieldCheck, CheckCircle2, Zap, Sun } from "lucide-react";
 import { Heading } from "./ui/Typography";
 import { Button } from "./ui/Button";
+import SpotlightCard from "./ui/SpotlightCard";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 
@@ -82,10 +83,10 @@ export default function ConstructionContent() {
                     >
                         <span className="text-brand-gold font-bold tracking-[0.5em] uppercase text-[10px] block">Engineering Legacy</span>
                         <h1 className="text-6xl md:text-9xl font-bold text-white tracking-tighter leading-[0.85]">
-                            Precision <br />
-                            <span className="text-brand-gold">Redefined.</span>
+                            Structural <br />
+                            <span className="text-brand-gold">Certainty.</span>
                         </h1>
-                            We don&apos;t just build homes. We engineer benchmarks of structural integrity and architectural soul.
+                        We don&apos;t just build homes. We engineer benchmarks of structural integrity and architectural soul.
                         <div className="pt-8 flex gap-6">
                             <Button className="bg-brand-gold text-white px-10 h-14 rounded-full text-[10px] uppercase tracking-widest border-none hover:bg-white hover:text-brand-charcoal transition-all">
                                 Request Audit
@@ -120,11 +121,11 @@ export default function ConstructionContent() {
             </section>
 
             {/* The Timeline Section */}
-            <section className="py-32 bg-brand-charcoal text-white overflow-hidden relative">
+            <SpotlightCard className="py-32 bg-brand-charcoal text-white overflow-hidden relative">
                 <div className="container mx-auto px-6 md:px-12 relative z-10">
                     <div className="text-center max-w-2xl mx-auto mb-32 space-y-6">
                         <span className="text-brand-gold font-bold tracking-[0.3em] uppercase text-[10px]">The Construction Journey</span>
-                        <Heading className="text-white">Our 5-Stage Blueprint.</Heading>
+                        <Heading className="text-white">The Blueprint of Certainty.</Heading>
                         <p className="text-white/40 font-light leading-relaxed">
                             From the first soil test to the final walkthrough, our process is optimized for transparency, speed, and uncompromising quality.
                         </p>
@@ -175,7 +176,7 @@ export default function ConstructionContent() {
                         </div>
                     </div>
                 </div>
-            </section>
+            </SpotlightCard>
 
             {/* Quality Commitment Section */}
             <section className="py-32">
@@ -193,7 +194,7 @@ export default function ConstructionContent() {
                             <div className="space-y-6">
                                 <span className="text-brand-gold font-bold tracking-[0.3em] uppercase text-[10px] block">Standard Excellence</span>
                                 <Heading>The Gharana <br /> Structural Covenant.</Heading>
-                                    We use the highest grade of materials and advanced modular construction techniques to ensure that our projects aren&apos;t just homes—they&apos;re generational assets.
+                                We use the highest grade of materials and advanced modular construction techniques to ensure that our projects aren&apos;t just homes—they&apos;re generational assets.
                             </div>
 
                             <div className="space-y-6">

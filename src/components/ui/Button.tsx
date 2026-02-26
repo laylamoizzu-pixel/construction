@@ -18,6 +18,8 @@ export const Button = ({
     children,
     ...props
 }: ButtonProps) => {
+    // Filter out potential motion prop conflicts
+    const { onDrag, onDragStart, onDragEnd, onPointerDown, ...safeProps } = props as any;
     const variants = {
         primary: "bg-brand-charcoal text-brand-white hover:bg-opacity-90",
         secondary: "bg-brand-gold text-brand-white hover:bg-opacity-90",
@@ -35,17 +37,21 @@ export const Button = ({
 
     return (
         <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             className={cn(
-                "inline-flex items-center justify-center rounded-full transition-all duration-300 font-medium tracking-tight",
+                "group relative inline-flex items-center justify-center rounded-full transition-all duration-500 font-bold overflow-hidden isolation-auto",
                 variants[variant],
                 sizes[size],
                 className
             )}
-            {...props}
+            {...safeProps}
         >
-            {children}
+            <span className="relative z-10">{children}</span>
+            <motion.div
+                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-shimmer"
+                initial={false}
+            />
         </motion.button>
     );
 };

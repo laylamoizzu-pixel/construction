@@ -9,6 +9,7 @@ import { useSiteConfig } from "@/context/SiteConfigContext";
 import { HeroConfig } from "@/types/site-config";
 import { Subheading } from "./ui/Typography";
 import { Button } from "./ui/Button";
+import SpotlightCard from "./ui/SpotlightCard";
 import { cn } from "@/lib/utils";
 
 export default function Hero() {
@@ -66,52 +67,51 @@ export default function Hero() {
                     <div className="absolute inset-0 bg-gradient-to-t from-brand-charcoal via-transparent to-brand-charcoal/30" />
                     <div className="absolute inset-0 bg-brand-charcoal/40" />
 
-                    <div className="container mx-auto px-6 md:px-12 relative z-10 h-full flex items-center">
-                        <div className="max-w-5xl pt-20">
-                            <motion.div
-                                initial={{ opacity: 0, y: 60 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 1, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
-                            >
-                                <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-white/10 backdrop-blur-xl border border-white/10 text-brand-gold text-[10px] font-bold tracking-[0.3em] mb-10 uppercase">
-                                    <Sparkles className="w-3.5 h-3.5 fill-brand-gold" />
-                                    <span>The Gharana Standard</span>
-                                </div>
-
+                    <SpotlightCard className="absolute inset-0 z-10 flex items-center bg-transparent">
+                        <div className="container mx-auto px-6 md:px-12 relative h-full flex items-center">
+                            <div className="max-w-5xl pt-20">
                                 <motion.div
-                                    initial={{ opacity: 0, x: -20 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    transition={{ delay: 0.8, duration: 1 }}
+                                    initial={{ opacity: 0, y: 60 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 1, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
                                 >
-                                    <h1 className="text-6xl sm:text-7xl md:text-9xl font-bold text-white mb-10 leading-[0.85] tracking-[-0.05em]">
-                                        {slide.title.split(" ").map((word, i) => (
-                                            <span key={i} className={cn("block", i === 1 && "text-brand-gold")}>
-                                                {word}
-                                            </span>
-                                        ))}
-                                    </h1>
+                                    <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-white/10 backdrop-blur-xl border border-white/10 text-brand-gold text-[10px] font-bold tracking-[0.3em] mb-10 uppercase">
+                                        <Sparkles className="w-3.5 h-3.5 fill-brand-gold" />
+                                        <span>The Gharana Standard</span>
+                                    </div>
+
+                                    <motion.div
+                                        initial={{ opacity: 0, x: -20 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        transition={{ delay: 0.8, duration: 1 }}
+                                    >
+                                        <h1 className="text-6xl sm:text-7xl md:text-9xl font-bold text-white mb-10 leading-[0.85] tracking-[-0.05em]">
+                                            Architectural <br />
+                                            <span className="text-brand-gold">Legacies.</span>
+                                        </h1>
+                                    </motion.div>
+
+                                    <Subheading className="text-white/80 mb-12 max-w-2xl leading-relaxed text-xl md:text-2xl font-light">
+                                        Engineering structural masterpieces that define the future of premium living and commercial innovation.
+                                    </Subheading>
+
+                                    <div className="flex flex-col sm:flex-row gap-6">
+                                        <Link href={slide.ctaLink || "/products"}>
+                                            <Button variant="secondary" size="xl" className="group">
+                                                {slide.ctaText}
+                                                <ArrowRight className="w-5 h-5 ml-3 group-hover:translate-x-1.5 transition-transform" />
+                                            </Button>
+                                        </Link>
+                                        <Link href={slide.learnMoreLink || "/offers"}>
+                                            <Button variant="glass" size="xl">
+                                                Explore Portfolio
+                                            </Button>
+                                        </Link>
+                                    </div>
                                 </motion.div>
-
-                                <Subheading className="text-white/80 mb-12 max-w-2xl leading-relaxed text-xl md:text-2xl font-light">
-                                    {slide.subtitle}
-                                </Subheading>
-
-                                <div className="flex flex-col sm:flex-row gap-6">
-                                    <Link href={slide.ctaLink || "/products"}>
-                                        <Button variant="secondary" size="xl" className="group">
-                                            {slide.ctaText}
-                                            <ArrowRight className="w-5 h-5 ml-3 group-hover:translate-x-1.5 transition-transform" />
-                                        </Button>
-                                    </Link>
-                                    <Link href={slide.learnMoreLink || "/offers"}>
-                                        <Button variant="glass" size="xl">
-                                            Explore Portfolio
-                                        </Button>
-                                    </Link>
-                                </div>
-                            </motion.div>
+                            </div>
                         </div>
-                    </div>
+                    </SpotlightCard>
                 </motion.div>
             </AnimatePresence>
 

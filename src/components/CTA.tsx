@@ -35,7 +35,7 @@ export default function CTA({ content, aiEnabled = true }: { content?: CTAConten
     }
 
     return (
-        <section className="py-40 relative overflow-hidden min-h-[700px] flex items-center bg-brand-charcoal">
+        <SpotlightCard className="py-40 relative overflow-hidden min-h-[700px] flex items-center bg-brand-charcoal">
             {/* Background Carousel with refined zoom */}
             <div className="absolute inset-0 z-0">
                 <AnimatePresence mode="wait">
@@ -73,7 +73,7 @@ export default function CTA({ content, aiEnabled = true }: { content?: CTAConten
                     transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
                 >
                     <Heading className="text-white text-5xl md:text-8xl mb-8 max-w-5xl mx-auto leading-[0.95]">
-                        {content.title}
+                        The Zenith of Real Estate.
                     </Heading>
                     <Subheading className="text-white/60 mb-14 max-w-2xl mx-auto text-xl md:text-2xl font-light">
                         {content.text}
@@ -99,6 +99,6 @@ export default function CTA({ content, aiEnabled = true }: { content?: CTAConten
                     </div>
                 </motion.div>
             </div>
-        </section>
+        </SpotlightCard>
     );
 }

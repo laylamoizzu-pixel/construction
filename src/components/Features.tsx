@@ -31,7 +31,7 @@ export default function Features({ content }: { content?: FeaturesContent }) {
                 <div className="flex flex-col lg:flex-row items-end justify-between mb-24 gap-12">
                     <div className="max-w-4xl">
                         <SectionTitle subtitle={content.subtitle || "Performance"}>
-                            {content.title}
+                            The Engineering Soul.
                         </SectionTitle>
                     </div>
                     <motion.p
@@ -77,6 +77,6 @@ export default function Features({ content }: { content?: FeaturesContent }) {
                     })}
                 </div>
             </div>
-        </section>
+        </SpotlightCard>
     );
 }

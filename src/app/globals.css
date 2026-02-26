@@ -98,4 +98,42 @@ h6 {
     scrollbar-width: none;
     /* Firefox */
   }
+
+  .animate-shimmer {
+    animation: shimmer 2s infinite linear;
+  }
+}
+
+.noise-texture {
+  position: fixed;
+  top: -50%;
+  left: -50%;
+  right: -50%;
+  bottom: -50%;
+  width: 200%;
+  height: 200%;
+  background: transparent url('https://grainy-gradients.vercel.app/noise.svg') repeat 0 0;
+  opacity: 0.05;
+  z-index: 9999;
+  pointer-events: none;
+  animation: noise 0.2s infinite;
+}
+
+@keyframes noise {
+  0% { transform: translate(0, 0); }
+  10% { transform: translate(-5%, -5%); }
+  20% { transform: translate(-10%, 5%); }
+  33% { transform: translate(5%, -10%); }
+  44% { transform: translate(-5%, 15%); }
+  55% { transform: translate(-10%, 5%); }
+  66% { transform: translate(15%, 0); }
+  77% { transform: translate(0, 10%); }
+  88% { transform: translate(-15%, 0); }
+  99% { transform: translate(10%, 5%); }
+  100% { transform: translate(5%, 0); }
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
 }

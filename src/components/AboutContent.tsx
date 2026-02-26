@@ -5,6 +5,7 @@ import { CheckCircle2, Globe, ShieldCheck, Users, Zap, TrendingUp, MapPin, Phone
 import Image from "next/image";
 import { AboutPageContent, ContactContent } from "@/app/actions";
 import { Heading } from "./ui/Typography";
+import SpotlightCard from "./ui/SpotlightCard";
 
 const iconMap: Record<string, React.ElementType> = {
     CheckCircle2, Globe, ShieldCheck, Users, Zap, TrendingUp, MapPin, Phone, Mail, Clock, Check, Star, Heart, Award
@@ -83,7 +84,7 @@ export default function AboutContent({ content, contact }: { content: AboutPageC
                             {data.heroLabel || "The Narrative"}
                         </span>
                         <h1 className="text-6xl md:text-9xl font-bold text-white tracking-tighter leading-[0.8] mb-12">
-                            {data.heroTitle}
+                            The Visionary <br /> <span className="text-brand-gold">Perspective.</span>
                         </h1>
                         <p className="text-xl md:text-2xl text-white/40 max-w-2xl mx-auto font-light leading-relaxed">
                             {data.heroSubtitle}
